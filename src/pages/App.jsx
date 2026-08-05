@@ -48,7 +48,7 @@ export default function App() {
       return <ClientDashboard onSignOut={handleSignOut} />;
     }
     if (userRole === "Manager") {
-      return <ManagerDashboard onSignOut={handleSignOut} />;
+      return <ManagerDashboard onSignOut={handleSignOut} userEmail={userEmail} />;
     }
     if (userRole === "Sales Person") {
       return <SalesDashboard onSignOut={handleSignOut} />;

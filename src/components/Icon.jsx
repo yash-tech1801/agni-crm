@@ -1,70 +1,106 @@
-import React from "react";
+import React from 'react';
 
-const Icon = ({ name, size = 20, stroke = 1.9 }) => {
-  const common = {
-    width: size,
-    height: size,
-    viewBox: "0 0 24 24",
-    fill: "none",
-    stroke: "currentColor",
-    strokeWidth: stroke,
-    strokeLinecap: "round",
-    strokeLinejoin: "round",
-    "aria-hidden": true,
-  };
-  const icons = {
-    bolt: (
-      <>
-        <path d="m13 2-9 12h7l-1 8 10-13h-7l1-7Z" />
-      </>
-    ),
-    arrow: (
-      <>
-        <path d="M5 12h14" />
-        <path d="m13 6 6 6-6 6" />
-      </>
-    ),
-    check: <path d="m5 12 4 4L19 6" />,
-    eye: (
-      <>
-        <path d="M2 12s3.5-6 10-6 10 6 10 6-3.5 6-10 6S2 12 2 12Z" />
-        <circle cx="12" cy="12" r="2.5" />
-      </>
-    ),
-    eyeOff: (
-      <>
-        <path d="m3 3 18 18" />
-        <path d="M10.6 10.6a2 2 0 0 0 2.8 2.8" />
-        <path d="M9.9 4.2A10.5 10.5 0 0 1 12 4c6.5 0 10 8 10 8a18 18 0 0 1-3.4 4.1" />
-        <path d="M6.6 6.6C3.7 8.5 2 12 2 12s3.5 8 10 8a9.7 9.7 0 0 0 3.4-.6" />
-      </>
-    ),
-    google: (
-      <>
-        <path
-          d="M21.35 12.24c0-.71-.06-1.22-.2-1.75H12v3.3h5.37a4.6 4.6 0 0 1-2 3.02v2.14h3.12c1.82-1.68 2.86-4.16 2.86-6.71Z"
-          fill="currentColor"
-          stroke="none"
-        />
-        <path
-          d="M12 21.7c2.62 0 4.82-.86 6.43-2.34l-3.12-2.14c-.86.58-1.97.92-3.31.92-2.52 0-4.66-1.7-5.42-4v2.2H3.36A9.7 9.7 0 0 0 12 21.7Z"
-          fill="currentColor"
-          stroke="none"
-        />
-        <path
-          d="M6.58 14.14a5.8 5.8 0 0 1 0-3.7V8.25H3.36a9.7 9.7 0 0 0 0 8.18l3.22-2.29Z"
-          fill="currentColor"
-          stroke="none"
-        />
-        <path
-          d="M12 6.55c1.45 0 2.75.5 3.77 1.48l2.83-2.77C16.82 3.6 14.62 2.3 12 2.3a9.7 9.7 0 0 0-8.64 5.95l3.22 2.2c.76-2.3 2.9-3.9 5.42-3.9Z"
-          fill="currentColor"
-          stroke="none"
-        />
-      </>
-    ),
-  };
-  return <svg {...common}>{icons[name]}</svg>;
+const ownerIcons = {
+  dashboard: (
+    <>
+      <rect x="3" y="3" width="7" height="7" rx="1.5" />
+      <rect x="14" y="3" width="7" height="7" rx="1.5" />
+      <rect x="3" y="14" width="7" height="7" rx="1.5" />
+      <rect x="14" y="14" width="7" height="7" rx="1.5" />
+    </>
+  ),
+  overview: (
+    <>
+      <path d="M4 6h16M4 12h16M4 18h16" />
+    </>
+  ),
+  clients: (
+    <>
+      <circle cx="8" cy="9" r="3" />
+      <path d="M4 20c1.5-3.5 4-5 6.5-5s5 1.5 6.5 5" />
+      <circle cx="17" cy="8" r="3" />
+    </>
+  ),
+  managers: (
+    <>
+      <path d="M8 14c-2 0-4 1-4 3v1h12v-1c0-2-2-3-4-3" />
+      <circle cx="8" cy="7" r="3" />
+      <path d="M17 7a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z" />
+    </>
+  ),
+  team: (
+    <>
+      <path d="M5 19c0-3 2.5-5 5.5-5s5.5 2 5.5 5" />
+      <path d="M8 9a3 3 0 1 1 0-6 3 3 0 0 1 0 6Z" />
+      <path d="M17 9a3 3 0 1 1 0-6 3 3 0 0 1 0 6Z" />
+    </>
+  ),
+  leads: (
+    <>
+      <circle cx="12" cy="12" r="6" />
+      <path d="M12 6v6h6" />
+    </>
+  ),
+  revenue: (
+    <>
+      <path d="M4 7h16v10H4z" />
+      <path d="M8 10h8M8 14h5" />
+    </>
+  ),
+  reports: (
+    <>
+      <path d="M6 20V8l6-4 6 4v12H6z" />
+      <path d="M10 12h4M10 16h4" />
+    </>
+  ),
+  settings: (
+    <>
+      <circle cx="12" cy="12" r="3" />
+      <path d="M12 4v2M12 18v2M4 12h2M18 12h2M6.3 6.3l1.5 1.5M16.2 16.2l1.5 1.5M6.3 17.7l1.5-1.5M16.2 7.8l1.5-1.5" />
+    </>
+  ),
+  search: (
+    <>
+      <circle cx="11" cy="11" r="6" />
+      <path d="m16 16 4 4" />
+    </>
+  ),
+  bell: (
+    <>
+      <path d="M5 16h14" />
+      <path d="M8 16V11a4 4 0 0 1 8 0v5" />
+      <path d="M12 20a2 2 0 0 0 2-2H10a2 2 0 0 0 2 2Z" />
+    </>
+  ),
+  moon: (
+    <>
+      <path d="M12 3c-4.97 0-9 4.03-9 9 0 4.97 4.03 9 9 9 2.78 0 5.28-1.18 7.08-3.08C18.82 17.28 20 14.78 20 12c0-4.97-4.03-9-9-9Z" />
+    </>
+  ),
+  arrowUp: (
+    <>
+      <path d="M12 18V8" />
+      <path d="m8 12 4-4 4 4" />
+    </>
+  ),
 };
 
-export default Icon;
+export default function Icon({ name, size = 18, className }) {
+  return (
+    <svg
+      className={className}
+      width={size}
+      height={size}
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.9"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      aria-hidden="true"
+    >
+      {ownerIcons[name]}
+    </svg>
+  );
+}
+
