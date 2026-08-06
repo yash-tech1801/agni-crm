@@ -3,6 +3,7 @@ import AuthScreen from "./Auth/AuthScreen";
 import ClientDashboard from "../ClientDashboard";
 import OwnerDashboard from "./Owner/OwnerDashboard";
 import ManagerDashboard from "./Manager/ManagerDashboard";
+import BranchManagerDashboard from "./BranchManager/BranchManagerDashboard";
 import SalesDashboard from "./Sales/SalesDashboard";
 
 export default function App() {
@@ -13,7 +14,7 @@ export default function App() {
   React.useEffect(() => {
     const email = localStorage.getItem("agni_user_email");
     const role = localStorage.getItem("agni_user_role");
-    const validRoles = ["Owner", "Client", "Manager", "Sales Person"];
+    const validRoles = ["Owner", "Client", "Manager", "Sales Person", "Branch Manager"];
     if (email && validRoles.includes(role)) {
       setUserEmail(email);
       setUserRole(role);
@@ -51,7 +52,10 @@ export default function App() {
       return <ManagerDashboard onSignOut={handleSignOut} userEmail={userEmail} />;
     }
     if (userRole === "Sales Person") {
-      return <SalesDashboard onSignOut={handleSignOut} />;
+      return <SalesDashboard onSignOut={handleSignOut} userEmail={userEmail} />;
+    }
+    if (userRole === "Branch Manager") {
+      return <BranchManagerDashboard onSignOut={handleSignOut} userEmail={userEmail} />;
     }
     return <AuthScreen onLogin={handleLogin} />;
   }

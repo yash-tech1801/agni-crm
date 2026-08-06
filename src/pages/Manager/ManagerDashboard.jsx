@@ -4,6 +4,8 @@ import KpiCard from "../../components/KpiCard";
 import PerformanceChart from "../../components/PerformanceChart";
 import SimpleModal from "../../components/SimpleModal";
 import TopPerformerLeaderboard from "../../components/TopPerformerLeaderboard";
+import EditForm from "../../components/EditForm";
+import ConfirmDialog from "../../components/ConfirmDialog";
 import ManagerRequests from "./ManagerRequests";
 
 const navItems = [
@@ -190,6 +192,9 @@ export default function ManagerDashboard({ onSignOut, userEmail }) {
   const [query, setQuery] = React.useState("");
   const [selectedTeamMember, setSelectedTeamMember] = React.useState(null);
   const [selectedClient, setSelectedClient] = React.useState(null);
+  const [clients, setClients] = React.useState(managerClients);
+  const [editClientValues, setEditClientValues] = React.useState(null);
+  const [deleteTargetClient, setDeleteTargetClient] = React.useState(null);
   const notificationWrapRef = React.useRef(null);
   const notificationsListRef = React.useRef(null);
   const notificationsPauseTimer = React.useRef(null);
@@ -205,7 +210,7 @@ export default function ManagerDashboard({ onSignOut, userEmail }) {
   const managedRegion = "East Zone";
   const branchTeam = salesTeam.filter((member) => member.branch === managedBranch);
   const branchTeamNames = branchTeam.map((member) => member.name);
-  const branchClients = managerClients.filter((client) => branchTeamNames.includes(client.salesRep));
+  const branchClients = clients.filter((client) => branchTeamNames.includes(client.salesRep));
 
   React.useEffect(() => {
     function handleOutsideClick(event) {
@@ -276,10 +281,53 @@ export default function ManagerDashboard({ onSignOut, userEmail }) {
 
   function openClientInfo(client) {
     setSelectedClient(client);
+    setEditClientValues(null);
   }
 
   function closeClientInfo() {
     setSelectedClient(null);
+    setEditClientValues(null);
+  }
+
+  function openDeleteConfirm(client) {
+    setDeleteTargetClient(client);
+  }
+
+  function closeDeleteConfirm() {
+    setDeleteTargetClient(null);
+  }
+
+  function handleDeleteClient(clientId) {
+    setClients((prev) => prev.filter((client) => client.id !== clientId));
+    if (selectedClient?.id === clientId) {
+      setSelectedClient(null);
+      setEditClientValues(null);
+    }
+  }
+
+  function confirmDeleteClient() {
+    if (!deleteTargetClient) return;
+    handleDeleteClient(deleteTargetClient.id);
+    closeDeleteConfirm();
+  }
+
+  function startClientEdit() {
+    setEditClientValues(selectedClient);
+  }
+
+  function handleEditClientChange(event) {
+    const { name, value } = event.target;
+    setEditClientValues((prev) => ({ ...prev, [name]: value }));
+  }
+
+  function saveClientEdit() {
+    setClients((prev) => prev.map((client) => (client.id === editClientValues.id ? editClientValues : client)));
+    setSelectedClient(editClientValues);
+    setEditClientValues(null);
+  }
+
+  function cancelClientEdit() {
+    setEditClientValues(null);
   }
 
   function openPerformance(employee) {
@@ -610,6 +658,9 @@ export default function ManagerDashboard({ onSignOut, userEmail }) {
                       <button className="table-action" type="button" onClick={() => openClientInfo(client)}>
                         Info
                       </button>
+                      <button className="table-action danger" type="button" onClick={() => openDeleteConfirm(client)}>
+                        Delete
+                      </button>
                     </td>
                   </tr>
                 ))}
@@ -624,40 +675,72 @@ export default function ManagerDashboard({ onSignOut, userEmail }) {
                     <div style={{ color: '#7a748e', fontSize: 13 }}>{selectedClient.company}</div>
                   </div>
                 </div>
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12, marginTop: 16, padding: '12px 0' }}>
-                  <div style={{ background: '#fbfbfe', padding: 12, borderRadius: 8 }}>
-                    <div style={{ color: '#6b6b77', fontSize: 12 }}>Client</div>
-                    <div style={{ marginTop: 6, fontWeight: 600 }}>{selectedClient.name}</div>
+
+                {editClientValues ? (
+                  <div style={{ display: 'grid', gap: 16, marginTop: 16 }}>
+                    <EditForm values={editClientValues} onChange={handleEditClientChange} />
+                    <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 10 }}>
+                      <button className="table-action" type="button" onClick={cancelClientEdit}>
+                        Cancel
+                      </button>
+                      <button className="table-action" type="button" onClick={saveClientEdit}>
+                        Save
+                      </button>
+                    </div>
                   </div>
-                  <div style={{ background: '#fbfbfe', padding: 12, borderRadius: 8 }}>
-                    <div style={{ color: '#6b6b77', fontSize: 12 }}>Company</div>
-                    <div style={{ marginTop: 6, fontWeight: 600 }}>{selectedClient.company}</div>
-                  </div>
-                  <div style={{ background: '#fbfbfe', padding: 12, borderRadius: 8 }}>
-                    <div style={{ color: '#6b6b77', fontSize: 12 }}>Assigned rep</div>
-                    <div style={{ marginTop: 6, fontWeight: 600 }}>{selectedClient.salesRep}</div>
-                  </div>
-                  <div style={{ background: '#fbfbfe', padding: 12, borderRadius: 8 }}>
-                    <div style={{ color: '#6b6b77', fontSize: 12 }}>Email</div>
-                    <div style={{ marginTop: 6, fontWeight: 600 }}>{selectedClient.email}</div>
-                  </div>
-                  <div style={{ background: '#fbfbfe', padding: 12, borderRadius: 8 }}>
-                    <div style={{ color: '#6b6b77', fontSize: 12 }}>Phone</div>
-                    <div style={{ marginTop: 6, fontWeight: 600 }}>{selectedClient.phone}</div>
-                  </div>
-                  <div style={{ background: '#fbfbfe', padding: 12, borderRadius: 8 }}>
-                    <div style={{ color: '#6b6b77', fontSize: 12 }}>Service</div>
-                    <div style={{ marginTop: 6, fontWeight: 600 }}>{selectedClient.service}</div>
-                  </div>
-                  <div style={{ background: '#fbfbfe', padding: 12, borderRadius: 8 }}>
-                    <div style={{ color: '#6b6b77', fontSize: 12 }}>Start date</div>
-                    <div style={{ marginTop: 6, fontWeight: 600 }}>{selectedClient.startDate}</div>
-                  </div>
-                  <div style={{ background: '#fbfbfe', padding: 12, borderRadius: 8 }}>
-                    <div style={{ color: '#6b6b77', fontSize: 12 }}>Revenue</div>
-                    <div style={{ marginTop: 6, fontWeight: 600 }}>{selectedClient.revenue}</div>
-                  </div>
-                </div>
+                ) : (
+                  <>
+                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12, marginTop: 16, padding: '12px 0' }}>
+                      <div style={{ background: '#fbfbfe', padding: 12, borderRadius: 8 }}>
+                        <div style={{ color: '#6b6b77', fontSize: 12 }}>Client</div>
+                        <div style={{ marginTop: 6, fontWeight: 600 }}>{selectedClient.name}</div>
+                      </div>
+                      <div style={{ background: '#fbfbfe', padding: 12, borderRadius: 8 }}>
+                        <div style={{ color: '#6b6b77', fontSize: 12 }}>Company</div>
+                        <div style={{ marginTop: 6, fontWeight: 600 }}>{selectedClient.company}</div>
+                      </div>
+                      <div style={{ background: '#fbfbfe', padding: 12, borderRadius: 8 }}>
+                        <div style={{ color: '#6b6b77', fontSize: 12 }}>Assigned rep</div>
+                        <div style={{ marginTop: 6, fontWeight: 600 }}>{selectedClient.salesRep}</div>
+                      </div>
+                      <div style={{ background: '#fbfbfe', padding: 12, borderRadius: 8 }}>
+                        <div style={{ color: '#6b6b77', fontSize: 12 }}>Email</div>
+                        <div style={{ marginTop: 6, fontWeight: 600 }}>{selectedClient.email}</div>
+                      </div>
+                      <div style={{ background: '#fbfbfe', padding: 12, borderRadius: 8 }}>
+                        <div style={{ color: '#6b6b77', fontSize: 12 }}>Phone</div>
+                        <div style={{ marginTop: 6, fontWeight: 600 }}>{selectedClient.phone}</div>
+                      </div>
+                      <div style={{ background: '#fbfbfe', padding: 12, borderRadius: 8 }}>
+                        <div style={{ color: '#6b6b77', fontSize: 12 }}>Service</div>
+                        <div style={{ marginTop: 6, fontWeight: 600 }}>{selectedClient.service}</div>
+                      </div>
+                      <div style={{ background: '#fbfbfe', padding: 12, borderRadius: 8 }}>
+                        <div style={{ color: '#6b6b77', fontSize: 12 }}>Start date</div>
+                        <div style={{ marginTop: 6, fontWeight: 600 }}>{selectedClient.startDate}</div>
+                      </div>
+                      <div style={{ background: '#fbfbfe', padding: 12, borderRadius: 8 }}>
+                        <div style={{ color: '#6b6b77', fontSize: 12 }}>Revenue</div>
+                        <div style={{ marginTop: 6, fontWeight: 600 }}>{selectedClient.revenue}</div>
+                      </div>
+                    </div>
+                    <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: 16 }}>
+                      <button className="table-action" type="button" onClick={startClientEdit}>
+                        Edit
+                      </button>
+                    </div>
+                  </>
+                )}
+              </SimpleModal>
+            )}
+
+            {deleteTargetClient && (
+              <SimpleModal onClose={closeDeleteConfirm} showCloseButton={false}>
+                <ConfirmDialog
+                  message={`Delete ${deleteTargetClient.name} from clients?`}
+                  onConfirm={confirmDeleteClient}
+                  onCancel={closeDeleteConfirm}
+                />
               </SimpleModal>
             )}
           </section>

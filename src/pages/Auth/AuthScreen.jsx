@@ -120,6 +120,7 @@ export default function AuthScreen({ onLogin }) {
                 <option value="Client">Client</option>
                 <option value="Manager">Manager</option>
                 <option value="Sales Person">Sales Person</option>
+                <option value="Branch Manager">Branch Manager</option>
               </select>
             </label>
             <label className="field-label">

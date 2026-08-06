@@ -1786,6 +1786,371 @@ form {
 }
 
 /* Modal for performance chart and edit/delete dialogs */
+.client-details-panel {
+    display: grid;
+    gap: 16px;
+    margin-top: 18px;
+    padding: 20px;
+    border-radius: 20px;
+    border: 1px solid #ece9f3;
+    background: linear-gradient(145deg, #ffffff, #fcfbff);
+    box-shadow: 0 12px 30px rgba(23, 19, 43, 0.05);
+}
+
+.full-page-details {
+    margin-top: 0;
+    min-height: calc(100vh - 180px);
+}
+
+.client-details-header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 12px;
+}
+
+.client-details-header h3 {
+    margin: 6px 0 4px;
+    color: #1f2330;
+    font-size: 20px;
+    letter-spacing: -0.6px;
+}
+
+.client-details-header p {
+    margin: 0;
+    color: #7a748e;
+    font-size: 13px;
+}
+
+.detail-section-card {
+    padding: 16px;
+    border-radius: 16px;
+    border: 1px solid #efeaf8;
+    background: #fbfbfe;
+}
+
+.detail-value-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 16px;
+    margin-top: 10px;
+}
+
+.detail-label {
+    margin: 0 0 6px;
+    color: #7a748e;
+    font-size: 12px;
+}
+
+.detail-value-grid strong {
+    color: #2d3140;
+    font-size: 14px;
+}
+
+.detail-doc-list {
+    display: grid;
+    gap: 12px;
+    margin-top: 10px;
+}
+
+.detail-doc-item {
+    padding: 14px;
+    border-radius: 14px;
+    background: #fff;
+    border: 1px solid #ece8f2;
+}
+
+.detail-doc-top {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+}
+
+.detail-doc-item p {
+    margin: 8px 0 0;
+    color: #6b6b77;
+    font-size: 13px;
+}
+
+.detail-pill {
+    padding: 4px 8px;
+    border-radius: 999px;
+    font-size: 11px;
+    font-weight: 700;
+}
+
+.detail-pill.success {
+    color: #2f7b58;
+    background: #e7f7ee;
+}
+
+.detail-pill.warning {
+    color: #b5782a;
+    background: #fff3de;
+}
+
+.detail-note-card {
+    margin-top: 10px;
+    padding: 14px;
+    border-radius: 14px;
+    border: 1px solid #ece8f2;
+    background: #fff;
+    color: #5e596f;
+    font-size: 13px;
+    line-height: 1.6;
+}
+
+.eligible-schemes-section {
+    display: grid;
+    gap: 16px;
+}
+
+.eligible-schemes-card {
+    display: grid;
+    gap: 18px;
+    padding: 20px;
+    border-radius: 20px;
+    border: 1px solid #ece9f3;
+    background: linear-gradient(145deg, #ffffff, #fbf9ff);
+    box-shadow: 0 12px 30px rgba(23, 19, 43, 0.05);
+}
+
+.eligible-panel-header {
+    margin-bottom: 0;
+}
+
+.eligible-section-description {
+    margin: 6px 0 0;
+    color: #7a748e;
+    font-size: 13px;
+    line-height: 1.6;
+}
+
+.eligible-controls {
+    display: grid;
+    grid-template-columns: 1.3fr 0.7fr;
+    gap: 16px;
+}
+
+.eligible-control-field input,
+.eligible-control-field select {
+    width: 100%;
+    min-height: 44px;
+    padding: 0 14px;
+    border-radius: 12px;
+    border: 1px solid #e6e2eb;
+    background: #fff;
+    color: #20303f;
+    outline: none;
+}
+
+.eligible-control-field span {
+    color: #6d647c;
+    font-size: 12px;
+}
+
+.eligible-save-button {
+    width: fit-content;
+    padding: 0 22px;
+}
+
+.eligible-toast {
+    margin: -4px 0 0;
+    color: #358c58;
+    font-size: 12px;
+    font-weight: 700;
+}
+
+.eligible-summary-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 16px;
+}
+
+.eligible-summary-card {
+    display: grid;
+    gap: 12px;
+    padding: 16px;
+    border-radius: 16px;
+    background: #fbfbfe;
+    border: 1px solid #efeaf8;
+}
+
+.eligible-summary-list {
+    display: grid;
+    gap: 8px;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+.eligible-summary-list li {
+    padding: 10px 12px;
+    border-radius: 10px;
+    background: #fff;
+    color: #3b3947;
+    font-size: 13px;
+    font-weight: 600;
+    border: 1px solid #ece8f2;
+}
+
+.eligible-summary-empty {
+    margin: 0;
+    color: #7a748e;
+    font-size: 13px;
+    line-height: 1.6;
+}
+
+.eligible-empty-state {
+    display: grid;
+    justify-items: center;
+    gap: 8px;
+    padding: 28px 16px;
+    border-radius: 16px;
+    text-align: center;
+    background: #f8f6fc;
+    border: 1px dashed #e0dbe8;
+}
+
+.eligible-empty-icon {
+    display: grid;
+    place-items: center;
+    width: 42px;
+    height: 42px;
+    border-radius: 50%;
+    background: #efe7ff;
+    color: #7c4dff;
+    font-size: 18px;
+}
+
+.eligible-empty-state h3 {
+    margin: 0;
+    color: #303238;
+    font-size: 15px;
+}
+
+.eligible-empty-state p {
+    margin: 0;
+    color: #7a748e;
+    font-size: 12px;
+}
+
+.eligible-meta-row {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 10px;
+    padding: 12px 0;
+    border-top: 1px solid #ece9f1;
+    border-bottom: 1px solid #ece9f1;
+    margin: 6px 0 12px;
+}
+
+.eligible-meta-label {
+    display: block;
+    color: #8c8798;
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: .06em;
+}
+
+.eligible-meta-row strong {
+    display: block;
+    margin-top: 4px;
+    color: #2f3040;
+    font-size: 12px;
+}
+
+.toggle-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    margin-top: auto;
+    color: #463f58;
+    font-size: 13px;
+    font-weight: 700;
+}
+
+.toggle-pill {
+    width: 42px;
+    height: 24px;
+    padding: 2px;
+    border: 0;
+    border-radius: 999px;
+    background: #d5d0dc;
+    display: inline-flex;
+    align-items: center;
+    transition: background .18s ease;
+}
+
+.toggle-pill i {
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    background: #fff;
+    display: block;
+    transform: translateX(0);
+    transition: transform .18s ease;
+}
+
+.toggle-pill.active {
+    background: #9370e9;
+}
+
+.toggle-pill.active i {
+    transform: translateX(18px);
+}
+
+/* Compact toggle for eligible scheme cards (override broader button rules) */
+.eligible-scheme-card .toggle-pill,
+.client-details-panel .eligible-scheme-card .toggle-pill {
+    width: 42px !important;
+    height: 24px !important;
+    padding: 2px !important;
+    margin-left: auto !important;
+}
+
+.eligible-scheme-card .toggle-pill.active {
+    background: #9370e9 !important;
+}
+
+.eligible-scheme-card .toggle-pill.active i {
+    transform: translateX(18px) !important;
+}
+
+.eligible-scheme-card .toggle-row {
+    align-items: center;
+}
+
+/* Strong override: ensure toggle-pill inside eligible scheme cards is compact
+   and does not inherit the card's full-width button styles. */
+.eligible-scheme-card button.toggle-pill,
+.client-details-panel .eligible-scheme-card button.toggle-pill,
+.full-page-details .eligible-scheme-card button.toggle-pill {
+    width: 42px !important;
+    min-width: 42px !important;
+    height: 24px !important;
+    padding: 2px !important;
+    margin-left: 0 !important;
+    display: inline-flex !important;
+    justify-content: center !important;
+    align-items: center !important;
+}
+
+.eligible-scheme-card .toggle-pill i {
+    width: 18px !important;
+    height: 18px !important;
+}
+
+.sales-eligible-grid {
+    margin-top: 0;
+}
+
+.sales-eligible-card {
+    min-height: 260px;
+}
+
 .modal-backdrop {
     position: fixed;
     inset: 0;
@@ -3547,6 +3912,11 @@ form {
         grid-template-columns: 210px 1fr;
     }
 
+    .eligible-controls,
+    .eligible-summary-grid {
+        grid-template-columns: 1fr;
+    }
+
     .client-sidebar {
         padding-left: 12px;
         padding-right: 12px;
@@ -3637,6 +4007,30 @@ form {
 @media (max-width: 640px) {
     .client-dashboard {
         display: block;
+    }
+
+    .client-details-panel {
+        padding: 16px;
+    }
+
+    .client-details-header {
+        flex-direction: column;
+    }
+
+    .detail-value-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .eligible-schemes-card {
+        padding: 16px;
+    }
+
+    .eligible-controls {
+        grid-template-columns: 1fr;
+    }
+
+    .eligible-save-button {
+        width: 100%;
     }
 
     .client-sidebar {
@@ -3883,5 +4277,190 @@ form {
     .modal-close {
         top: 12px;
         right: 12px;
+    }
+}
+
+/* ---------- Responsive improvements · Manager / Branch manager dashboards ---------- */
+
+/* Tablet: owner-style sidebar must stop being a full-height sticky column
+   once the layout stacks into a single column. */
+@media (max-width: 840px) {
+    .owner-dashboard .client-sidebar {
+        position: relative;
+        top: auto;
+        min-height: 0;
+        align-self: stretch;
+        border-radius: 0;
+        box-shadow: 0 6px 20px rgba(59, 52, 86, .06);
+    }
+
+    .owner-dashboard .dashboard-content {
+        padding-top: 20px;
+    }
+
+    /* Branch manager: the inline kpi-activity-row (flex + 2-col scheme grid)
+       gets too tight once the sidebar stacks, so flow the activity panel
+       onto its own row. */
+    .branch-manager-dashboard .kpi-activity-row {
+        display: block !important;
+    }
+
+    .branch-manager-dashboard .sidebar-widgets {
+        width: 100% !important;
+        min-width: 0 !important;
+        margin-top: 18px;
+    }
+}
+
+/* Phone: turn the owner-style sidebar into a fixed bottom navigation bar,
+   matching the client dashboard treatment. */
+@media (max-width: 640px) {
+    .owner-dashboard {
+        display: block;
+    }
+
+    .owner-dashboard .client-sidebar {
+        position: fixed;
+        top: auto;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        z-index: 40;
+        min-height: 0;
+        height: 64px;
+        display: flex;
+        flex-direction: row;
+        align-items: center;
+        justify-content: space-around;
+        padding: 8px 10px;
+        border-radius: 18px 18px 0 0;
+        box-shadow: 0 -8px 24px rgba(23, 19, 43, .12);
+    }
+
+    .dashboard-dark .owner-dashboard .client-sidebar {
+        box-shadow: 0 -8px 24px rgba(0, 0, 0, .35);
+    }
+
+    .owner-dashboard .client-sidebar .client-brand,
+    .owner-dashboard .client-sidebar .sidebar-bottom,
+    .owner-dashboard .client-sidebar .upgrade-card {
+        display: none;
+    }
+
+    .owner-dashboard .client-sidebar nav {
+        width: 100%;
+        display: flex;
+        align-items: center;
+        justify-content: space-around;
+        gap: 2px;
+    }
+
+    .owner-dashboard .client-sidebar nav button {
+        width: 52px;
+        height: 46px;
+        justify-content: center;
+        gap: 0;
+        padding: 0;
+        border-radius: 13px;
+        font-size: 0; /* hides inline text labels (Manager dashboard nav) */
+    }
+
+    /* Content needs bottom clearance for the fixed nav, plus horizontal
+       scrolling so wide tables stay readable on small screens. */
+    .owner-dashboard .dashboard-content {
+        padding: 19px 14px 84px;
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+    }
+
+    .owner-dashboard-top h1 {
+        font-size: 30px;
+    }
+
+    .owner-top-actions {
+        gap: 10px;
+    }
+
+    .owner-top-actions>button,
+    .owner-top-actions .profile {
+        width: 38px;
+        height: 38px;
+        min-width: 38px;
+        min-height: 38px;
+    }
+
+    .role-badge {
+        display: none;
+    }
+
+    .clients-table {
+        min-width: 680px;
+    }
+
+    .notifications-popover {
+        position: fixed;
+        top: auto;
+        bottom: 82px;
+        right: 14px;
+        width: min(320px, calc(100vw - 28px));
+        max-height: calc(100vh - 160px);
+        overflow-y: auto;
+    }
+
+    .kpi-card {
+        padding: 20px;
+        padding-bottom: 56px;
+    }
+
+    .kpi-card h2 {
+        font-size: 1.7rem;
+    }
+
+    .revenue-panel {
+        padding: 20px;
+        border-radius: 22px;
+    }
+
+    .revenue-chart-panel {
+        padding: 18px;
+    }
+
+    .dashboard-layout,
+    .dashboard-split {
+        gap: 14px;
+    }
+
+    .owner-sidebar-widgets {
+        gap: 14px;
+    }
+
+    .activity-row {
+        padding: 12px 14px;
+    }
+
+    /* Branch manager / sales: force the inline 2-col KPI grids to one column,
+       and give the inline-styled panels room to breathe. */
+    .branch-manager-dashboard .scheme-grid,
+    .sales-dashboard .scheme-grid {
+        grid-template-columns: 1fr !important;
+    }
+
+    .branch-manager-dashboard .activity-panel,
+    .branch-manager-dashboard .analytics-card,
+    .sales-dashboard .analytics-card {
+        padding: 16px !important;
+    }
+
+    /* Modal internals get a little more room on phones. */
+    .modal-backdrop {
+        padding: 16px;
+    }
+
+    .modal-content {
+        padding: 18px;
+    }
+
+    .edit-form-grid {
+        grid-template-columns: 1fr;
     }
 }
