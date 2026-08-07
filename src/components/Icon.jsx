@@ -47,6 +47,32 @@ const ownerIcons = {
       <path d="M8 10h8M8 14h5" />
     </>
   ),
+  calendarToday: (
+    <>
+      <rect x="4" y="6" width="16" height="14" rx="3" />
+      <path d="M4 10h16" />
+      <path d="M8 3v6" />
+      <path d="M16 3v6" />
+    </>
+  ),
+  calendarWeek: (
+    <>
+      <rect x="4" y="6" width="16" height="14" rx="3" />
+      <path d="M4 10h16" />
+      <path d="M8 3v6" />
+      <path d="M16 3v6" />
+      <path d="M8 14h2" />
+      <path d="M12 14h2" />
+      <path d="M16 14h2" />
+    </>
+  ),
+  wallet: (
+    <>
+      <path d="M4 8h16v10a3 3 0 0 1-3 3H7a3 3 0 0 1-3-3V8Z" />
+      <path d="M4 10h16" />
+      <circle cx="16" cy="14" r="1.5" />
+    </>
+  ),
   reports: (
     <>
       <path d="M6 20V8l6-4 6 4v12H6z" />

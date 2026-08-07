@@ -3,9 +3,16 @@ import Icon from './Icon';
 
 export default function KpiCard({ card, onAction }) {
   return (
-    <article className={`kpi-card ${card.slug || ''}`}>
+    <article className={`kpi-card ${card.slug || ''}`} style={card.bg ? { background: card.bg, borderColor: 'transparent' } : {}}>
       <div className="kpi-card-header">
-        <span>{card.label}</span>
+        <div className="kpi-card-title">
+          {card.icon && (
+            <span className="kpi-card-icon" style={{ background: card.accent + "22", color: card.accent }}>
+              <Icon name={card.icon} size={18} />
+            </span>
+          )}
+          <span>{card.label}</span>
+        </div>
         <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
           <span className="metric-chip" style={{ background: card.accent + "20", color: card.accent }}>
             {card.trend}

@@ -1,6 +1,7 @@
 import React from "react";
 import Icon from "../../components/Icon";
 import KpiCard from "../../components/KpiCard";
+import { getDailyPayment, getWeeklyPayment, getMonthlyPayment, formatCurrency } from "../../utils/paymentHelpers";
 import PerformanceChart from "../../components/PerformanceChart";
 import SimpleModal from "../../components/SimpleModal";
 import TopPerformerLeaderboard from "../../components/TopPerformerLeaderboard";
@@ -117,6 +118,7 @@ const managerClients = [
     phone: "+91 98765 32100",
     service: "CRM Implementation",
     salesRep: "Mia Ross",
+    assignedSalesPersonId: 1,
     branch: "East",
     revenue: "₹68k",
     startDate: "2024-03-02",
@@ -129,6 +131,7 @@ const managerClients = [
     phone: "+91 91234 55678",
     service: "Marketing Campaign",
     salesRep: "Mia Ross",
+    assignedSalesPersonId: 1,
     branch: "East",
     revenue: "₹54k",
     startDate: "2024-04-18",
@@ -141,6 +144,7 @@ const managerClients = [
     phone: "+91 99876 44556",
     service: "IT Support",
     salesRep: "Rohan Varma",
+    assignedSalesPersonId: 2,
     branch: "South",
     revenue: "₹46k",
     startDate: "2024-05-09",
@@ -193,6 +197,7 @@ export default function ManagerDashboard({ onSignOut, userEmail }) {
   const [selectedTeamMember, setSelectedTeamMember] = React.useState(null);
   const [selectedClient, setSelectedClient] = React.useState(null);
   const [clients, setClients] = React.useState(managerClients);
+  const [selectedSalesPerson, setSelectedSalesPerson] = React.useState("all");
   const [editClientValues, setEditClientValues] = React.useState(null);
   const [deleteTargetClient, setDeleteTargetClient] = React.useState(null);
   const notificationWrapRef = React.useRef(null);
@@ -211,6 +216,57 @@ export default function ManagerDashboard({ onSignOut, userEmail }) {
   const branchTeam = salesTeam.filter((member) => member.branch === managedBranch);
   const branchTeamNames = branchTeam.map((member) => member.name);
   const branchClients = clients.filter((client) => branchTeamNames.includes(client.salesRep));
+
+  const salesPeople = React.useMemo(
+    () => branchTeam.map((member) => ({ id: member.id, name: member.name })),
+    [branchTeam]
+  );
+
+  const filteredClients = React.useMemo(() => {
+    // Apply salesperson filtering first, then any other table-level filters if added.
+    if (selectedSalesPerson === "all") {
+      return branchClients;
+    }
+
+    const selectedId = Number(selectedSalesPerson);
+    return branchClients.filter((client) => client.assignedSalesPersonId === selectedId);
+  }, [branchClients, selectedSalesPerson]);
+
+  const currentManagerId = React.useMemo(() => 4, [userEmail]);
+
+  const paymentMetrics = React.useMemo(() => ({
+    daily: formatCurrency(getDailyPayment(currentManagerId)),
+    weekly: formatCurrency(getWeeklyPayment(currentManagerId)),
+    monthly: formatCurrency(getMonthlyPayment(currentManagerId)),
+  }), [currentManagerId]);
+
+  const dashboardKpiCards = React.useMemo(() => [
+    ...kpiCards,
+    {
+      label: "Daily Payment",
+      value: paymentMetrics.daily,
+      trend: "Today",
+      description: "Today's collection",
+      accent: "#f2938f",
+      icon: "calendarToday",
+    },
+    {
+      label: "Weekly Payment",
+      value: paymentMetrics.weekly,
+      trend: "This week",
+      description: "Sales team total",
+      accent: "#6f94f8",
+      icon: "calendarWeek",
+    },
+    {
+      label: "Monthly Payment",
+      value: paymentMetrics.monthly,
+      trend: "This month",
+      description: "Manager collection",
+      accent: "#56c37d",
+      icon: "wallet",
+    },
+  ], [paymentMetrics]);
 
   React.useEffect(() => {
     function handleOutsideClick(event) {
@@ -467,7 +523,7 @@ export default function ManagerDashboard({ onSignOut, userEmail }) {
           <section className="dashboard-layout">
             <div className="dashboard-main">
               <section className="kpi-grid">
-                {kpiCards.map((card) => (
+                {dashboardKpiCards.map((card) => (
                   <KpiCard
                     key={card.label}
                     card={card}
@@ -630,7 +686,23 @@ export default function ManagerDashboard({ onSignOut, userEmail }) {
                 <h2>Clients under your sales team</h2>
                 <p style={{ margin: 0, color: '#6b6b77', fontSize: 13 }}>Showing only clients managed by sales members in your branch.</p>
               </div>
-              <div style={{ color: '#7a748e', fontSize: 13 }}>{branchClients.length} clients</div>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 12, flexWrap: 'wrap' }}>
+                <div style={{ color: '#7a748e', fontSize: 13 }}>{filteredClients.length} clients</div>
+                <label className="field-label" style={{ minWidth: 220, margin: 0 }}>
+                  <span>Sales Person</span>
+                  <select
+                    value={selectedSalesPerson}
+                    onChange={(event) => setSelectedSalesPerson(event.target.value)}
+                  >
+                    <option value="all">All Sales Persons</option>
+                    {salesPeople.map((person) => (
+                      <option key={person.id} value={person.id}>
+                        {person.name}
+                      </option>
+                    ))}
+                  </select>
+                </label>
+              </div>
             </div>
 
             <table className="clients-table">
@@ -646,7 +718,7 @@ export default function ManagerDashboard({ onSignOut, userEmail }) {
                 </tr>
               </thead>
               <tbody>
-                {branchClients.map((client) => (
+                {filteredClients.map((client) => (
                   <tr key={client.id}>
                     <td>{client.name}</td>
                     <td>{client.company}</td>
@@ -818,7 +890,7 @@ export default function ManagerDashboard({ onSignOut, userEmail }) {
           <section className="dashboard-layout">
             <div className="dashboard-main">
               <section className="kpi-grid">
-                {kpiCards.map((card) => (
+                {dashboardKpiCards.map((card) => (
                   <KpiCard
                     key={card.label}
                     card={card}
