@@ -1,4 +1,6 @@
 import React from "react";
+import DashboardSidebar from "./components/dashboard/DashboardSidebar";
+import DashboardHeader from "./components/dashboard/DashboardHeader";
 import MoreServicesPage from "./pages/MoreServicesPage";
 import EligibilityPage from "./pages/EligibilityPage";
 
@@ -224,46 +226,20 @@ export default function Dashboard({ onSignOut }) {
   );
   return (
     <main className={`client-dashboard ${dark ? "dashboard-dark" : ""}`}>
-      <aside className="client-sidebar">
-        <div className="client-brand">
-          <span className="client-brand-mark">A</span>
-          <span>
-            Agni<span>CRM</span>
-          </span>
-        </div>
-        <nav aria-label="Client dashboard navigation">
-          {navItems.map(([icon, label]) => (
-            <button
-              key={label}
-              className={activeNav === label ? "selected" : ""}
-              onClick={() => setActiveNav(label)}
-            >
-              <DashboardIcon name={icon} />
-              <span>{label}</span>
-            </button>
-          ))}
-        </nav>
-        <div className="sidebar-bottom">
-          <div className="theme-toggle">
-            <span>
-              <DashboardIcon name="moon" size={15} /> Dark mode
-            </span>
-            <button
-              className={dark ? "on" : ""}
-              onClick={() => setDark(!dark)}
-              aria-label="Toggle dark mode"
-            >
-              <i />
-            </button>
-          </div>
-          <button className="sign-out" onClick={onSignOut}>
-            Sign out
-          </button>
-        </div>
-      </aside>
+      <DashboardSidebar
+        navItems={navItems}
+        activeNav={activeNav}
+        onNavChange={setActiveNav}
+        dark={dark}
+        onToggleDark={() => setDark((value) => !value)}
+        onSignOut={onSignOut}
+        IconComponent={DashboardIcon}
+        brandMark="A"
+        navLabel="Client dashboard navigation"
+      />
 
       <section className="dashboard-content">
-        <header className="dashboard-top">
+        <DashboardHeader>
           <article className="customer-company-card">
             <h1>Acme Industries Pvt. Ltd.</h1>
           </article>
@@ -378,7 +354,7 @@ export default function Dashboard({ onSignOut }) {
               )}
             </div>
           </div>
-        </header>
+        </DashboardHeader>
         {activeNav === "More Services" ? (
           <MoreServicesPage />
         ) : activeNav === "Eligibility" ? (

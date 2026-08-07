@@ -1,4 +1,6 @@
 import React from "react";
+import DashboardSidebar from "../../components/dashboard/DashboardSidebar";
+import DashboardHeader from "../../components/dashboard/DashboardHeader";
 import Icon from "../../components/Icon";
 import KpiCard from "../../components/KpiCard";
 import { getDailyPayment, getWeeklyPayment, getMonthlyPayment, formatCurrency } from "../../utils/paymentHelpers";
@@ -406,53 +408,26 @@ export default function ManagerDashboard({ onSignOut, userEmail }) {
 
   return (
     <main className={`owner-dashboard ${dark ? "dashboard-dark" : ""}`}>
-      <aside className="client-sidebar">
-        <div className="client-brand">
-          <strong>Agni CRM</strong>
-        </div>
-        <nav>
-          {navItems.map((item) => (
-            <button
-              key={item.label}
-              type="button"
-              className={activeNav === item.label ? "selected" : ""}
-              onClick={() => setActiveNav(item.label)}
-            >
-              <Icon name={item.icon} size={16} />
-              {item.label}
-            </button>
-          ))}
-        </nav>
-        <div className="sidebar-bottom">
-          <div className="theme-toggle">
-            <span>
-              <Icon name="moon" size={15} /> Dark mode
-            </span>
-            <button
-              className={dark ? "on" : ""}
-              onClick={() => setDark((value) => !value)}
-              type="button"
-              aria-label="Toggle dark mode"
-            >
-              <i />
-            </button>
-          </div>
-          <button className="sign-out" type="button" onClick={onSignOut}>
-            Sign out
-          </button>
-        </div>
-      </aside>
+      <DashboardSidebar
+        navItems={navItems}
+        activeNav={activeNav}
+        onNavChange={setActiveNav}
+        dark={dark}
+        onToggleDark={() => setDark((value) => !value)}
+        onSignOut={onSignOut}
+        IconComponent={Icon}
+        brandName={<strong>Agni CRM</strong>}
+        navLabel="Manager dashboard navigation"
+      />
 
       <section className="dashboard-content">
-        <header className="dashboard-top owner-dashboard-top" ref={notificationWrapRef}>
-          <div>
-            <p className="dashboard-eyebrow">Manager workspace</p>
-            <h1>Welcome back, {managerName}</h1>
-            <p className="dashboard-copy">
-              Monitor your team, track pipeline momentum, and keep client work moving forward.
-            </p>
-          </div>
-
+        <DashboardHeader
+          ref={notificationWrapRef}
+          eyebrow="Manager workspace"
+          title={`Welcome back, ${managerName}`}
+          copy="Monitor your team, track pipeline momentum, and keep client work moving forward."
+          className="owner-dashboard-top"
+        >
           <div className="top-actions owner-top-actions">
             {searchOpen ? (
               <div className="search-field">
@@ -517,7 +492,7 @@ export default function ManagerDashboard({ onSignOut, userEmail }) {
               )}
             </div>
           </div>
-        </header>
+        </DashboardHeader>
 
         {activeNav === "Dashboard" ? (
           <section className="dashboard-layout">

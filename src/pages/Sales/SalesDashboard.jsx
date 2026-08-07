@@ -1,4 +1,6 @@
 import React from "react";
+import DashboardSidebar from "../../components/dashboard/DashboardSidebar";
+import DashboardHeader from "../../components/dashboard/DashboardHeader";
 import Icon from "../../components/Icon";
 import KpiCard from "../../components/KpiCard";
 import SalesRequests from "./SalesRequests";
@@ -252,54 +254,24 @@ export default function SalesDashboard({ onSignOut, userEmail }) {
 
   return (
     <main className={`owner-dashboard sales-dashboard ${dark ? "dashboard-dark" : ""}`}>
-      <aside className="client-sidebar">
-        <div className="client-brand">
-          <span className="client-brand-mark">S</span>
-          <span>
-            Agni<span>CRM</span>
-          </span>
-        </div>
-
-        <nav aria-label="Sales dashboard navigation">
-          {navItems.map((item) => (
-            <button
-              key={item.label}
-              className={activeNav === item.label ? "selected" : ""}
-              onClick={() => setActiveNav(item.label)}
-              type="button"
-            >
-              <Icon name={item.icon} size={18} />
-              <span>{item.label}</span>
-            </button>
-          ))}
-        </nav>
-
-        <div className="sidebar-bottom">
-          <div className="theme-toggle">
-            <span>
-              <Icon name="moon" size={15} /> Dark mode
-            </span>
-            <button
-              className={dark ? "on" : ""}
-              onClick={() => setDark(!dark)}
-              type="button"
-              aria-label="Toggle dark mode"
-            >
-              <i />
-            </button>
-          </div>
-          <button className="sign-out" type="button" onClick={onSignOut}>
-            Sign out
-          </button>
-        </div>
-      </aside>
+      <DashboardSidebar
+        navItems={navItems}
+        activeNav={activeNav}
+        onNavChange={setActiveNav}
+        dark={dark}
+        onToggleDark={() => setDark((value) => !value)}
+        onSignOut={onSignOut}
+        IconComponent={Icon}
+        brandMark="S"
+        navLabel="Sales dashboard navigation"
+      />
 
       <section className="dashboard-content">
-        <header className="dashboard-top sales-dashboard-top">
-          <div>
-            <p className="dashboard-eyebrow">Sales workspace</p>
-            <h1>Hello, {salesPersonName}</h1>
-          </div>
+        <DashboardHeader
+          eyebrow="Sales workspace"
+          title={`Hello, ${salesPersonName}`}
+          className="sales-dashboard-top"
+        >
           <div className="top-actions">
             {searchOpen ? (
               <div className="search-field">
@@ -356,7 +328,7 @@ export default function SalesDashboard({ onSignOut, userEmail }) {
             </button>
             <span className="role-badge">Sales</span>
           </div>
-        </header>
+        </DashboardHeader>
 
         {activeNav === "Dashboard" ? (
           <section>

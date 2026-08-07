@@ -1,4 +1,6 @@
 import React from "react";
+import DashboardSidebar from "../../components/dashboard/DashboardSidebar";
+import DashboardHeader from "../../components/dashboard/DashboardHeader";
 import Icon from "../../components/Icon";
 import RevenueSummaryCard from "../../components/RevenueSummaryCard";
 import PerformanceChart from "../../components/PerformanceChart";
@@ -554,58 +556,24 @@ export default function OwnerDashboard({ onSignOut, userEmail }) {
 
   return (
     <main className={`owner-dashboard ${dark ? "dashboard-dark" : ""}`}>
-      <aside className="client-sidebar">
-        <div className="client-brand">
-          <span className="client-brand-mark">A</span>
-          <span>
-            Agni<span>CRM</span>
-          </span>
-        </div>
-
-        <nav aria-label="Owner dashboard navigation">
-          {navItems.map((item) => (
-            <button
-              key={item.label}
-              className={activeNav === item.label ? "selected" : ""}
-              onClick={() => setActiveNav(item.label)}
-              type="button"
-            >
-              <Icon name={item.icon} size={18} />
-              <span>{item.label}</span>
-            </button>
-          ))}
-        </nav>
-
-        <div className="sidebar-bottom">
-          <div className="theme-toggle">
-            <span>
-              <Icon name="moon" size={15} /> Dark mode
-            </span>
-            <button
-              className={dark ? "on" : ""}
-              onClick={() => setDark(!dark)}
-              type="button"
-              aria-label="Toggle dark mode"
-            >
-              <i />
-            </button>
-          </div>
-          <button className="sign-out" type="button" onClick={onSignOut}>
-            Sign out
-          </button>
-        </div>
-      </aside>
+      <DashboardSidebar
+        navItems={navItems}
+        activeNav={activeNav}
+        onNavChange={setActiveNav}
+        dark={dark}
+        onToggleDark={() => setDark(!dark)}
+        onSignOut={onSignOut}
+        IconComponent={Icon}
+        navLabel="Owner dashboard navigation"
+      />
 
       <section className="dashboard-content">
-        <header className="dashboard-top owner-dashboard-top">
-          <div>
-            <p className="dashboard-eyebrow">Owner workspace</p>
-            <h1>Hello, {ownerName}</h1>
-            <p className="dashboard-copy">
-              Track revenue, top performers, and client activity in one place.
-            </p>
-          </div>
-
+        <DashboardHeader
+          eyebrow="Owner workspace"
+          title={`Hello, ${ownerName}`}
+          copy="Track revenue, top performers, and client activity in one place."
+          className="owner-dashboard-top"
+        >
           <div className="top-actions owner-top-actions">
             {searchOpen ? (
               <div className="search-field">
@@ -662,7 +630,7 @@ export default function OwnerDashboard({ onSignOut, userEmail }) {
             </button>
             <span className="role-badge">Owner</span>
           </div>
-        </header>
+        </DashboardHeader>
 
         {activeNav === "Clients" ? (
           <section>
