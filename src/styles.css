@@ -1026,8 +1026,9 @@ form {
     background: #fff;
     border-radius: 12px;
     overflow: hidden;
-    box-shadow: 0 8px 24px rgba(23,19,43,0.04);
+    box-shadow: 0 8px 24px rgba(23, 19, 43, 0.04);
 }
+
 .clients-table thead th {
     text-align: left;
     padding: 14px 18px;
@@ -1036,11 +1037,13 @@ form {
     font-weight: 700;
     font-size: 13px;
 }
+
 .clients-table tbody td {
     padding: 14px 18px;
     border-top: 1px solid #f2f2f6;
     vertical-align: middle;
 }
+
 .table-action {
     margin-left: 8px;
     padding: 8px 12px;
@@ -1051,7 +1054,10 @@ form {
     cursor: pointer;
     font-weight: 700;
 }
-.table-action.danger { background: #ff5757; }
+
+.table-action.danger {
+    background: #ff5757;
+}
 
 .scheme-card p {
     margin: 4px 0 0;
@@ -1083,7 +1089,7 @@ form {
     position: absolute;
     right: 16px;
     bottom: 16px;
-    box-shadow: 0 8px 20px rgba(15,23,36,0.18);
+    box-shadow: 0 8px 20px rgba(15, 23, 36, 0.18);
     transition: transform .14s ease, background .12s ease;
 }
 
@@ -1319,21 +1325,53 @@ form {
 }
 
 /* per-card background tints */
-.kpi-card.clients { background: linear-gradient(135deg, #dcd0ff 0%, #f4eaff 50%, #fff 100%); }
-.kpi-card.managers { background: linear-gradient(135deg, #dff4ff 0%, #eaf9ff 50%, #fff 100%); }
-.kpi-card.sales { background: linear-gradient(135deg, #eafff4 0%, #eafff7 50%, #fff 100%); }
-.kpi-card.revenue { background: linear-gradient(135deg, #fff5d9 0%, #fff6e3 50%, #fff 100%); }
-.kpi-card.projects { background: linear-gradient(135deg, #e9ecff 0%, #f3f4ff 50%, #fff 100%); }
-.kpi-card.conversion { background: linear-gradient(135deg, #fff0f4 0%, #fff6f8 50%, #fff 100%); }
+.kpi-card.clients {
+    background: linear-gradient(135deg, #dcd0ff 0%, #f4eaff 50%, #fff 100%);
+}
+
+.kpi-card.managers {
+    background: linear-gradient(135deg, #dff4ff 0%, #eaf9ff 50%, #fff 100%);
+}
+
+.kpi-card.sales {
+    background: linear-gradient(135deg, #eafff4 0%, #eafff7 50%, #fff 100%);
+}
+
+.kpi-card.revenue {
+    background: linear-gradient(135deg, #fff5d9 0%, #fff6e3 50%, #fff 100%);
+}
+
+.kpi-card.projects {
+    background: linear-gradient(135deg, #e9ecff 0%, #f3f4ff 50%, #fff 100%);
+}
+
+.kpi-card.conversion {
+    background: linear-gradient(135deg, #fff0f4 0%, #fff6f8 50%, #fff 100%);
+}
 
 /* ensure strong text contrast if using light tinted backgrounds */
-.kpi-card h2, .kpi-card p, .kpi-card .kpi-card-header span { color: #1f2130; }
+.kpi-card h2,
+.kpi-card p,
+.kpi-card .kpi-card-header span {
+    color: #1f2130;
+}
 
 /* stronger panel gradients for emphasis */
-.performance-panel { background: linear-gradient(135deg,#eef9ff 0%, #fff 100%); }
-.analytics-card { background: linear-gradient(135deg,#f6edff 0%, #fff 100%); }
-.activity-panel { background: linear-gradient(135deg,#f3fff6 0%, #fff 100%); }
-.notification-panel { background: linear-gradient(135deg,#fff4f6 0%, #fff 100%); }
+.performance-panel {
+    background: linear-gradient(135deg, #eef9ff 0%, #fff 100%);
+}
+
+.analytics-card {
+    background: linear-gradient(135deg, #f6edff 0%, #fff 100%);
+}
+
+.activity-panel {
+    background: linear-gradient(135deg, #f3fff6 0%, #fff 100%);
+}
+
+.notification-panel {
+    background: linear-gradient(135deg, #fff4f6 0%, #fff 100%);
+}
 
 .kpi-card-header {
     display: flex;
@@ -1373,7 +1411,7 @@ form {
     position: absolute;
     right: 16px;
     bottom: 16px;
-    box-shadow: 0 8px 20px rgba(15,23,36,0.18);
+    box-shadow: 0 8px 20px rgba(15, 23, 36, 0.18);
     transition: transform .14s ease, background .12s ease;
 }
 
@@ -1502,10 +1540,21 @@ form {
 }
 
 /* Owner dashboard panel tints */
-.performance-panel { background: linear-gradient(180deg,#f7fbff 0%, #fff 100%); }
-.analytics-card { background: linear-gradient(180deg,#f8f3ff 0%, #fff 100%); }
-.activity-panel { background: linear-gradient(180deg,#f6fff7 0%, #fff 100%); }
-.notification-panel { background: linear-gradient(180deg,#fff7f8 0%, #fff 100%); }
+.performance-panel {
+    background: linear-gradient(180deg, #f7fbff 0%, #fff 100%);
+}
+
+.analytics-card {
+    background: linear-gradient(180deg, #f8f3ff 0%, #fff 100%);
+}
+
+.activity-panel {
+    background: linear-gradient(180deg, #f6fff7 0%, #fff 100%);
+}
+
+.notification-panel {
+    background: linear-gradient(180deg, #fff7f8 0%, #fff 100%);
+}
 
 .panel-header {
     display: flex;
@@ -2180,7 +2229,7 @@ form {
     inset: 0;
     display: grid;
     place-items: center;
-    background: rgba(12,14,24,0.44);
+    background: rgba(12, 14, 24, 0.44);
     z-index: 60;
     padding: 24px;
 }
@@ -2191,8 +2240,8 @@ form {
     background: #fff;
     border-radius: 18px;
     padding: 24px;
-    box-shadow: 0 24px 64px rgba(15,23,42,0.18);
-    border: 1px solid rgba(15,23,42,0.06);
+    box-shadow: 0 24px 64px rgba(15, 23, 42, 0.18);
+    border: 1px solid rgba(15, 23, 42, 0.06);
     overflow: hidden;
     display: flex;
     flex-direction: column;
@@ -2219,7 +2268,7 @@ form {
     height: 38px;
     display: grid;
     place-items: center;
-    border: 1px solid rgba(15,23,42,0.12);
+    border: 1px solid rgba(15, 23, 42, 0.12);
     border-radius: 12px;
     background: #f8fafc;
     color: #111827;
@@ -2264,7 +2313,7 @@ form {
 
 .edit-form-grid input:focus {
     border-color: #7c3aed;
-    box-shadow: 0 0 0 4px rgba(124,58,237,0.08);
+    box-shadow: 0 0 0 4px rgba(124, 58, 237, 0.08);
 }
 
 .confirm-dialog p {
@@ -2306,16 +2355,16 @@ form {
 .dashboard-dark .modal-content {
     background: #2e293f;
     color: #f3f2f7;
-    border-color: rgba(148,163,184,0.18);
+    border-color: rgba(148, 163, 184, 0.18);
 }
 
 .dashboard-dark .modal-header {
-    border-color: rgba(148,163,184,0.18);
+    border-color: rgba(148, 163, 184, 0.18);
 }
 
 .dashboard-dark .modal-close {
     background: #312d45;
-    border-color: rgba(148,163,184,0.18);
+    border-color: rgba(148, 163, 184, 0.18);
     color: #e2e8f0;
 }
 
@@ -2331,7 +2380,7 @@ form {
 
 .dashboard-dark .edit-form-grid input:focus {
     border-color: #b084fc;
-    box-shadow: 0 0 0 4px rgba(176,94,255,0.12);
+    box-shadow: 0 0 0 4px rgba(176, 94, 255, 0.12);
 }
 
 .dashboard-dark .confirm-dialog p {
@@ -2367,6 +2416,7 @@ form {
     .analytics-grid {
         grid-template-columns: 1fr;
     }
+
     .kpi-grid {
         grid-template-columns: repeat(2, minmax(0, 1fr));
     }
@@ -2431,8 +2481,15 @@ form {
 }
 
 @keyframes fadeIn {
-    from { opacity: 0; transform: translateY(8px); }
-    to { opacity: 1; transform: translateY(0); }
+    from {
+        opacity: 0;
+        transform: translateY(8px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
 }
 
 .dashboard-dark .owner-dashboard,
@@ -2548,6 +2605,39 @@ form {
 .dashboard-dark .revenue-summary p,
 .dashboard-dark .revenue-chip {
     color: #f6f3ff;
+}
+
+.dashboard-dark .clients-table {
+    background: #2f2a40;
+    box-shadow: 0 8px 24px rgba(7, 7, 14, .3);
+}
+
+.dashboard-dark .clients-table thead th {
+    background: #262234;
+    color: #c1bdcd;
+}
+
+.dashboard-dark .clients-table tbody td {
+    border-top: 1px solid rgba(255, 255, 255, .08);
+    color: #f3f2f7;
+}
+
+.dashboard-dark .clients-table tbody tr:hover td {
+    background: rgba(255, 255, 255, .03);
+}
+
+.dashboard-dark .table-action {
+    background: #4b4363;
+    color: #f3f2f7;
+}
+
+.dashboard-dark .table-action.danger {
+    background: #ef4444;
+    color: #fff;
+}
+
+.dashboard-dark .table-pagination {
+    color: #c1bdcd;
 }
 
 .notifications-popover {
@@ -4400,7 +4490,8 @@ form {
         gap: 0;
         padding: 0;
         border-radius: 13px;
-        font-size: 0; /* hides inline text labels (Manager dashboard nav) */
+        font-size: 0;
+        /* hides inline text labels (Manager dashboard nav) */
     }
 
     /* Content needs bottom clearance for the fixed nav, plus horizontal

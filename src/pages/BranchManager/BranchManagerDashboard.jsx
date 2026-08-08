@@ -3,7 +3,6 @@ import DashboardSidebar from "../../components/dashboard/DashboardSidebar";
 import DashboardHeader from "../../components/dashboard/DashboardHeader";
 import Icon from "../../components/Icon";
 import RevenueSummaryCard from "../../components/RevenueSummaryCard";
-import PerformanceChart from "../../components/PerformanceChart";
 import BranchRevenueChart from "../../components/BranchRevenueChart";
 import SimpleModal from "../../components/SimpleModal";
 import KpiCard from "../../components/KpiCard";
@@ -30,12 +29,46 @@ const branchRevenueData = [
   { branch: 'West', revenue: 320 },
 ];
 
+function RevenueTrendChart({ data }) {
+  const width = 320;
+  const height = 180;
+  const padding = 24;
+  const values = data.map((item) => item.value);
+  const maxValue = Math.max(...values);
+  const minValue = Math.min(...values);
+  const range = maxValue - minValue || 1;
+
+  const points = data.map((item, index) => {
+    const x = padding + (index * (width - padding * 2)) / Math.max(data.length - 1, 1);
+    const y = height - padding - ((item.value - minValue) / range) * (height - padding * 2);
+    return { x, y, label: item.label };
+  });
+
+  const linePath = points.map((point, index) => `${index === 0 ? 'M' : 'L'} ${point.x} ${point.y}`).join(' ');
+  const areaPath = `${linePath} L ${points[points.length - 1].x} ${height - padding} L ${points[0].x} ${height - padding} Z`;
+
+  return (
+    <svg viewBox={`0 0 ${width} ${height}`} className="dashboard-chart" aria-hidden="true">
+      <path d={areaPath} fill="rgba(154, 116, 233, 0.16)" />
+      <path d={linePath} fill="none" stroke="#9a74e9" strokeWidth="3" strokeLinecap="round" />
+      {points.map((point) => (
+        <g key={point.label}>
+          <circle cx={point.x} cy={point.y} r="4.5" fill="#fff" stroke="#9a74e9" strokeWidth="2" />
+          <text x={point.x} y={height - 6} textAnchor="middle" fill="#7d79a8" fontSize="11">
+            {point.label}
+          </text>
+        </g>
+      ))}
+    </svg>
+  );
+}
+
 const kpiCards = [
-  { label: "Total Regional Managers", value: "7", trend: "+3%", description: "Managers across region", accent: "#9a74e9", slug: "regional-managers", bg: "#9a74e915" },
-  { label: "Total Employees", value: "124", trend: "+6%", description: "Staff at branch", accent: "#4e7cff", slug: "employees", bg: "#4e7cff15" },
-  { label: "Active Clients", value: "248", trend: "+8%", description: "Currently active", accent: "#44bfb0", slug: "clients", bg: "#44bfb015" },
-  { label: "Pending Requests", value: "12", trend: "-2%", description: "Awaiting action", accent: "#f2aa38", slug: "requests", bg: "#f2aa3815" },
-  { label: "Branch Revenue", value: "₹278.8k", trend: "+22%", description: "This month", accent: "#f97316", slug: "branch-revenue", bg: "#f9731615" },
+  { label: "Total Regional Managers", value: "7", trend: "+3%", description: "Managers across region", accent: "#9a74e9" },
+  { label: "Total Employees", value: "124", trend: "+6%", description: "Staff at branch", accent: "#4e7cff" },
+  { label: "Active Clients", value: "248", trend: "+8%", description: "Currently active", accent: "#44bfb0" },
+  { label: "Pending Requests", value: "12", trend: "-2%", description: "Awaiting action", accent: "#f2aa38" },
+  { label: "Branch Revenue", value: "₹278.8k", trend: "+22%", description: "This month", accent: "#f97316" },
 ];
 
 const branchManagerClients = [
@@ -86,6 +119,7 @@ const branchManagerClients = [
 export default function BranchManagerDashboard({ onSignOut, userEmail }) {
   const [activeNav, setActiveNav] = React.useState("Dashboard");
   const [dark, setDark] = React.useState(false);
+  const [revenueRange, setRevenueRange] = React.useState("monthly");
   const [searchOpen, setSearchOpen] = React.useState(false);
   const [notificationsOpen, setNotificationsOpen] = React.useState(false);
   const [query, setQuery] = React.useState("");
@@ -113,15 +147,6 @@ export default function BranchManagerDashboard({ onSignOut, userEmail }) {
     { id: 1, name: 'Daniel Cruz', email: 'daniel@agni.com', joiningDate: '2023-05-11', role: 'Marketing Specialist', region: 'South Zone', branchManagerName: 'Ariana Lee' },
     { id: 2, name: 'Lily Chen', email: 'lily@agni.com', joiningDate: '2023-08-02', role: 'SEO Expert', region: 'East Zone', branchManagerName: 'Priya Menon' },
   ]);
-
-  // Regional Revenue state
-  const [regionalRevenue] = React.useState([
-    { id: 1, region: 'North Zone', manager: 'Ariana Lee', revenue: '₹145k', series: [80, 95, 110, 105, 130, 145] },
-    { id: 2, region: 'South Zone', manager: 'Priya Menon', revenue: '₹210k', series: [120, 130, 150, 160, 190, 210] },
-    { id: 3, region: 'East Zone', manager: 'Mia Ross', revenue: '₹180k', series: [100, 110, 125, 140, 165, 180] },
-    { id: 4, region: 'West Zone', manager: 'Eli Brooks', revenue: '₹320k', series: [150, 180, 210, 240, 280, 320] },
-  ]);
-  const [selectedRegionRevenue, setSelectedRegionRevenue] = React.useState(null);
 
   // Employee management state
   const [employeesList] = React.useState([
@@ -187,6 +212,9 @@ export default function BranchManagerDashboard({ onSignOut, userEmail }) {
     return parts.map((part) => part.charAt(0).toUpperCase() + part.slice(1).toLowerCase()).join(" ");
   }, [userEmail]);
 
+  // This branch manager's own branch — Revenue tab is scoped to this branch only
+  const myBranch = "East";
+
   // Client handlers
   function openClientInfo(client) {
     setSelectedClient(client);
@@ -238,6 +266,74 @@ export default function BranchManagerDashboard({ onSignOut, userEmail }) {
   function cancelClientEdit() {
     setEditClientValues(null);
   }
+
+  const revenueSeries = {
+    daily: [
+      { label: 'Mon', value: 4200 },
+      { label: 'Tue', value: 4800 },
+      { label: 'Wed', value: 4500 },
+      { label: 'Thu', value: 5200 },
+      { label: 'Fri', value: 5000 },
+      { label: 'Sat', value: 5600 },
+    ],
+    weekly: [
+      { label: 'W1', value: 21000 },
+      { label: 'W2', value: 23000 },
+      { label: 'W3', value: 25000 },
+      { label: 'W4', value: 27000 },
+    ],
+    monthly: [
+      { label: 'Jan', value: 18000 },
+      { label: 'Feb', value: 21000 },
+      { label: 'Mar', value: 22800 },
+      { label: 'Apr', value: 24500 },
+      { label: 'May', value: 27000 },
+      { label: 'Jun', value: 30500 },
+    ],
+    yearly: [
+      { label: '2021', value: 120000 },
+      { label: '2022', value: 155000 },
+      { label: '2023', value: 190000 },
+      { label: '2024', value: 227000 },
+      { label: '2025', value: 260000 },
+    ],
+    allTime: [
+      { label: '2019', value: 80000 },
+      { label: '2020', value: 118000 },
+      { label: '2021', value: 155000 },
+      { label: '2022', value: 190000 },
+      { label: '2023', value: 230000 },
+      { label: '2024', value: 270000 },
+    ],
+  };
+
+  const selectedRevenueData = revenueSeries[revenueRange] || revenueSeries.monthly;
+  const revenueTotal = selectedRevenueData.reduce((sum, point) => sum + point.value, 0);
+  const revenueReceived = Math.round(revenueTotal * 0.72);
+  const revenuePending = Math.round(revenueTotal * 0.28);
+  const revenueSummaryCards = [
+    {
+      label: 'Payment received',
+      value: `₹${revenueReceived.toLocaleString()}`,
+      hint: 'Collected from clients',
+      accentClass: 'received',
+      icon: 'arrowUp',
+    },
+    {
+      label: 'Payment pending',
+      value: `₹${revenuePending.toLocaleString()}`,
+      hint: 'Awaiting confirmation',
+      accentClass: 'pending',
+      icon: 'overview',
+    },
+    {
+      label: 'Total payment',
+      value: `₹${revenueTotal.toLocaleString()}`,
+      hint: 'Overall revenue range',
+      accentClass: 'total',
+      icon: 'revenue',
+    },
+  ];
 
   return (
     <main className={`owner-dashboard branch-manager-dashboard ${dark ? "dashboard-dark" : ""}`}>
@@ -718,57 +814,66 @@ export default function BranchManagerDashboard({ onSignOut, userEmail }) {
           </section>
         ) : activeNav === "Revenue" ? (
           <section>
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12, marginBottom: 16 }}>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12, marginBottom: 12, flexWrap: 'wrap' }}>
               <div>
-                <h2 style={{ margin: 0 }}>Regional Revenue</h2>
-                <div style={{ color: '#7a748e', fontSize: 13, marginTop: 4 }}>Revenue breakdown by region</div>
+                <h2 style={{ margin: 0 }}>Revenue analytics — {myBranch} Branch</h2>
+                <div style={{ color: '#7a748e', fontSize: 13, marginTop: 4 }}>Track revenue performance for your branch over time</div>
+              </div>
+              <div>
+                <label style={{ fontSize: 13, color: '#6b6b77', marginRight: 8 }}>Time range</label>
+                <select value={revenueRange} onChange={(event) => setRevenueRange(event.target.value)}>
+                  <option value="daily">Daily</option>
+                  <option value="weekly">Weekly</option>
+                  <option value="monthly">Monthly</option>
+                  <option value="yearly">Yearly</option>
+                  <option value="allTime">All time</option>
+                </select>
               </div>
             </div>
-            <table className="clients-table">
-              <thead>
-                <tr>
-                  <th>Region Name</th>
-                  <th>Manager Name</th>
-                  <th>Revenue (This Month)</th>
-                  <th></th>
-                </tr>
-              </thead>
-              <tbody>
-                {regionalRevenue.map((item) => (
-                  <tr key={item.id}>
-                    <td>{item.region}</td>
-                    <td>{item.manager}</td>
-                    <td>{item.revenue}</td>
-                    <td style={{ textAlign: 'right' }}>
-                      <button className="table-action" onClick={() => setSelectedRegionRevenue(item)}>View Chart</button>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
 
-            {selectedRegionRevenue && (
-              <SimpleModal onClose={() => setSelectedRegionRevenue(null)}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 12 }}>
+            <div className="revenue-panel" style={{ display: 'grid', gridTemplateColumns: '1.2fr 0.8fr', gap: 16, alignItems: 'stretch' }}>
+              <div className="revenue-summary" style={{ minHeight: 220 }}>
+                <p className="eyebrow">Revenue overview</p>
+                <h2>₹{revenueTotal.toLocaleString()}</h2>
+                <p className="revenue-copy">Selected range: {revenueRange.charAt(0).toUpperCase() + revenueRange.slice(1)}</p>
+                <div className="revenue-breakdown">
                   <div>
-                    <h3 style={{ margin: 0 }}>Revenue Chart — {selectedRegionRevenue.region}</h3>
-                    <div style={{ color: '#7a748e', fontSize: 13 }}>Manager: {selectedRegionRevenue.manager}</div>
+                    <span>Average</span>
+                    <strong>₹{Math.round(revenueTotal / selectedRevenueData.length).toLocaleString()}</strong>
+                  </div>
+                  <div>
+                    <span>Peak</span>
+                    <strong>₹{Math.max(...selectedRevenueData.map((item) => item.value)).toLocaleString()}</strong>
+                  </div>
+                  <div>
+                    <span>Points</span>
+                    <strong>{selectedRevenueData.length}</strong>
                   </div>
                 </div>
-                <div style={{ marginTop: 24, padding: '12px 0' }}>
-                  <PerformanceChart series={selectedRegionRevenue.series} label={`${selectedRegionRevenue.region} Monthly Trend`} />
+              </div>
+              <div className="revenue-chart-panel" style={{ minHeight: 220 }}>
+                <div className="revenue-chip">
+                  <Icon name="arrowUp" size={14} />
+                  <span>Trend</span>
                 </div>
-              </SimpleModal>
-            )}
+                <RevenueTrendChart data={selectedRevenueData} />
+              </div>
+            </div>
+
+            <div className="revenue-summary-grid">
+              {revenueSummaryCards.map((card) => (
+                <RevenueSummaryCard key={card.label} card={card} />
+              ))}
+            </div>
           </section>
         ) : (
           <section>
-            <div className="kpi-activity-row" style={{ display: 'flex', gap: 18, alignItems: 'stretch', width: '100%'}}>
-              <div className="scheme-grid" style={{ gridTemplateColumns: 'repeat(2, minmax(0, 1fr))', flex: '2 1 0%', minWidth: 0 }}>
+            <div className="kpi-activity-row" style={{ display: 'flex', gap: 18, alignItems: 'stretch', width: '100%' }}>
+              <section className="kpi-grid" style={{ flex: '2 1 0%', minWidth: 0 }}>
                 {kpiCards.map((card) => (
-                  <KpiCard key={card.label} card={card} />
+                  <KpiCard key={card.label} card={card} dark={dark} />
                 ))}
-              </div>
+              </section>
 
               <aside className="sidebar-widgets" style={{ flex: '1 1 0%', minWidth: 300, display: 'flex' }}>
                 <section className="activity-panel" style={{ width: '100%', display: 'flex', flexDirection: 'column' }}>

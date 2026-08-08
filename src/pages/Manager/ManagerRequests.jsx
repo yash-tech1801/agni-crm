@@ -3,10 +3,15 @@ import RequestTable from "./RequestTable";
 import RequestHistory from "./RequestHistory";
 import RequestModal from "./RequestModal";
 import { mockRequests } from "./mockRequests";
+import ManagerCreateRequestModal from "./ManagerCreateRequestModal";
+import { mockClients } from "../Sales/mockClients";
 
-export default function ManagerRequests({ branchTeamNames, managedRegion }) {
+export default function ManagerRequests({ branchTeamNames, managedRegion, branchTeam }) {
   const [activeTab, setActiveTab] = useState("Pending");
   const [requests, setRequests] = useState(mockRequests);
+  const [myRequests, setMyRequests] = useState([]);
+  const [showCreateModal, setShowCreateModal] = useState(false);
+  const [notification, setNotification] = useState("");
   const [selectedRequest, setSelectedRequest] = useState(null);
 
   const branchRequests = useMemo(
@@ -61,10 +66,13 @@ export default function ManagerRequests({ branchTeamNames, managedRegion }) {
             Review pending requests from your sales team and track historical decisions for completed requests.
           </p>
         </div>
+        <button type="button" className="primary-button" onClick={() => setShowCreateModal(true)}>
+          + Create Request
+        </button>
       </div>
 
       <div style={{ display: 'flex', flexWrap: 'wrap', gap: 10, marginBottom: 24 }}>
-        {['Pending', 'History'].map((tab) => (
+        {['Pending', 'Review', 'History'].map((tab) => (
           <button
             key={tab}
             type="button"
@@ -77,10 +85,16 @@ export default function ManagerRequests({ branchTeamNames, managedRegion }) {
             }}
             onClick={() => setActiveTab(tab)}
           >
-            {tab === 'Pending' ? 'Pending Requests' : 'Request History'}
+            {tab === 'Pending' ? 'Pending Requests' : tab === 'Review' ? 'Review Request' : 'Request History'}
           </button>
         ))}
       </div>
+
+      {notification ? (
+        <div style={{ marginBottom: 18, padding: 16, borderRadius: 16, background: "#e7f6ff", color: "#175f8f", border: "1px solid #c7e5f7" }}>
+          {notification}
+        </div>
+      ) : null}
 
       {activeTab === 'Pending' ? (
         <div>
@@ -88,7 +102,19 @@ export default function ManagerRequests({ branchTeamNames, managedRegion }) {
             <div>
               <p className="eyebrow">Pending requests</p>
               <p style={{ margin: 0, color: '#6b6b77', fontSize: 13 }}>
-                {pendingRequests.length} pending requests from your sales team in {managedRegion}.
+                {myRequests.length === 0 ? "No pending requests." : `${myRequests.length} pending requests created by you.`}
+              </p>
+            </div>
+          </div>
+          {myRequests.length > 0 && <RequestTable requests={myRequests} onView={handleViewRequest} />}
+        </div>
+      ) : activeTab === 'Review' ? (
+        <div>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 10, marginBottom: 14 }}>
+            <div>
+              <p className="eyebrow">Review requests</p>
+              <p style={{ margin: 0, color: '#6b6b77', fontSize: 13 }}>
+                {pendingRequests.length} requests to review from your sales team in {managedRegion}.
               </p>
             </div>
           </div>
@@ -96,7 +122,7 @@ export default function ManagerRequests({ branchTeamNames, managedRegion }) {
         </div>
       ) : (
         <div>
-          <RequestHistory requests={historyRequests} onView={handleViewRequest} />
+          <RequestHistory receivedRequests={historyRequests} sentRequests={myRequests} onView={handleViewRequest} />
         </div>
       )}
 
@@ -106,7 +132,19 @@ export default function ManagerRequests({ branchTeamNames, managedRegion }) {
           onClose={() => setSelectedRequest(null)}
           onApprove={handleApprove}
           onReject={handleReject}
-          readOnly={activeTab === 'History'}
+          readOnly={activeTab === 'History' || activeTab === 'Pending'}
+        />
+      )}
+
+      {showCreateModal && (
+        <ManagerCreateRequestModal
+          salesPeople={branchTeam}
+          onClose={() => setShowCreateModal(false)}
+          onSubmit={(newReq) => {
+            setMyRequests([newReq, ...myRequests]);
+            setNotification("Your request has been submitted successfully.");
+            setTimeout(() => setNotification(""), 4200);
+          }}
         />
       )}
     </section>

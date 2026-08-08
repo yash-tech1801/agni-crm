@@ -1,9 +1,16 @@
 import React from 'react';
 import Icon from './Icon';
 
-export default function KpiCard({ card, onAction }) {
+export default function KpiCard({ card, onAction, dark }) {
+  const accent = card.accent || "#4e7cff";
+  const base = dark ? "#353241" : "#fff";
+  const cardStyle = {
+    background: `linear-gradient(135deg, ${accent}${dark ? "3d" : "26"} 0%, ${accent}${dark ? "1f" : "12"} 55%, ${base} 100%)`,
+    borderColor: "transparent",
+  };
+
   return (
-    <article className={`kpi-card ${card.slug || ''}`} style={card.bg ? { background: card.bg, borderColor: 'transparent' } : {}}>
+    <article className="kpi-card" style={cardStyle}>
       <div className="kpi-card-header">
         <div className="kpi-card-title">
           {card.icon && (

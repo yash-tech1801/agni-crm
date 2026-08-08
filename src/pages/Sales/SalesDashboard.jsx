@@ -2,40 +2,56 @@ import React from "react";
 import DashboardSidebar from "../../components/dashboard/DashboardSidebar";
 import DashboardHeader from "../../components/dashboard/DashboardHeader";
 import Icon from "../../components/Icon";
+import RevenueSummaryCard from "../../components/RevenueSummaryCard";
+import PerformanceChart from "../../components/PerformanceChart";
+import BranchRevenueChart from "../../components/BranchRevenueChart";
+import SimpleModal from "../../components/SimpleModal";
 import KpiCard from "../../components/KpiCard";
-import SalesRequests from "./SalesRequests";
-import EligibleSchemes from "./EligibleSchemes";
-import { mockEligibleSchemes } from "./mockEligibleSchemes";
+import Modal from "../../components/Modal";
+import EditForm from "../../components/EditForm";
+import ConfirmDialog from "../../components/ConfirmDialog";
+import TopPerformerLeaderboard from "../../components/TopPerformerLeaderboard";
 
 const navItems = [
   { icon: "dashboard", label: "Dashboard" },
   { icon: "clients", label: "Clients" },
-  { icon: "overview", label: "Requests" },
-  { icon: "reports", label: "Details" },
+  { icon: "team", label: "Employees" },
+  { icon: "revenue", label: "Revenue" },
+  { icon: "reports", label: "Reports" },
+  { icon: "settings", label: "Admin" },
+  { icon: "overview", label: "IT" },
+  { icon: "leads", label: "Marketing" },
 ];
 
-const salesLeads = [
-  { id: 1, client: "Bright Retail", contact: "Anil Kumar", status: "Proposal", value: "₹58k", owner: "Mia Ross" },
-  { id: 2, client: "Urban Foods", contact: "Riya Sharma", status: "Negotiation", value: "₹46k", owner: "Rohan Varma" },
-  { id: 3, client: "Nova Textiles", contact: "Sanjay Patel", status: "Qualified", value: "₹34k", owner: "Noah Kim" },
-  { id: 4, client: "Peak Logistics", contact: "Rakesh Mehra", status: "Demo", value: "₹72k", owner: "Tara Singh" },
+const branchRevenueData = [
+  { branch: 'North', revenue: 145 },
+  { branch: 'South', revenue: 210 },
+  { branch: 'East', revenue: 180 },
+  { branch: 'West', revenue: 320 },
 ];
 
-const salesClients = [
+const kpiCards = [
+  { label: "Total Regional Managers", value: "7", trend: "+3%", description: "Managers across region", accent: "#9a74e9" },
+  { label: "Total Employees", value: "124", trend: "+6%", description: "Staff at branch", accent: "#4e7cff" },
+  { label: "Active Clients", value: "248", trend: "+8%", description: "Currently active", accent: "#44bfb0" },
+  { label: "Pending Requests", value: "12", trend: "-2%", description: "Awaiting action", accent: "#f2aa38" },
+  { label: "Branch Revenue", value: "₹278.8k", trend: "+22%", description: "This month", accent: "#f97316" },
+];
+
+const branchManagerClients = [
   {
     id: 1,
     name: "Bright Retail",
     company: "Bright Retail Pvt Ltd",
     email: "hello@brightretail.com",
     phone: "+91 98765 32100",
-    stage: "Active",
-    owner: "Mia Ross",
-    documentDetails: [
-      { label: "PAN Number", value: "ABCDE1234F", available: "Yes" },
-      { label: "Aadhar Number", value: "1234 5678 9012", available: "Yes" },
-      { label: "GST Number", value: "27ABCDE1234F1Z5", available: "Yes" },
-      { label: "KYC Documents", value: "Submitted", available: "Yes" },
-    ],
+    service: "CRM Implementation",
+    salesRep: "Mia Ross",
+    branch: "East",
+    revenue: "₹68k",
+    startDate: "2024-03-02",
+    region: "East Zone",
+    managerName: "Ariana Lee",
   },
   {
     id: 2,
@@ -43,14 +59,13 @@ const salesClients = [
     company: "Urban Foods Ltd",
     email: "sales@urbanfoods.com",
     phone: "+91 91234 55678",
-    stage: "Onboarding",
-    owner: "Mia Ross",
-    documentDetails: [
-      { label: "PAN Number", value: "PQRSX6789K", available: "Yes" },
-      { label: "Aadhar Number", value: "2345 6789 0123", available: "Yes" },
-      { label: "GST Number", value: "27PQRSX6789K1Z1", available: "Yes" },
-      { label: "KYC Documents", value: "Pending", available: "No" },
-    ],
+    service: "Marketing Campaign",
+    salesRep: "Mia Ross",
+    branch: "East",
+    revenue: "₹54k",
+    startDate: "2024-04-18",
+    region: "East Zone",
+    managerName: "Ariana Lee",
   },
   {
     id: 3,
@@ -58,202 +73,174 @@ const salesClients = [
     company: "Nova Textiles Co",
     email: "contact@novatextiles.com",
     phone: "+91 99876 44556",
-    stage: "Renewal",
-    owner: "Rohan Varma",
-    documentDetails: [
-      { label: "PAN Number", value: "LMNOP4321D", available: "Yes" },
-      { label: "Aadhar Number", value: "3456 7890 1234", available: "Yes" },
-      { label: "GST Number", value: "27LMNOP4321D1Z3", available: "Yes" },
-      { label: "KYC Documents", value: "Submitted", available: "Yes" },
-    ],
-  },
-  {
-    id: 4,
-    name: "Peak Logistics",
-    company: "Peak Logistics Pvt Ltd",
-    email: "contact@peaklogistics.com",
-    phone: "+91 90123 45678",
-    stage: "Active",
-    owner: "Tara Singh",
-    documentDetails: [
-      { label: "PAN Number", value: "RSTUV9876P", available: "Yes" },
-      { label: "Aadhar Number", value: "4567 8901 2345", available: "No" },
-      { label: "GST Number", value: "27RSTUV9876P1Z2", available: "Yes" },
-      { label: "KYC Documents", value: "Pending", available: "No" },
-    ],
+    service: "IT Support",
+    salesRep: "Rohan Varma",
+    branch: "South",
+    revenue: "₹46k",
+    startDate: "2024-05-09",
+    region: "South Zone",
+    managerName: "Priya Menon",
   },
 ];
 
-const notifications = [
-  { title: "New lead assigned", detail: "4 leads were assigned to your queue.", issuer: "CRM", tone: "#9a74e9" },
-  { title: "Deal updated", detail: "Urban Foods moved to Negotiation.", issuer: "Sales Ops", tone: "#44bfb0" },
-  { title: "Quota alert", detail: "You are 18% ahead of pace.", issuer: "System", tone: "#f2aa38" },
-];
-
-const requestActivities = [
-  { title: "Request approved", detail: "Client update request approved by management.", time: "2m ago", tone: "#44bfb0" },
-  { title: "Request rejected", detail: "Delete request rejected for Nova Textiles.", time: "1h ago", tone: "#f2aa38" },
-  { title: "New request", detail: "A new approval request is ready for review.", time: "3h ago", tone: "#9a74e3" },
-];
-
-const requestFeed = [
-  { id: 1, client: "Nova Textiles", type: "Edit Request", status: "Approved", submitted: "Today" },
-  { id: 2, client: "Peak Logistics", type: "Delete Request", status: "Rejected", submitted: "Yesterday" },
-  { id: 3, client: "Urban Foods", type: "New Request", status: "Pending", submitted: "Today" },
-];
-
-function generateSeries(amount = 12, seed = 1) {
-  return Array.from({ length: amount }, (_, index) =>
-    Math.round(32000 + seed * 2400 + index * 1450 + Math.sin(index / 2) * 1600)
-  );
-}
-
-function DashboardChart() {
-  const months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
-  const quotaData = [62000, 65000, 70000, 72000, 74000, 76000, 78000, 80000, 82000, 84000, 86000, 90000];
-  const acquiredData = [52000, 58000, 63000, 68000, 71000, 74000, 76000, 79000, 81000, 83000, 85000, 89000];
-  return <SalesQuotaChart months={months} quotaData={quotaData} acquiredData={acquiredData} />;
-}
-
-function SalesQuotaChart({ months, quotaData, acquiredData }) {
-  const width = 560;
-  const height = 260;
-  const padding = 44;
-  const maxValue = Math.max(...quotaData, ...acquiredData);
-  const points = months.map((label, index) => {
-    const x = padding + (index * (width - padding * 2)) / Math.max(months.length - 1, 1);
-    const quotaY = height - padding - (quotaData[index] / maxValue) * (height - padding * 2);
-    const acquiredY = height - padding - (acquiredData[index] / maxValue) * (height - padding * 2);
-    return { label, x, quotaY, acquiredY, quota: quotaData[index], acquired: acquiredData[index] };
-  });
-
-  const quotaPath = points.map((p, i) => `${i === 0 ? "M" : "L"} ${p.x} ${p.quotaY}`).join(" ");
-  const acquiredPath = points.map((p, i) => `${i === 0 ? "M" : "L"} ${p.x} ${p.acquiredY}`).join(" ");
-
-  return (
-    <div>
-      <div style={{ display: 'flex', alignItems: 'center', gap: 16, marginBottom: 12 }}>
-        <span style={{ display: 'inline-flex', alignItems: 'center', gap: 8 }}>
-          <span style={{ width: 12, height: 12, background: '#9a74e9', borderRadius: 999 }} /> Quota
-        </span>
-        <span style={{ display: 'inline-flex', alignItems: 'center', gap: 8 }}>
-          <span style={{ width: 12, height: 12, background: '#44bfb0', borderRadius: 999 }} /> Acquired
-        </span>
-      </div>
-      <svg viewBox={`0 0 ${width} ${height}`} style={{ width: '100%', height: 280 }} aria-hidden="true">
-        <path d={quotaPath} fill="none" stroke="#9a74e9" strokeWidth={3} strokeLinecap="round" />
-        <path d={acquiredPath} fill="none" stroke="#44bfb0" strokeWidth={3} strokeLinecap="round" />
-        {points.map((point) => (
-          <g key={point.label}>
-            <circle cx={point.x} cy={point.quotaY} r={5} fill="#fff" stroke="#9a74e9" strokeWidth={2} />
-            <circle cx={point.x} cy={point.acquiredY} r={5} fill="#fff" stroke="#44bfb0" strokeWidth={2} />
-          </g>
-        ))}
-        {points.map((point) => (
-          <text key={`${point.label}-label`} x={point.x} y={height - 16} textAnchor="middle" fontSize="11" fill="#6b6b77">
-            {point.label}
-          </text>
-        ))}
-      </svg>
-    </div>
-  );
-}
-
-export default function SalesDashboard({ onSignOut, userEmail }) {
+export default function BranchManagerDashboard({ onSignOut, userEmail }) {
   const [activeNav, setActiveNav] = React.useState("Dashboard");
   const [dark, setDark] = React.useState(false);
   const [searchOpen, setSearchOpen] = React.useState(false);
   const [notificationsOpen, setNotificationsOpen] = React.useState(false);
   const [query, setQuery] = React.useState("");
-  const notificationWrapRef = React.useRef(null);
-  const notificationsListRef = React.useRef(null);
-  const notificationsPauseTimer = React.useRef(null);
+  const [activityAutoScrollPaused, setActivityAutoScrollPaused] = React.useState(false);
+  const activityScrollTimer = React.useRef(null);
+  const activityListRef = React.useRef(null);
+
+  // Client management state
+  const [clients, setClients] = React.useState(branchManagerClients);
+  const [selectedClient, setSelectedClient] = React.useState(null);
+  const [editClientValues, setEditClientValues] = React.useState(null);
+  const [deleteTargetClient, setDeleteTargetClient] = React.useState(null);
+
+  const [branchAdmins] = React.useState([
+    { id: 1, name: 'Sara Kim', email: 'sara@agni.com', joiningDate: '2023-01-15', role: 'admin', region: 'North Zone', branchManagerName: 'Ariana Lee' },
+    { id: 2, name: 'Nisha Rao', email: 'nisha@agni.com', joiningDate: '2024-03-22', role: 'admin', region: 'South Zone', branchManagerName: 'Priya Menon' },
+  ]);
+
+  const [branchIT] = React.useState([
+    { id: 1, name: 'Noah Kim', email: 'noah@agni.com', joiningDate: '2022-11-04', role: 'IT Support', region: 'West Zone', branchManagerName: 'Ariana Lee' },
+    { id: 2, name: 'Janet Paul', email: 'janet@agni.com', joiningDate: '2024-01-18', role: 'Systems Admin', region: 'West Zone', branchManagerName: 'Ariana Lee' },
+  ]);
+
+  const [branchMarketing] = React.useState([
+    { id: 1, name: 'Daniel Cruz', email: 'daniel@agni.com', joiningDate: '2023-05-11', role: 'Marketing Specialist', region: 'South Zone', branchManagerName: 'Ariana Lee' },
+    { id: 2, name: 'Lily Chen', email: 'lily@agni.com', joiningDate: '2023-08-02', role: 'SEO Expert', region: 'East Zone', branchManagerName: 'Priya Menon' },
+  ]);
+
+  // Regional Revenue state
+  const [regionalRevenue] = React.useState([
+    { id: 1, region: 'North Zone', manager: 'Ariana Lee', revenue: '₹145k', series: [80, 95, 110, 105, 130, 145] },
+    { id: 2, region: 'South Zone', manager: 'Priya Menon', revenue: '₹210k', series: [120, 130, 150, 160, 190, 210] },
+    { id: 3, region: 'East Zone', manager: 'Mia Ross', revenue: '₹180k', series: [100, 110, 125, 140, 165, 180] },
+    { id: 4, region: 'West Zone', manager: 'Eli Brooks', revenue: '₹320k', series: [150, 180, 210, 240, 280, 320] },
+  ]);
+  const [selectedRegionRevenue, setSelectedRegionRevenue] = React.useState(null);
+
+  // Employee management state
+  const [employeesList] = React.useState([
+    { id: 1, name: 'Eli Brooks', email: 'eli@agni.com', phone: '+91 91234 00222', role: 'manager', branch: 'South', branchManager: 'Ariana Lee' },
+    { id: 2, name: 'Mia Ross', email: 'mia@agni.com', phone: '+91 91234 10101', role: 'sales', branch: 'East', branchManager: 'Ariana Lee', reportingManager: 'Eli Brooks' },
+    { id: 3, name: 'Noah Kim', email: 'noah@agni.com', phone: '+91 91234 10202', role: 'sales', branch: 'West', branchManager: 'Ariana Lee', reportingManager: 'Eli Brooks' },
+    { id: 4, name: 'Daniel Cruz', email: 'daniel@agni.com', phone: '+91 91234 30303', role: 'manager', branch: 'South', branchManager: 'Ariana Lee' },
+    { id: 5, name: 'Priya Menon', email: 'priya@agni.com', phone: '+91 91234 40404', role: 'sales', branch: 'East', branchManager: 'Ariana Lee', reportingManager: 'Daniel Cruz' },
+  ]);
+  const [selectedManagerForTeam, setSelectedManagerForTeam] = React.useState(null);
+  const [selectedEmployeeInfo, setSelectedEmployeeInfo] = React.useState(null);
+
+  function openEmployeeInfo(employee) {
+    setSelectedEmployeeInfo(employee);
+  }
+  function closeEmployeeInfo() {
+    setSelectedEmployeeInfo(null);
+  }
+
+  React.useEffect(() => {
+    const list = activityListRef.current;
+    if (!list) return undefined;
+
+    const intervalId = window.setInterval(() => {
+      if (activityAutoScrollPaused || !list) return;
+      const maxScroll = list.scrollHeight - list.clientHeight;
+      if (maxScroll <= 0) return;
+      const nextScrollTop = Math.min(list.scrollTop + 86, maxScroll);
+      if (list.scrollTop >= maxScroll - 2) {
+        list.scrollTo({ top: 0, behavior: 'smooth' });
+      } else {
+        list.scrollTo({ top: nextScrollTop, behavior: 'smooth' });
+      }
+    }, 2600);
+
+    return () => window.clearInterval(intervalId);
+  }, [activityAutoScrollPaused]);
+
+  React.useEffect(() => {
+    return () => {
+      if (activityScrollTimer.current) {
+        window.clearTimeout(activityScrollTimer.current);
+      }
+    };
+  }, []);
+
+  function handleActivityListScroll() {
+    if (activityScrollTimer.current) {
+      window.clearTimeout(activityScrollTimer.current);
+    }
+
+    setActivityAutoScrollPaused(true);
+    activityScrollTimer.current = window.setTimeout(() => {
+      setActivityAutoScrollPaused(false);
+      activityScrollTimer.current = null;
+    }, 3000);
+  }
 
   const salesPersonName = React.useMemo(() => {
-    if (!userEmail) return "Sales Person";
+    if (!userEmail) return "Branch Manager";
     const raw = userEmail.split("@")[0];
     const parts = raw.split(/[^a-zA-Z0-9]+/).filter(Boolean);
     return parts.map((part) => part.charAt(0).toUpperCase() + part.slice(1).toLowerCase()).join(" ");
   }, [userEmail]);
 
-  const [clients, setClients] = React.useState(salesClients);
-  const [selectedClient, setSelectedClient] = React.useState(null);
-  const [newClient, setNewClient] = React.useState({
-    name: "",
-    company: "",
-    email: "",
-    phone: "",
-    stage: "Active",
-  });
+  // Client handlers
+  function openClientInfo(client) {
+    setSelectedClient(client);
+    setEditClientValues(null);
+  }
 
-  const totalActiveClients = clients.filter((client) => client.stage === "Active").length;
-  const totalClosedDeals = salesLeads.filter((lead) => lead.status === "Closed").length;
-  const kpiCards = [
-    { label: "Active clients", value: `${totalActiveClients}`, trend: "+6%", description: "Currently active", accent: "#4e7cff" },
-    { label: "Total closed", value: `${totalClosedDeals}`, trend: "+3%", description: "Closed deals", accent: "#44bfb0" },
-    { label: "Quota progress", value: "76%", trend: "+4%", description: "Towards target", accent: "#9a74e9" },
-    { label: "New contacts", value: "28", trend: "+22%", description: "Added this week", accent: "#f2aa38" },
-  ];
+  function closeClientInfo() {
+    setSelectedClient(null);
+    setEditClientValues(null);
+  }
 
-  const handleNewClientChange = (event) => {
+  function openDeleteConfirm(client) {
+    setDeleteTargetClient(client);
+  }
+
+  function closeDeleteConfirm() {
+    setDeleteTargetClient(null);
+  }
+
+  function handleDeleteClient(clientId) {
+    setClients((prev) => prev.filter((client) => client.id !== clientId));
+    if (selectedClient?.id === clientId) {
+      setSelectedClient(null);
+      setEditClientValues(null);
+    }
+  }
+
+  function confirmDeleteClient() {
+    if (!deleteTargetClient) return;
+    handleDeleteClient(deleteTargetClient.id);
+    closeDeleteConfirm();
+  }
+
+  function startClientEdit() {
+    setEditClientValues(selectedClient);
+  }
+
+  function handleEditClientChange(event) {
     const { name, value } = event.target;
-    setNewClient((prev) => ({ ...prev, [name]: value }));
-  };
+    setEditClientValues((prev) => ({ ...prev, [name]: value }));
+  }
 
-  const handleAddClient = (event) => {
-    event.preventDefault();
-    const nextId = clients.length ? Math.max(...clients.map((client) => client.id)) + 1 : 1;
-    setClients((prev) => [
-      ...prev,
-      { id: nextId, ...newClient },
-    ]);
-    setNewClient({ name: "", company: "", email: "", phone: "", stage: "Active" });
-  };
+  function saveClientEdit() {
+    setClients((prev) => prev.map((client) => (client.id === editClientValues.id ? editClientValues : client)));
+    setSelectedClient(editClientValues);
+    setEditClientValues(null);
+  }
 
-  React.useEffect(() => {
-    function handleOutsideClick(event) {
-      if (
-        notificationsOpen &&
-        notificationWrapRef.current &&
-        !notificationWrapRef.current.contains(event.target)
-      ) {
-        setNotificationsOpen(false);
-      }
-    }
-
-    document.addEventListener("mousedown", handleOutsideClick);
-    return () => document.removeEventListener("mousedown", handleOutsideClick);
-  }, [notificationsOpen]);
-
-  React.useEffect(() => {
-    if (!notificationsOpen) return undefined;
-    const list = notificationsListRef.current;
-    if (!list) return undefined;
-
-    const intervalId = window.setInterval(() => {
-      const maxScroll = list.scrollHeight - list.clientHeight;
-      if (maxScroll <= 0) return;
-      const nextScrollTop = Math.min(list.scrollTop + 76, maxScroll);
-      list.scrollTo({ top: nextScrollTop, behavior: "smooth" });
-      if (list.scrollTop >= maxScroll - 2) {
-        list.scrollTo({ top: 0, behavior: "smooth" });
-      }
-    }, 2600);
-
-    return () => window.clearInterval(intervalId);
-  }, [notificationsOpen]);
-
-  function handleNotificationsListScroll() {
-    if (notificationsPauseTimer.current) {
-      window.clearTimeout(notificationsPauseTimer.current);
-    }
-    notificationsPauseTimer.current = window.setTimeout(() => {
-      notificationsPauseTimer.current = null;
-    }, 3000);
+  function cancelClientEdit() {
+    setEditClientValues(null);
   }
 
   return (
-    <main className={`owner-dashboard sales-dashboard ${dark ? "dashboard-dark" : ""}`}>
+    <main className={`owner-dashboard branch-manager-dashboard ${dark ? "dashboard-dark" : ""}`}>
       <DashboardSidebar
         navItems={navItems}
         activeNav={activeNav}
@@ -262,13 +249,13 @@ export default function SalesDashboard({ onSignOut, userEmail }) {
         onToggleDark={() => setDark((value) => !value)}
         onSignOut={onSignOut}
         IconComponent={Icon}
-        brandMark="S"
-        navLabel="Sales dashboard navigation"
+        brandMark="BM"
+        navLabel="Branch manager navigation"
       />
 
       <section className="dashboard-content">
         <DashboardHeader
-          eyebrow="Sales workspace"
+          eyebrow="Branch manager workspace"
           title={`Hello, ${salesPersonName}`}
           className="sales-dashboard-top"
         >
@@ -289,230 +276,173 @@ export default function SalesDashboard({ onSignOut, userEmail }) {
                 <Icon name="search" size={16} />
               </button>
             )}
-            <div className="notification-wrap" ref={notificationWrapRef}>
-              <button
-                className="notification"
-                type="button"
-                onClick={() => setNotificationsOpen(!notificationsOpen)}
-                aria-label="Notifications"
-              >
-                <Icon name="bell" size={16} />
-                <i />
-              </button>
-              {notificationsOpen && (
-                <section className="notifications-popover" aria-label="Notifications">
-                  <header>
-                    <h2>Notifications</h2>
-                    <span>{notifications.length} new</span>
-                  </header>
-                  <div
-                    ref={notificationsListRef}
-                    className="notifications-scroll"
-                    onScroll={handleNotificationsListScroll}
-                  >
-                    {notifications.map((notice) => (
-                      <article key={notice.title}>
-                        <span className={`notice-dot ${notice.tone === '#aa83eb' ? 'violet' : notice.tone === '#88cda4' ? 'green' : 'coral'}`} />
-                        <div>
-                          <strong>{notice.title}</strong>
-                          <p>{notice.detail}</p>
-                        </div>
-                      </article>
-                    ))}
-                  </div>
-                </section>
-              )}
-            </div>
             <button className="profile" type="button">
-              SP
+              BM
             </button>
-            <span className="role-badge">Sales</span>
+            <span className="role-badge">Branch Manager</span>
           </div>
         </DashboardHeader>
 
-        {activeNav === "Dashboard" ? (
+        {activeNav === "Clients" ? (
           <section>
-            <div className="scheme-grid" style={{ gridTemplateColumns: 'repeat(2, minmax(0, 1fr))', maxWidth: 940 }}>
-              {kpiCards.map((card) => (
-                <KpiCard key={card.label} card={card} />
-              ))}
-            </div>
-
-            <div className="dashboard-layout" style={{ marginTop: 18 }}>
-              <div className="dashboard-main">
-                <div className="analytics-card" style={{ padding: 20 }}>
-                  <div className="panel-header" style={{ marginBottom: 18 }}>
-                    <div>
-                      <h2>Monthly quota</h2>
-                      <p>Quota decided each month vs target acquired.</p>
-                    </div>
-                  </div>
-                  <DashboardChart />
-                </div>
-              </div>
-              <aside className="sidebar-widgets">
-                <section className="activity-panel">
-                  <div className="panel-header">
-                    <div>
-                      <p className="eyebrow">Recent activity</p>
-                      <h2>What's happening</h2>
-                    </div>
-                  </div>
-                  <div className="activity-list">
-                    {requestActivities.map((activity) => (
-                      <button
-                        key={activity.title}
-                        className="activity-row"
-                        type="button"
-                        onClick={() => setActiveNav("Requests")}
-                        style={{ border: 'none', background: 'transparent', width: '100%', textAlign: 'left', padding: 0 }}
-                      >
-                        <span className="activity-mark" style={{ background: activity.tone }} />
-                        <div>
-                          <strong>{activity.title}</strong>
-                          <small>{activity.detail}</small>
-                        </div>
-                        <Icon name="arrowUp" size={16} />
-                      </button>
-                    ))}
-                  </div>
-                </section>
-              </aside>
-            </div>
-          </section>
-        ) : activeNav === "Clients" ? (
-          <section>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 12, marginBottom: 16, flexWrap: 'wrap' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16, flexWrap: 'wrap', gap: 12 }}>
               <div>
-                <p className="eyebrow">Client management</p>
-                <h2>Add a new client</h2>
+                <p className="eyebrow">Branch clients</p>
+                <h2>Clients under your branch</h2>
+                <p style={{ margin: 0, color: '#6b6b77', fontSize: 13 }}>Showing clients managed by sales members in your branch.</p>
               </div>
               <div style={{ color: '#7a748e', fontSize: 13 }}>{clients.length} clients</div>
             </div>
-            <form onSubmit={handleAddClient} style={{ display: 'grid', gap: 18, maxWidth: 760 }}>
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 18 }}>
-                <label className="field-label">
-                  Client name
-                  <input
-                    type="text"
-                    name="name"
-                    value={newClient.name}
-                    onChange={handleNewClientChange}
-                    placeholder="Acme Retail"
-                    required
-                  />
-                </label>
-                <label className="field-label">
-                  Company
-                  <input
-                    type="text"
-                    name="company"
-                    value={newClient.company}
-                    onChange={handleNewClientChange}
-                    placeholder="Acme Retail Pvt. Ltd."
-                    required
-                  />
-                </label>
-              </div>
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 18 }}>
-                <label className="field-label">
-                  Email
-                  <input
-                    type="email"
-                    name="email"
-                    value={newClient.email}
-                    onChange={handleNewClientChange}
-                    placeholder="email@client.com"
-                    required
-                  />
-                </label>
-                <label className="field-label">
-                  Phone
-                  <input
-                    type="tel"
-                    name="phone"
-                    value={newClient.phone}
-                    onChange={handleNewClientChange}
-                    placeholder="+91 98765 43210"
-                    required
-                  />
-                </label>
-              </div>
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 18 }}>
-                <label className="field-label">
-                  Stage
-                  <select name="stage" value={newClient.stage} onChange={handleNewClientChange}>
-                    <option>Active</option>
-                    <option>Onboarding</option>
-                    <option>Renewal</option>
-                    <option>Prospect</option>
-                  </select>
-                </label>
-                <div />
-              </div>
-              <button type="submit" className="primary-button" style={{ width: 160, justifySelf: 'start' }}>
-                Add client
-              </button>
-            </form>
-          </section>
-        ) : activeNav === "Requests" ? (
-          <SalesRequests />
-        ) : activeNav === "Performance" ? (
-          <section>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 12, marginBottom: 16, flexWrap: 'wrap' }}>
-              <div>
-                <p className="eyebrow">Performance overview</p>
-                <h2>Sales velocity</h2>
-              </div>
-            </div>
-            <div className="revenue-panel" style={{ display: 'grid', gridTemplateColumns: '1.2fr', gap: 18 }}>
-              <div className="revenue-summary" style={{ background: '#fff', padding: 20 }}>
-                <div style={{ marginBottom: 20 }}>
-                  <h3>Latest revenue plan</h3>
-                  <p style={{ margin: 0, color: '#6b6b77' }}>Compare actuals against target over the last 12 months.</p>
-                </div>
-                <DashboardChart />
-              </div>
-            </div>
-          </section>
-        ) : activeNav === "Details" ? (
-          <section>
-            {!selectedClient ? (
-              <>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 12, marginBottom: 16, flexWrap: 'wrap' }}>
+
+            <table className="clients-table">
+              <thead>
+                <tr>
+                  <th>Client</th>
+                  <th>Company</th>
+                  <th>Assigned rep</th>
+                  <th>Email</th>
+                  <th>Phone</th>
+                  <th>Start</th>
+                  <th></th>
+                </tr>
+              </thead>
+              <tbody>
+                {clients.map((client) => (
+                  <tr key={client.id}>
+                    <td>{client.name}</td>
+                    <td>{client.company}</td>
+                    <td>{client.salesRep}</td>
+                    <td>{client.email}</td>
+                    <td>{client.phone}</td>
+                    <td>{client.startDate}</td>
+                    <td style={{ textAlign: 'right' }}>
+                      <button className="table-action" type="button" onClick={() => openClientInfo(client)}>
+                        Info
+                      </button>
+                      <button className="table-action danger" type="button" onClick={() => openDeleteConfirm(client)}>
+                        Delete
+                      </button>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+
+            {selectedClient && (
+              <SimpleModal onClose={closeClientInfo}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 12 }}>
                   <div>
-                    <p className="eyebrow">Client details</p>
-                    <h2>Sales-owned clients</h2>
+                    <h3 style={{ margin: 0 }}>Client — {selectedClient.name}</h3>
+                    <div style={{ color: '#7a748e', fontSize: 13 }}>{selectedClient.company}</div>
                   </div>
-                  <div style={{ color: '#7a748e', fontSize: 13 }}>{clients.length} clients</div>
+                </div>
+
+                {editClientValues ? (
+                  <div style={{ display: 'grid', gap: 16, marginTop: 16 }}>
+                    <EditForm values={editClientValues} onChange={handleEditClientChange} />
+                    <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 10 }}>
+                      <button className="table-action" type="button" onClick={cancelClientEdit}>
+                        Cancel
+                      </button>
+                      <button className="table-action" type="button" onClick={saveClientEdit}>
+                        Save
+                      </button>
+                    </div>
+                  </div>
+                ) : (
+                  <>
+                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12, marginTop: 16, padding: '12px 0' }}>
+                      <div style={{ background: '#fbfbfe', padding: 12, borderRadius: 8 }}>
+                        <div style={{ color: '#6b6b77', fontSize: 12 }}>Client</div>
+                        <div style={{ marginTop: 6, fontWeight: 600 }}>{selectedClient.name}</div>
+                      </div>
+                      <div style={{ background: '#fbfbfe', padding: 12, borderRadius: 8 }}>
+                        <div style={{ color: '#6b6b77', fontSize: 12 }}>Company</div>
+                        <div style={{ marginTop: 6, fontWeight: 600 }}>{selectedClient.company}</div>
+                      </div>
+                      <div style={{ background: '#fbfbfe', padding: 12, borderRadius: 8 }}>
+                        <div style={{ color: '#6b6b77', fontSize: 12 }}>Assigned rep</div>
+                        <div style={{ marginTop: 6, fontWeight: 600 }}>{selectedClient.salesRep}</div>
+                      </div>
+                      <div style={{ background: '#fbfbfe', padding: 12, borderRadius: 8 }}>
+                        <div style={{ color: '#6b6b77', fontSize: 12 }}>Email</div>
+                        <div style={{ marginTop: 6, fontWeight: 600 }}>{selectedClient.email}</div>
+                      </div>
+                      <div style={{ background: '#fbfbfe', padding: 12, borderRadius: 8 }}>
+                        <div style={{ color: '#6b6b77', fontSize: 12 }}>Phone</div>
+                        <div style={{ marginTop: 6, fontWeight: 600 }}>{selectedClient.phone}</div>
+                      </div>
+                      <div style={{ background: '#fbfbfe', padding: 12, borderRadius: 8 }}>
+                        <div style={{ color: '#6b6b77', fontSize: 12 }}>Service</div>
+                        <div style={{ marginTop: 6, fontWeight: 600 }}>{selectedClient.service}</div>
+                      </div>
+                      <div style={{ background: '#fbfbfe', padding: 12, borderRadius: 8 }}>
+                        <div style={{ color: '#6b6b77', fontSize: 12 }}>Start date</div>
+                        <div style={{ marginTop: 6, fontWeight: 600 }}>{selectedClient.startDate}</div>
+                      </div>
+                      <div style={{ background: '#fbfbfe', padding: 12, borderRadius: 8 }}>
+                        <div style={{ color: '#6b6b77', fontSize: 12 }}>Revenue</div>
+                        <div style={{ marginTop: 6, fontWeight: 600 }}>{selectedClient.revenue}</div>
+                      </div>
+                      <div style={{ background: '#eef0fb', padding: 12, borderRadius: 8, border: '1px solid #d4d8f0' }}>
+                        <div style={{ color: '#4e5579', fontSize: 12, fontWeight: 500 }}>Region name</div>
+                        <div style={{ marginTop: 6, fontWeight: 600 }}>{selectedClient.region}</div>
+                      </div>
+                      <div style={{ background: '#eef0fb', padding: 12, borderRadius: 8, border: '1px solid #d4d8f0' }}>
+                        <div style={{ color: '#4e5579', fontSize: 12, fontWeight: 500 }}>Manager name</div>
+                        <div style={{ marginTop: 6, fontWeight: 600 }}>{selectedClient.managerName}</div>
+                      </div>
+                    </div>
+                    <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: 16 }}>
+                      <button className="table-action" type="button" onClick={startClientEdit}>
+                        Edit
+                      </button>
+                    </div>
+                  </>
+                )}
+              </SimpleModal>
+            )}
+
+            {deleteTargetClient && (
+              <SimpleModal onClose={closeDeleteConfirm} showCloseButton={false}>
+                <ConfirmDialog
+                  message={`Delete ${deleteTargetClient.name} from clients?`}
+                  onConfirm={confirmDeleteClient}
+                  onCancel={closeDeleteConfirm}
+                />
+              </SimpleModal>
+            )}
+          </section>
+        ) : activeNav === "Employees" ? (
+          <section>
+            {selectedManagerForTeam ? (
+              <>
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12, marginBottom: 16 }}>
+                  <div>
+                    <h2 style={{ margin: 0 }}>Team: {selectedManagerForTeam.name}</h2>
+                    <div style={{ color: '#7a748e', fontSize: 13, marginTop: 4 }}>Region: {selectedManagerForTeam.branch}</div>
+                  </div>
+                  <button className="table-action" onClick={() => setSelectedManagerForTeam(null)}>Back to Managers</button>
                 </div>
                 <table className="clients-table">
                   <thead>
                     <tr>
-                      <th>ID</th>
-                      <th>Client</th>
-                      <th>Company</th>
+                      <th>Name</th>
                       <th>Email</th>
-                      <th>Stage</th>
-                      <th>Action</th>
+                      <th>Phone</th>
+                      <th>Role</th>
+                      <th></th>
                     </tr>
                   </thead>
                   <tbody>
-                    {clients.map((client) => (
-                      <tr key={client.id}>
-                        <td>{client.id}</td>
-                        <td>{client.name}</td>
-                        <td>{client.company}</td>
-                        <td>{client.email}</td>
-                        <td>{client.stage}</td>
-                        <td>
-                          <button
-                            type="button"
-                            className="table-action"
-                            onClick={() => setSelectedClient(client)}
-                          >
-                            Info
-                          </button>
+                    {employeesList.filter(emp => emp.reportingManager === selectedManagerForTeam.name || emp.branchManager === selectedManagerForTeam.name).map((employee) => (
+                      <tr key={employee.id}>
+                        <td>{employee.name}</td>
+                        <td>{employee.email}</td>
+                        <td>{employee.phone}</td>
+                        <td>{employee.role}</td>
+                        <td style={{ textAlign: 'right' }}>
+                          <button className="table-action" onClick={() => openEmployeeInfo(employee)}>View</button>
                         </td>
                       </tr>
                     ))}
@@ -520,100 +450,368 @@ export default function SalesDashboard({ onSignOut, userEmail }) {
                 </table>
               </>
             ) : (
-              <section className="client-details-panel full-page-details">
-                <div className="client-details-header">
+              <>
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12, marginBottom: 16 }}>
                   <div>
-                    <p className="eyebrow">Client details</p>
-                    <h3>{selectedClient.name}</h3>
-                    <p>{selectedClient.company}</p>
-                  </div>
-                  <button type="button" className="table-action" onClick={() => setSelectedClient(null)}>
-                    Close
-                  </button>
-                </div>
-
-                <div className="detail-section-card">
-                  <div className="panel-header">
-                    <div>
-                      <p className="eyebrow">Client profile</p>
-                      <h3>Personal Information</h3>
-                    </div>
-                  </div>
-                  <div className="detail-value-grid">
-                    <div>
-                      <p className="detail-label">Email</p>
-                      <strong>{selectedClient.email}</strong>
-                    </div>
-                    <div>
-                      <p className="detail-label">Phone</p>
-                      <strong>{selectedClient.phone}</strong>
-                    </div>
+                    <h2 style={{ margin: 0 }}>Managers</h2>
+                    <div style={{ color: '#7a748e', fontSize: 13, marginTop: 4 }}>Select a manager to view their team</div>
                   </div>
                 </div>
+                <table className="clients-table">
+                  <thead>
+                    <tr>
+                      <th>Manager Name</th>
+                      <th>Region Name</th>
+                      <th>Sales Persons</th>
+                      <th></th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {employeesList
+                      .filter(emp => (emp.role || '').toLowerCase().includes('manager'))
+                      .map((manager) => {
+                        const teamCount = employeesList.filter(emp => emp.reportingManager === manager.name || emp.branchManager === manager.name).length;
+                        return (
+                          <tr key={manager.id}>
+                            <td>{manager.name}</td>
+                            <td>{manager.branch}</td>
+                            <td>{teamCount}</td>
+                            <td style={{ textAlign: 'right' }}>
+                              <button className="table-action" onClick={() => setSelectedManagerForTeam(manager)}>View Team</button>
+                            </td>
+                          </tr>
+                        );
+                      })}
+                  </tbody>
+                </table>
+              </>
+            )}
 
-                <div className="detail-section-card">
-                  <div className="panel-header">
-                    <div>
-                      <p className="eyebrow">Client profile</p>
-                      <h3>Business Information</h3>
-                    </div>
-                  </div>
-                  <div className="detail-value-grid">
-                    <div>
-                      <p className="detail-label">Company</p>
-                      <strong>{selectedClient.company}</strong>
-                    </div>
-                    <div>
-                      <p className="detail-label">Stage</p>
-                      <strong>{selectedClient.stage}</strong>
-                    </div>
+            {selectedEmployeeInfo && (
+              <SimpleModal onClose={closeEmployeeInfo}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 12 }}>
+                  <div>
+                    <h3 style={{ margin: 0 }}>Employee — {selectedEmployeeInfo.name}</h3>
+                    <div style={{ color: '#7a748e', fontSize: 13 }}>{selectedEmployeeInfo.role}</div>
                   </div>
                 </div>
-
-                <div className="detail-section-card">
-                  <div className="panel-header">
-                    <div>
-                      <p className="eyebrow">Documentation</p>
-                      <h3>Uploaded Documents</h3>
-                    </div>
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12, marginTop: 16, padding: '12px 0' }}>
+                  <div style={{ background: '#fbfbfe', padding: 12, borderRadius: 8 }}>
+                    <div style={{ color: '#6b6b77', fontSize: 12 }}>Name</div>
+                    <div style={{ marginTop: 6, fontWeight: 600 }}>{selectedEmployeeInfo.name}</div>
                   </div>
-                  <div className="detail-doc-list">
-                    {selectedClient.documentDetails.map((doc) => (
-                      <div key={doc.label} className="detail-doc-item">
-                        <div className="detail-doc-top">
-                          <strong>{doc.label}</strong>
-                          <span className={doc.available === 'Yes' ? 'detail-pill success' : 'detail-pill warning'}>
-                            {doc.available}
-                          </span>
-                        </div>
-                        <p>{doc.value}</p>
-                      </div>
-                    ))}
+                  <div style={{ background: '#fbfbfe', padding: 12, borderRadius: 8 }}>
+                    <div style={{ color: '#6b6b77', fontSize: 12 }}>Email</div>
+                    <div style={{ marginTop: 6, fontWeight: 600 }}>{selectedEmployeeInfo.email}</div>
                   </div>
-                </div>
-
-                <EligibleSchemes initialSchemes={mockEligibleSchemes} onSave={() => {
-                  // Navigate to Details view and keep this client selected
-                  setActiveNav('Details');
-                  // ensure selectedClient remains set so the details panel shows
-                  setSelectedClient((prev) => prev || selectedClient);
-                }} />
-
-                <div className="detail-section-card">
-                  <div className="panel-header">
-                    <div>
-                      <p className="eyebrow">Follow-up</p>
-                      <h3>Notes</h3>
-                    </div>
+                  <div style={{ background: '#fbfbfe', padding: 12, borderRadius: 8 }}>
+                    <div style={{ color: '#6b6b77', fontSize: 12 }}>Mobile</div>
+                    <div style={{ marginTop: 6, fontWeight: 600 }}>{selectedEmployeeInfo.phone}</div>
                   </div>
-                  <div className="detail-note-card">
-                    <p>Client documents are reviewed and the recommended schemes will be shared after the salesperson confirms visibility.</p>
+                  <div style={{ background: '#fbfbfe', padding: 12, borderRadius: 8 }}>
+                    <div style={{ color: '#6b6b77', fontSize: 12 }}>Designation</div>
+                    <div style={{ marginTop: 6, fontWeight: 600 }}>{selectedEmployeeInfo.role}</div>
+                  </div>
+                  <div style={{ background: '#fbfbfe', padding: 12, borderRadius: 8 }}>
+                    <div style={{ color: '#6b6b77', fontSize: 12 }}>Branch</div>
+                    <div style={{ marginTop: 6, fontWeight: 600 }}>{selectedEmployeeInfo.branch}</div>
+                  </div>
+                  <div style={{ background: '#fbfbfe', padding: 12, borderRadius: 8, gridColumn: '1 / -1' }}>
+                    <div style={{ color: '#6b6b77', fontSize: 12 }}>Reporting manager</div>
+                    <div style={{ marginTop: 6, fontWeight: 600 }}>{selectedEmployeeInfo.reportingManager || '—'}</div>
                   </div>
                 </div>
-              </section>
+              </SimpleModal>
             )}
           </section>
-        ) : null}
+        ) : activeNav === "Admin" ? (
+          <section>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12, marginBottom: 16 }}>
+              <div>
+                <h2 style={{ margin: 0 }}>Branch Admins</h2>
+                <div style={{ color: '#7a748e', fontSize: 13, marginTop: 4 }}>Administrators working under your branch</div>
+              </div>
+            </div>
+            <table className="clients-table">
+              <thead>
+                <tr>
+                  <th>Name</th>
+                  <th>Email</th>
+                  <th>Joining Date</th>
+                  <th></th>
+                </tr>
+              </thead>
+              <tbody>
+                {branchAdmins.map((admin) => (
+                  <tr key={admin.id}>
+                    <td>{admin.name}</td>
+                    <td>{admin.email}</td>
+                    <td>{admin.joiningDate}</td>
+                    <td style={{ textAlign: 'right' }}>
+                      <button className="table-action" onClick={() => openEmployeeInfo(admin)}>Info</button>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+
+            {selectedEmployeeInfo && (
+              <SimpleModal onClose={closeEmployeeInfo}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 12 }}>
+                  <div>
+                    <h3 style={{ margin: 0 }}>Admin — {selectedEmployeeInfo.name}</h3>
+                    <div style={{ color: '#7a748e', fontSize: 13 }}>{selectedEmployeeInfo.role}</div>
+                  </div>
+                </div>
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12, marginTop: 16, padding: '12px 0' }}>
+                  <div style={{ background: '#fbfbfe', padding: 12, borderRadius: 8 }}>
+                    <div style={{ color: '#6b6b77', fontSize: 12 }}>Name</div>
+                    <div style={{ marginTop: 6, fontWeight: 600 }}>{selectedEmployeeInfo.name}</div>
+                  </div>
+                  <div style={{ background: '#fbfbfe', padding: 12, borderRadius: 8 }}>
+                    <div style={{ color: '#6b6b77', fontSize: 12 }}>Email</div>
+                    <div style={{ marginTop: 6, fontWeight: 600 }}>{selectedEmployeeInfo.email}</div>
+                  </div>
+                  <div style={{ background: '#fbfbfe', padding: 12, borderRadius: 8 }}>
+                    <div style={{ color: '#6b6b77', fontSize: 12 }}>Joining Date</div>
+                    <div style={{ marginTop: 6, fontWeight: 600 }}>{selectedEmployeeInfo.joiningDate}</div>
+                  </div>
+                  <div style={{ background: '#fbfbfe', padding: 12, borderRadius: 8 }}>
+                    <div style={{ color: '#6b6b77', fontSize: 12 }}>Designation</div>
+                    <div style={{ marginTop: 6, fontWeight: 600 }}>{selectedEmployeeInfo.role}</div>
+                  </div>
+                  <div style={{ background: '#fbfbfe', padding: 12, borderRadius: 8 }}>
+                    <div style={{ color: '#6b6b77', fontSize: 12 }}>Region</div>
+                    <div style={{ marginTop: 6, fontWeight: 600 }}>{selectedEmployeeInfo.region}</div>
+                  </div>
+                </div>
+              </SimpleModal>
+            )}
+          </section>
+        ) : activeNav === "IT" ? (
+          <section>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12, marginBottom: 16 }}>
+              <div>
+                <h2 style={{ margin: 0 }}>IT Team</h2>
+                <div style={{ color: '#7a748e', fontSize: 13, marginTop: 4 }}>IT professionals working under your branch</div>
+              </div>
+            </div>
+            <table className="clients-table">
+              <thead>
+                <tr>
+                  <th>Name</th>
+                  <th>Email</th>
+                  <th>Joining Date</th>
+                  <th></th>
+                </tr>
+              </thead>
+              <tbody>
+                {branchIT.map((emp) => (
+                  <tr key={emp.id}>
+                    <td>{emp.name}</td>
+                    <td>{emp.email}</td>
+                    <td>{emp.joiningDate}</td>
+                    <td style={{ textAlign: 'right' }}>
+                      <button className="table-action" onClick={() => openEmployeeInfo(emp)}>Info</button>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+
+            {selectedEmployeeInfo && (
+              <SimpleModal onClose={closeEmployeeInfo}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 12 }}>
+                  <div>
+                    <h3 style={{ margin: 0 }}>IT — {selectedEmployeeInfo.name}</h3>
+                    <div style={{ color: '#7a748e', fontSize: 13 }}>{selectedEmployeeInfo.role}</div>
+                  </div>
+                </div>
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12, marginTop: 16, padding: '12px 0' }}>
+                  <div style={{ background: '#fbfbfe', padding: 12, borderRadius: 8 }}>
+                    <div style={{ color: '#6b6b77', fontSize: 12 }}>Name</div>
+                    <div style={{ marginTop: 6, fontWeight: 600 }}>{selectedEmployeeInfo.name}</div>
+                  </div>
+                  <div style={{ background: '#fbfbfe', padding: 12, borderRadius: 8 }}>
+                    <div style={{ color: '#6b6b77', fontSize: 12 }}>Email</div>
+                    <div style={{ marginTop: 6, fontWeight: 600 }}>{selectedEmployeeInfo.email}</div>
+                  </div>
+                  <div style={{ background: '#fbfbfe', padding: 12, borderRadius: 8 }}>
+                    <div style={{ color: '#6b6b77', fontSize: 12 }}>Joining Date</div>
+                    <div style={{ marginTop: 6, fontWeight: 600 }}>{selectedEmployeeInfo.joiningDate}</div>
+                  </div>
+                  <div style={{ background: '#fbfbfe', padding: 12, borderRadius: 8 }}>
+                    <div style={{ color: '#6b6b77', fontSize: 12 }}>Designation</div>
+                    <div style={{ marginTop: 6, fontWeight: 600 }}>{selectedEmployeeInfo.role}</div>
+                  </div>
+                  <div style={{ background: '#fbfbfe', padding: 12, borderRadius: 8 }}>
+                    <div style={{ color: '#6b6b77', fontSize: 12 }}>Region</div>
+                    <div style={{ marginTop: 6, fontWeight: 600 }}>{selectedEmployeeInfo.region}</div>
+                  </div>
+                </div>
+              </SimpleModal>
+            )}
+          </section>
+        ) : activeNav === "Marketing" ? (
+          <section>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12, marginBottom: 16 }}>
+              <div>
+                <h2 style={{ margin: 0 }}>Marketing Team</h2>
+                <div style={{ color: '#7a748e', fontSize: 13, marginTop: 4 }}>Marketing experts working under your branch</div>
+              </div>
+            </div>
+            <table className="clients-table">
+              <thead>
+                <tr>
+                  <th>Name</th>
+                  <th>Email</th>
+                  <th>Joining Date</th>
+                  <th></th>
+                </tr>
+              </thead>
+              <tbody>
+                {branchMarketing.map((emp) => (
+                  <tr key={emp.id}>
+                    <td>{emp.name}</td>
+                    <td>{emp.email}</td>
+                    <td>{emp.joiningDate}</td>
+                    <td style={{ textAlign: 'right' }}>
+                      <button className="table-action" onClick={() => openEmployeeInfo(emp)}>Info</button>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+
+            {selectedEmployeeInfo && (
+              <SimpleModal onClose={closeEmployeeInfo}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 12 }}>
+                  <div>
+                    <h3 style={{ margin: 0 }}>Marketing — {selectedEmployeeInfo.name}</h3>
+                    <div style={{ color: '#7a748e', fontSize: 13 }}>{selectedEmployeeInfo.role}</div>
+                  </div>
+                </div>
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12, marginTop: 16, padding: '12px 0' }}>
+                  <div style={{ background: '#fbfbfe', padding: 12, borderRadius: 8 }}>
+                    <div style={{ color: '#6b6b77', fontSize: 12 }}>Name</div>
+                    <div style={{ marginTop: 6, fontWeight: 600 }}>{selectedEmployeeInfo.name}</div>
+                  </div>
+                  <div style={{ background: '#fbfbfe', padding: 12, borderRadius: 8 }}>
+                    <div style={{ color: '#6b6b77', fontSize: 12 }}>Email</div>
+                    <div style={{ marginTop: 6, fontWeight: 600 }}>{selectedEmployeeInfo.email}</div>
+                  </div>
+                  <div style={{ background: '#fbfbfe', padding: 12, borderRadius: 8 }}>
+                    <div style={{ color: '#6b6b77', fontSize: 12 }}>Joining Date</div>
+                    <div style={{ marginTop: 6, fontWeight: 600 }}>{selectedEmployeeInfo.joiningDate}</div>
+                  </div>
+                  <div style={{ background: '#fbfbfe', padding: 12, borderRadius: 8 }}>
+                    <div style={{ color: '#6b6b77', fontSize: 12 }}>Designation</div>
+                    <div style={{ marginTop: 6, fontWeight: 600 }}>{selectedEmployeeInfo.role}</div>
+                  </div>
+                  <div style={{ background: '#fbfbfe', padding: 12, borderRadius: 8 }}>
+                    <div style={{ color: '#6b6b77', fontSize: 12 }}>Region</div>
+                    <div style={{ marginTop: 6, fontWeight: 600 }}>{selectedEmployeeInfo.region}</div>
+                  </div>
+                </div>
+              </SimpleModal>
+            )}
+          </section>
+        ) : activeNav === "Revenue" ? (
+          <section>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12, marginBottom: 16 }}>
+              <div>
+                <h2 style={{ margin: 0 }}>Regional Revenue</h2>
+                <div style={{ color: '#7a748e', fontSize: 13, marginTop: 4 }}>Revenue breakdown by region</div>
+              </div>
+            </div>
+            <table className="clients-table">
+              <thead>
+                <tr>
+                  <th>Region Name</th>
+                  <th>Manager Name</th>
+                  <th>Revenue (This Month)</th>
+                  <th></th>
+                </tr>
+              </thead>
+              <tbody>
+                {regionalRevenue.map((item) => (
+                  <tr key={item.id}>
+                    <td>{item.region}</td>
+                    <td>{item.manager}</td>
+                    <td>{item.revenue}</td>
+                    <td style={{ textAlign: 'right' }}>
+                      <button className="table-action" onClick={() => setSelectedRegionRevenue(item)}>View Chart</button>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+
+            {selectedRegionRevenue && (
+              <SimpleModal onClose={() => setSelectedRegionRevenue(null)}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 12 }}>
+                  <div>
+                    <h3 style={{ margin: 0 }}>Revenue Chart — {selectedRegionRevenue.region}</h3>
+                    <div style={{ color: '#7a748e', fontSize: 13 }}>Manager: {selectedRegionRevenue.manager}</div>
+                  </div>
+                </div>
+                <div style={{ marginTop: 24, padding: '12px 0' }}>
+                  <PerformanceChart series={selectedRegionRevenue.series} label={`${selectedRegionRevenue.region} Monthly Trend`} />
+                </div>
+              </SimpleModal>
+            )}
+          </section>
+        ) : (
+          <section>
+            <div className="kpi-activity-row" style={{ display: 'flex', gap: 18, alignItems: 'stretch', width: '100%' }}>
+              <section className="kpi-grid" style={{ flex: '2 1 0%', minWidth: 0 }}>
+                {kpiCards.map((card) => (
+                  <KpiCard key={card.label} card={card} />
+                ))}
+              </section>
+
+              <aside className="sidebar-widgets" style={{ flex: '1 1 0%', minWidth: 300, display: 'flex' }}>
+                <section className="activity-panel" style={{ width: '100%', display: 'flex', flexDirection: 'column' }}>
+                  <div className="panel-header">
+                    <div>
+                      <p className="eyebrow">Recent activity</p>
+                      <h2>What's happening</h2>
+                    </div>
+                  </div>
+                  <div
+                    ref={activityListRef}
+                    className="activity-list notifications-scroll"
+                    onScroll={handleActivityListScroll}
+                    style={{ overflowY: 'auto', paddingRight: 2, flex: 1 }}
+                  >
+                    <div className="activity-row" style={{ height: 64 }}>
+                      <span className="activity-mark" style={{ background: '#9a74e9' }} />
+                      <div>
+                        <strong>New assignment</strong>
+                        <small>New client assigned to branch</small>
+                      </div>
+                      <Icon name="arrowUp" size={16} />
+                    </div>
+                  </div>
+                </section>
+              </aside>
+            </div>
+
+            <div className="dashboard-layout" style={{ marginTop: 18, gridTemplateColumns: '1fr' }}>
+              <div className="dashboard-main">
+                <div className="analytics-card" style={{ padding: 20 }}>
+                  <div className="panel-header" style={{ marginBottom: 18 }}>
+                    <div>
+                      <h2>Branch overview</h2>
+                      <p>Key metrics and branch health.</p>
+                    </div>
+                  </div>
+                  <BranchRevenueChart data={branchRevenueData} />
+                </div>
+              </div>
+            </div>
+          </section>
+        )}
       </section>
     </main>
   );

@@ -3,6 +3,7 @@ import DashboardSidebar from "../../components/dashboard/DashboardSidebar";
 import DashboardHeader from "../../components/dashboard/DashboardHeader";
 import Icon from "../../components/Icon";
 import KpiCard from "../../components/KpiCard";
+import RevenueSummaryCard from "../../components/RevenueSummaryCard";
 import { getDailyPayment, getWeeklyPayment, getMonthlyPayment, formatCurrency } from "../../utils/paymentHelpers";
 import PerformanceChart from "../../components/PerformanceChart";
 import SimpleModal from "../../components/SimpleModal";
@@ -16,6 +17,7 @@ const navItems = [
   { icon: "team", label: "Team" },
   { icon: "clients", label: "Clients" },
   { icon: "overview", label: "Requests" },
+  { icon: "revenue", label: "Revenue" },
   { icon: "reports", label: "Reports" },
 ];
 
@@ -72,6 +74,32 @@ const salesTeam = [
   },
   {
     id: 2,
+    name: "Alex Vance",
+    role: "Sales Executive",
+    branch: "East",
+    branchManager: "Ariana Lee",
+    email: "alex@agni.com",
+    phone: "+91 91234 10102",
+    region: "East Zone",
+    quota: "₹100k",
+    monthlySales: "₹82k",
+    joiningDate: "2024-03-10",
+  },
+  {
+    id: 3,
+    name: "Kabir Sharma",
+    role: "Sales Specialist",
+    branch: "East",
+    branchManager: "Ariana Lee",
+    email: "kabir@agni.com",
+    phone: "+91 91234 10103",
+    region: "East Zone",
+    quota: "₹110k",
+    monthlySales: "₹74k",
+    joiningDate: "2024-04-01",
+  },
+  {
+    id: 4,
     name: "Rohan Varma",
     role: "Sales Executive",
     branch: "South",
@@ -84,7 +112,7 @@ const salesTeam = [
     joiningDate: "2024-05-11",
   },
   {
-    id: 3,
+    id: 5,
     name: "Noah Kim",
     role: "Sales Associate",
     branch: "West",
@@ -97,7 +125,7 @@ const salesTeam = [
     joiningDate: "2024-03-18",
   },
   {
-    id: 4,
+    id: 6,
     name: "Tara Singh",
     role: "Sales Specialist",
     branch: "North",
@@ -189,6 +217,40 @@ function RevenueSparkline() {
   );
 }
 
+function RevenueTrendChart({ data }) {
+  const width = 320;
+  const height = 180;
+  const padding = 24;
+  const values = data.map((item) => item.value);
+  const maxValue = Math.max(...values);
+  const minValue = Math.min(...values);
+  const range = maxValue - minValue || 1;
+
+  const points = data.map((item, index) => {
+    const x = padding + (index * (width - padding * 2)) / Math.max(data.length - 1, 1);
+    const y = height - padding - ((item.value - minValue) / range) * (height - padding * 2);
+    return { x, y, label: item.label };
+  });
+
+  const linePath = points.map((point, index) => `${index === 0 ? 'M' : 'L'} ${point.x} ${point.y}`).join(' ');
+  const areaPath = `${linePath} L ${points[points.length - 1].x} ${height - padding} L ${points[0].x} ${height - padding} Z`;
+
+  return (
+    <svg viewBox={`0 0 ${width} ${height}`} className="dashboard-chart" aria-hidden="true">
+      <path d={areaPath} fill="rgba(154, 116, 233, 0.16)" />
+      <path d={linePath} fill="none" stroke="#9a74e9" strokeWidth="3" strokeLinecap="round" />
+      {points.map((point) => (
+        <g key={point.label}>
+          <circle cx={point.x} cy={point.y} r="4.5" fill="#fff" stroke="#9a74e9" strokeWidth="2" />
+          <text x={point.x} y={height - 6} textAnchor="middle" fill="#7d79a8" fontSize="11">
+            {point.label}
+          </text>
+        </g>
+      ))}
+    </svg>
+  );
+}
+
 export default function ManagerDashboard({ onSignOut, userEmail }) {
   const [activeNav, setActiveNav] = React.useState("Dashboard");
   const [searchOpen, setSearchOpen] = React.useState(false);
@@ -196,6 +258,8 @@ export default function ManagerDashboard({ onSignOut, userEmail }) {
   const [notificationsAutoScrollPaused, setNotificationsAutoScrollPaused] = React.useState(false);
   const [dark, setDark] = React.useState(false);
   const [query, setQuery] = React.useState("");
+  const [revenueRange, setRevenueRange] = React.useState("monthly");
+  const [revenueSalesPersonFilter, setRevenueSalesPersonFilter] = React.useState("all");
   const [selectedTeamMember, setSelectedTeamMember] = React.useState(null);
   const [selectedClient, setSelectedClient] = React.useState(null);
   const [clients, setClients] = React.useState(managerClients);
@@ -205,6 +269,87 @@ export default function ManagerDashboard({ onSignOut, userEmail }) {
   const notificationWrapRef = React.useRef(null);
   const notificationsListRef = React.useRef(null);
   const notificationsPauseTimer = React.useRef(null);
+
+  const revenueSeries = {
+    daily: [
+      { label: 'Mon', value: 12000 },
+      { label: 'Tue', value: 16000 },
+      { label: 'Wed', value: 14500 },
+      { label: 'Thu', value: 19000 },
+      { label: 'Fri', value: 17000 },
+      { label: 'Sat', value: 21000 },
+    ],
+    weekly: [
+      { label: 'W1', value: 58000 },
+      { label: 'W2', value: 64000 },
+      { label: 'W3', value: 71000 },
+      { label: 'W4', value: 82000 },
+    ],
+    monthly: [
+      { label: 'Jan', value: 52000 },
+      { label: 'Feb', value: 61000 },
+      { label: 'Mar', value: 68000 },
+      { label: 'Apr', value: 74000 },
+      { label: 'May', value: 82000 },
+      { label: 'Jun', value: 96000 },
+    ],
+    yearly: [
+      { label: '2021', value: 340000 },
+      { label: '2022', value: 450000 },
+      { label: '2023', value: 560000 },
+      { label: '2024', value: 680000 },
+      { label: '2025', value: 810000 },
+    ],
+    allTime: [
+      { label: '2019', value: 210000 },
+      { label: '2020', value: 310000 },
+      { label: '2021', value: 450000 },
+      { label: '2022', value: 560000 },
+      { label: '2023', value: 680000 },
+      { label: '2024', value: 810000 },
+    ],
+  };
+
+  const selectedRevenueData = React.useMemo(() => {
+    const rawData = revenueSeries[revenueRange] || revenueSeries.monthly;
+    if (revenueSalesPersonFilter === "all") {
+      return rawData;
+    }
+    const selectedId = Number(revenueSalesPersonFilter);
+    const memberIndex = salesTeam.findIndex((m) => m.id === selectedId);
+    const factor = memberIndex >= 0 ? 0.35 + ((memberIndex % 3) * 0.12) : 0.4;
+    return rawData.map((item) => ({
+      ...item,
+      value: Math.round(item.value * factor),
+    }));
+  }, [revenueRange, revenueSalesPersonFilter]);
+
+  const revenueTotal = selectedRevenueData.reduce((sum, point) => sum + point.value, 0);
+  const revenueReceived = Math.round(revenueTotal * 0.76);
+  const revenuePending = Math.round(revenueTotal * 0.24);
+  const revenueSummaryCards = [
+    {
+      label: 'Team Payment Received',
+      value: `₹${revenueReceived.toLocaleString()}`,
+      hint: 'Collected by team members',
+      accentClass: 'received',
+      icon: 'arrowUp',
+    },
+    {
+      label: 'Team Payment Pending',
+      value: `₹${revenuePending.toLocaleString()}`,
+      hint: 'Pending from team clients',
+      accentClass: 'pending',
+      icon: 'overview',
+    },
+    {
+      label: 'Total Team Payment',
+      value: `₹${revenueTotal.toLocaleString()}`,
+      hint: 'Overall team revenue range',
+      accentClass: 'total',
+      icon: 'revenue',
+    },
+  ];
 
   const managerName = React.useMemo(() => {
     if (!userEmail) return "Manager";
@@ -503,6 +648,7 @@ export default function ManagerDashboard({ onSignOut, userEmail }) {
                     key={card.label}
                     card={card}
                     onAction={(c) => c.linkTo && setActiveNav(c.linkTo)}
+                    dark={dark}
                   />
                 ))}
               </section>
@@ -793,7 +939,117 @@ export default function ManagerDashboard({ onSignOut, userEmail }) {
           </section>
         ) : activeNav === "Requests" ? (
           <section>
-            <ManagerRequests branchTeamNames={branchTeamNames} managedRegion={managedRegion} />
+            <ManagerRequests branchTeamNames={branchTeamNames} managedRegion={managedRegion} branchTeam={branchTeam} />
+          </section>
+        ) : activeNav === "Revenue" ? (
+          <section>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12, marginBottom: 16, flexWrap: 'wrap' }}>
+              <div>
+                <h2 style={{ margin: 0 }}>Team Revenue Analytics</h2>
+                <div style={{ color: '#7a748e', fontSize: 13, marginTop: 4 }}>
+                  Revenue performance for your sales team in {managedRegion} ({managedBranch} Branch)
+                </div>
+              </div>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 12, flexWrap: 'wrap' }}>
+                <div>
+                  <label style={{ fontSize: 13, color: '#6b6b77', marginRight: 8 }}>Team Member</label>
+                  <select value={revenueSalesPersonFilter} onChange={(e) => setRevenueSalesPersonFilter(e.target.value)}>
+                    <option value="all">All Team Members</option>
+                    {branchTeam.map((member) => (
+                      <option key={member.id} value={member.id}>{member.name}</option>
+                    ))}
+                  </select>
+                </div>
+                <div>
+                  <label style={{ fontSize: 13, color: '#6b6b77', marginRight: 8 }}>Time range</label>
+                  <select value={revenueRange} onChange={(event) => setRevenueRange(event.target.value)}>
+                    <option value="daily">Daily</option>
+                    <option value="weekly">Weekly</option>
+                    <option value="monthly">Monthly</option>
+                    <option value="yearly">Yearly</option>
+                    <option value="allTime">All time</option>
+                  </select>
+                </div>
+              </div>
+            </div>
+
+            <div className="revenue-panel" style={{ display: 'grid', gridTemplateColumns: '1.2fr 0.8fr', gap: 16, alignItems: 'stretch' }}>
+              <div className="revenue-summary" style={{ minHeight: 220 }}>
+                <p className="eyebrow">
+                  {revenueSalesPersonFilter === "all" ? "Team Revenue Overview" : `${branchTeam.find((m) => String(m.id) === String(revenueSalesPersonFilter))?.name || "Member"}'s Revenue`}
+                </p>
+                <h2>₹{revenueTotal.toLocaleString()}</h2>
+                <p className="revenue-copy">
+                  {revenueSalesPersonFilter === "all" ? `Combined revenue of ${branchTeam.length} sales team members.` : `Revenue generated by selected team member.`}
+                </p>
+                <div className="revenue-breakdown">
+                  <div>
+                    <span>Average</span>
+                    <strong>₹{Math.round(revenueTotal / selectedRevenueData.length).toLocaleString()}</strong>
+                  </div>
+                  <div>
+                    <span>Peak</span>
+                    <strong>₹{Math.max(...selectedRevenueData.map((item) => item.value)).toLocaleString()}</strong>
+                  </div>
+                  <div>
+                    <span>Team Members</span>
+                    <strong>{revenueSalesPersonFilter === "all" ? branchTeam.length : 1}</strong>
+                  </div>
+                </div>
+              </div>
+              <div className="revenue-chart-panel" style={{ minHeight: 220 }}>
+                <div className="revenue-chip">
+                  <Icon name="arrowUp" size={14} />
+                  <span>Team Trend</span>
+                </div>
+                <RevenueTrendChart data={selectedRevenueData} />
+              </div>
+            </div>
+
+            <div className="revenue-summary-grid">
+              {revenueSummaryCards.map((card) => (
+                <RevenueSummaryCard key={card.label} card={card} />
+              ))}
+            </div>
+
+            <div style={{ marginTop: 24 }}>
+              <h3 style={{ margin: '0 0 12px 0' }}>Team Member Revenue Breakdown</h3>
+              <table className="clients-table">
+                <thead>
+                  <tr>
+                    <th>Sales Person</th>
+                    <th>Role</th>
+                    <th>Region</th>
+                    <th>Monthly Quota</th>
+                    <th>Revenue Generated</th>
+                    <th>Achievement</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {branchTeam
+                    .filter((member) => revenueSalesPersonFilter === "all" || String(member.id) === String(revenueSalesPersonFilter))
+                    .map((member) => {
+                      const salesVal = parseInt(member.monthlySales.replace(/[^0-9]/g, '')) * 1000;
+                      const quotaVal = parseInt(member.quota.replace(/[^0-9]/g, '')) * 1000;
+                      const pct = Math.round((salesVal / quotaVal) * 100);
+                      return (
+                        <tr key={member.id}>
+                          <td style={{ fontWeight: 600 }}>{member.name}</td>
+                          <td>{member.role}</td>
+                          <td>{member.region}</td>
+                          <td>{member.quota}</td>
+                          <td style={{ color: '#44bfb0', fontWeight: 600 }}>{member.monthlySales}</td>
+                          <td>
+                            <span className="table-action" style={{ background: '#eef3ff', color: '#4e7cff', border: '1px solid #c7d7fe' }}>
+                              {pct}% Achieved
+                            </span>
+                          </td>
+                        </tr>
+                      );
+                    })}
+                </tbody>
+              </table>
+            </div>
           </section>
         ) : activeNav === "Reports" ? (
           <section>
@@ -870,6 +1126,7 @@ export default function ManagerDashboard({ onSignOut, userEmail }) {
                     key={card.label}
                     card={card}
                     onAction={(c) => c.linkTo && setActiveNav(c.linkTo)}
+                    dark={dark}
                   />
                 ))}
               </section>
