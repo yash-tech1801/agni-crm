@@ -23,9 +23,10 @@ export default function DashboardSidebar({
 
   return (
     <aside className="client-sidebar">
+      {/* ── Brand Logo ── */}
       <div className="client-brand">
         {brandMark && <span className="client-brand-mark">{brandMark}</span>}
-        <span>
+        <span className="client-brand-text">
           {brandName ?? (
             <>
               Agni<span>CRM</span>
@@ -34,6 +35,10 @@ export default function DashboardSidebar({
         </span>
       </div>
 
+      {/* ── Section Label ── */}
+      <span className="sidebar-section-label">NAVIGATION</span>
+
+      {/* ── Nav Items ── */}
       <nav aria-label={navLabel}>
         {items.map((item) => (
           <button
@@ -42,16 +47,21 @@ export default function DashboardSidebar({
             className={activeNav === item.label ? "selected" : ""}
             onClick={() => onNavChange(item.label)}
           >
-            <IconComponent name={item.icon} size={18} />
+            <span className="sidebar-nav-icon-wrap">
+              <IconComponent name={item.icon} size={18} />
+            </span>
             <span>{item.label}</span>
+            {activeNav === item.label && <span className="sidebar-active-indicator" />}
           </button>
         ))}
       </nav>
 
+      {/* ── Bottom Controls ── */}
       <div className="sidebar-bottom">
         <div className="theme-toggle">
           <span>
-            <Icon name="moon" size={15} /> Dark mode
+            <Icon name="moon" size={15} />
+            {dark ? "Light mode" : "Dark mode"}
           </span>
           <button
             className={dark ? "on" : ""}
@@ -63,6 +73,11 @@ export default function DashboardSidebar({
           </button>
         </div>
         <button className="sign-out" type="button" onClick={onSignOut}>
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+            <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
+            <polyline points="16 17 21 12 16 7" />
+            <line x1="21" y1="12" x2="9" y2="12" />
+          </svg>
           Sign out
         </button>
       </div>
