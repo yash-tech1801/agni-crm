@@ -16,23 +16,47 @@ const ownerIcons = {
   ),
   clients: (
     <>
-      <circle cx="8" cy="9" r="3" />
-      <path d="M4 20c1.5-3.5 4-5 6.5-5s5 1.5 6.5 5" />
-      <circle cx="17" cy="8" r="3" />
+      <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" />
+      <circle cx="9" cy="7" r="4" />
+      <path d="M23 21v-2a4 4 0 0 0-3-3.87" />
+      <path d="M16 3.13a4 4 0 0 1 0 7.75" />
     </>
   ),
   managers: (
     <>
-      <path d="M8 14c-2 0-4 1-4 3v1h12v-1c0-2-2-3-4-3" />
-      <circle cx="8" cy="7" r="3" />
-      <path d="M17 7a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z" />
+      <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" />
+      <circle cx="9" cy="7" r="4" />
+      <path d="M22 21v-2a4 4 0 0 0-3-3.87" />
+      <path d="M16 3.13a4 4 0 0 1 0 7.75" />
     </>
   ),
   team: (
     <>
-      <path d="M5 19c0-3 2.5-5 5.5-5s5.5 2 5.5 5" />
-      <path d="M8 9a3 3 0 1 1 0-6 3 3 0 0 1 0 6Z" />
-      <path d="M17 9a3 3 0 1 1 0-6 3 3 0 0 1 0 6Z" />
+      <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" />
+      <circle cx="9" cy="7" r="4" />
+      <path d="M23 21v-2a4 4 0 0 0-3-3.87" />
+      <path d="M16 3.13a4 4 0 0 1 0 7.75" />
+    </>
+  ),
+  employees: (
+    <>
+      <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" />
+      <circle cx="9" cy="7" r="4" />
+      <path d="M23 21v-2a4 4 0 0 0-3-3.87" />
+      <path d="M16 3.13a4 4 0 0 1 0 7.75" />
+    </>
+  ),
+  branches: (
+    <>
+      <line x1="6" y1="3" x2="6" y2="15" />
+      <circle cx="18" cy="6" r="3" />
+      <circle cx="6" cy="18" r="3" />
+      <path d="M18 9a9 9 0 0 1-9 9" />
+    </>
+  ),
+  roles: (
+    <>
+      <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
     </>
   ),
   leads: (
@@ -43,8 +67,9 @@ const ownerIcons = {
   ),
   revenue: (
     <>
-      <path d="M4 7h16v10H4z" />
-      <path d="M8 10h8M8 14h5" />
+      <rect x="2" y="6" width="20" height="12" rx="2" />
+      <circle cx="12" cy="12" r="2" />
+      <path d="M6 12h.01M18 12h.01" />
     </>
   ),
   calendarToday: (
@@ -79,6 +104,15 @@ const ownerIcons = {
       <path d="M10 12h4M10 16h4" />
     </>
   ),
+  requests: (
+    <>
+      <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+      <polyline points="14 2 14 8 20 8" />
+      <line x1="16" y1="13" x2="8" y2="13" />
+      <line x1="16" y1="17" x2="8" y2="17" />
+      <polyline points="10 9 9 9 8 9" />
+    </>
+  ),
   settings: (
     <>
       <circle cx="12" cy="12" r="3" />
@@ -109,6 +143,15 @@ const ownerIcons = {
       <path d="m8 12 4-4 4 4" />
     </>
   ),
+  invoice: (
+    <>
+      <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+      <polyline points="14 2 14 8 20 8" />
+      <line x1="16" y1="13" x2="8" y2="13" />
+      <line x1="16" y1="17" x2="8" y2="17" />
+      <line x1="12" y1="9" x2="8" y2="9" />
+    </>
+  ),
 };
 
 export default function Icon({ name, size = 18, className }) {
@@ -129,4 +172,3 @@ export default function Icon({ name, size = 18, className }) {
     </svg>
   );
 }
-
