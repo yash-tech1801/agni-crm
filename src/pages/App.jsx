@@ -38,12 +38,17 @@ export default function App() {
   }, []);
 
   function handleLogin(email, role) {
+    // Clear any stale session before writing the new one so an old
+    // cached role can never leak into this login.
+    localStorage.removeItem("agni_user_email");
+    localStorage.removeItem("agni_user_role");
+
     localStorage.setItem("agni_user_email", email);
     localStorage.setItem("agni_user_role", role);
     setUserEmail(email);
     setUserRole(role);
     const targetPath = rolePathMap[role] || "/login";
-    navigate(targetPath);
+    navigate(targetPath, { replace: true });
   }
 
   function handleSignOut() {
@@ -58,13 +63,7 @@ export default function App() {
     <Routes>
       <Route
         path="/login"
-        element={
-          userRole ? (
-            <Navigate to={rolePathMap[userRole] || "/login"} replace />
-          ) : (
-            <AuthScreen onLogin={handleLogin} />
-          )
-        }
+        element={<AuthScreen onLogin={handleLogin} />}
       />
 
       <Route
