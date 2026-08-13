@@ -4,13 +4,21 @@ import DashboardHeader from "../../components/dashboard/DashboardHeader";
 import Icon from "../../components/Icon";
 import KpiCard from "../../components/KpiCard";
 import SalesRequests from "./SalesRequests";
+import SalesInvoices from "./SalesInvoices";
+import SalesPayments from "./SalesPayments";
 import EligibleSchemes from "./EligibleSchemes";
 import { mockEligibleSchemes } from "./mockEligibleSchemes";
+
+const GST_RATE = 0.18; // 18% GST applied only when payment mode is Online
+
+const schemeOptions = mockEligibleSchemes.map((scheme) => scheme.schemeName);
 
 const navItems = [
   { icon: "dashboard", label: "Dashboard" },
   { icon: "clients", label: "Clients" },
   { icon: "overview", label: "Requests" },
+  { icon: "invoice", label: "Invoices" },
+  { icon: "wallet", label: "Payment" },
   { icon: "reports", label: "Details" },
 ];
 
@@ -184,6 +192,13 @@ export default function SalesDashboard({ onSignOut, userEmail }) {
     email: "",
     phone: "",
     stage: "Active",
+    scheme: schemeOptions[0] || "",
+    amount: "",
+    paymentMode: "Online",
+    gstAmount: 0,
+    totalPayment: 0,
+    paymentReceived: "",
+    paymentPending: 0,
   });
 
   const totalActiveClients = clients.filter((client) => client.stage === "Active").length;
@@ -197,7 +212,22 @@ export default function SalesDashboard({ onSignOut, userEmail }) {
 
   const handleNewClientChange = (event) => {
     const { name, value } = event.target;
-    setNewClient((prev) => ({ ...prev, [name]: value }));
+    setNewClient((prev) => {
+      const next = { ...prev, [name]: value };
+
+      const amountNum = parseFloat(next.amount) || 0;
+      const receivedNum = parseFloat(next.paymentReceived) || 0;
+      const gstAmount = next.paymentMode === "Online" ? Math.round(amountNum * GST_RATE) : 0;
+      const totalPayment = amountNum + gstAmount;
+      const paymentPending = Math.max(totalPayment - receivedNum, 0);
+
+      return {
+        ...next,
+        gstAmount,
+        totalPayment,
+        paymentPending,
+      };
+    });
   };
 
   const handleAddClient = (event) => {
@@ -207,7 +237,20 @@ export default function SalesDashboard({ onSignOut, userEmail }) {
       ...prev,
       { id: nextId, ...newClient },
     ]);
-    setNewClient({ name: "", company: "", email: "", phone: "", stage: "Active" });
+    setNewClient({
+      name: "",
+      company: "",
+      email: "",
+      phone: "",
+      stage: "Active",
+      scheme: schemeOptions[0] || "",
+      amount: "",
+      paymentMode: "Online",
+      gstAmount: 0,
+      totalPayment: 0,
+      paymentReceived: "",
+      paymentPending: 0,
+    });
   };
 
   React.useEffect(() => {
@@ -448,7 +491,62 @@ export default function SalesDashboard({ onSignOut, userEmail }) {
                     <option>Prospect</option>
                   </select>
                 </label>
-                <div />
+                <label className="field-label">
+                  Scheme
+                  <select name="scheme" value={newClient.scheme} onChange={handleNewClientChange} required>
+                    {schemeOptions.map((scheme) => (
+                      <option key={scheme} value={scheme}>{scheme}</option>
+                    ))}
+                  </select>
+                </label>
+              </div>
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 18 }}>
+                <label className="field-label">
+                  Amount
+                  <input
+                    type="number"
+                    name="amount"
+                    value={newClient.amount}
+                    onChange={handleNewClientChange}
+                    placeholder="50000"
+                    min="0"
+                    required
+                  />
+                </label>
+                <label className="field-label">
+                  Mode of payment
+                  <select name="paymentMode" value={newClient.paymentMode} onChange={handleNewClientChange}>
+                    <option value="Online">Online</option>
+                    <option value="Offline">Offline</option>
+                  </select>
+                </label>
+              </div>
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 18 }}>
+                <label className="field-label">
+                  GST {newClient.paymentMode === "Online" ? "(18%, added for online payment)" : "(not applicable for offline)"}
+                  <input type="text" value={`₹${newClient.gstAmount.toLocaleString("en-IN")}`} readOnly disabled />
+                </label>
+                <label className="field-label">
+                  Total payment
+                  <input type="text" value={`₹${newClient.totalPayment.toLocaleString("en-IN")}`} readOnly disabled />
+                </label>
+              </div>
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 18 }}>
+                <label className="field-label">
+                  Payment received
+                  <input
+                    type="number"
+                    name="paymentReceived"
+                    value={newClient.paymentReceived}
+                    onChange={handleNewClientChange}
+                    placeholder="0"
+                    min="0"
+                  />
+                </label>
+                <label className="field-label">
+                  Payment pending
+                  <input type="text" value={`₹${newClient.paymentPending.toLocaleString("en-IN")}`} readOnly disabled />
+                </label>
               </div>
               <button type="submit" className="primary-button" style={{ width: 160, justifySelf: 'start' }}>
                 Add client
@@ -457,6 +555,10 @@ export default function SalesDashboard({ onSignOut, userEmail }) {
           </section>
         ) : activeNav === "Requests" ? (
           <SalesRequests />
+        ) : activeNav === "Invoices" ? (
+          <SalesInvoices />
+        ) : activeNav === "Payment" ? (
+          <SalesPayments />
         ) : activeNav === "Performance" ? (
           <section>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 12, marginBottom: 16, flexWrap: 'wrap' }}>
