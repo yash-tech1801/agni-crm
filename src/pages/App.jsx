@@ -1,4 +1,4 @@
- import React from "react";
+import React from "react";
 import { Routes, Route, Navigate, useNavigate } from "react-router-dom";
 import AuthScreen from "./Auth/AuthScreen";
 import ClientDashboard from "../ClientDashboard";
@@ -6,6 +6,7 @@ import OwnerDashboard from "./Owner/OwnerDashboard";
 import ManagerDashboard from "./Manager/ManagerDashboard";
 import BranchManagerDashboard from "./BranchManager/BranchManagerDashboard";
 import SalesDashboard from "./Sales/SalesDashboard";
+import AdminDashboard from "./Admin/AdminDashboard";
 
 export default function App() {
   const navigate = useNavigate();
@@ -14,6 +15,7 @@ export default function App() {
   const [userEmail, setUserEmail] = React.useState(() => localStorage.getItem("agni_user_email") || "");
 
   const rolePathMap = {
+    "Admin": "/admin",
     "Owner": "/owner",
     "Client": "/client",
     "Manager": "/manager",
@@ -24,7 +26,7 @@ export default function App() {
   React.useEffect(() => {
     const email = localStorage.getItem("agni_user_email");
     const role = localStorage.getItem("agni_user_role");
-    const validRoles = ["Owner", "Client", "Manager", "Sales Person", "Branch Manager"];
+    const validRoles = ["Admin", "Owner", "Client", "Manager", "Sales Person", "Branch Manager"];
 
     if (email && validRoles.includes(role)) {
       setUserEmail(email);
@@ -64,6 +66,17 @@ export default function App() {
       <Route
         path="/login"
         element={<AuthScreen onLogin={handleLogin} />}
+      />
+
+      <Route
+        path="/admin/*"
+        element={
+          userRole === "Admin" ? (
+            <AdminDashboard onSignOut={handleSignOut} userEmail={userEmail} />
+          ) : (
+            <Navigate to={userRole ? (rolePathMap[userRole] || "/login") : "/login"} replace />
+          )
+        }
       />
 
       <Route

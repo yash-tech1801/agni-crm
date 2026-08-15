@@ -1,6 +1,9 @@
 import React, { useMemo, useState } from "react";
-import Icon from "../../components/Icon";
+import Modal from "../../components/Modal";
 import { mockClients } from "./mockClients";
+
+const INVOICE_TABS = ["All Invoices", "Tax Invoices", "Personal Invoices"];
+const INVOICE_TYPES = ["Tax Invoice", "Personal"];
 
 const initialInvoices = [
   {
@@ -48,39 +51,40 @@ const initialInvoices = [
     serviceDescription: "Enterprise IT Infra Shield Setup",
     baseAmount: 85000,
     gstPercentage: 18,
-    issueDate: "2026-07-10",
-    dueDate: "2026-07-25",
+    issueDate: "2026-07-15",
+    dueDate: "2026-07-30",
     status: "Paid",
     createdBy: "Sales Person",
-    notes: "IT infrastructure setup and annual maintenance.",
+    notes: "Infrastructure and network security setup fee.",
   },
 ];
 
-function formatCurrency(amount) {
-  return "₹" + Number(amount).toLocaleString("en-IN");
-}
+const statusBadge = {
+  Paid: "#44bfb0",
+  Pending: "#f2aa38",
+  Overdue: "#ff5757",
+  Cancelled: "#7c8490",
+};
 
-function calculateTotals(baseAmount, gstPercentage) {
-  const gstAmount = (Number(baseAmount) * Number(gstPercentage)) / 100;
-  const totalAmount = Number(baseAmount) + gstAmount;
-  return { gstAmount, totalAmount };
-}
+const formatCurrency = (val) =>
+  new Intl.NumberFormat("en-IN", { style: "currency", currency: "INR", maximumFractionDigits: 0 }).format(val);
 
-function generateInvoiceId(existingInvoices) {
-  const year = new Date().getFullYear();
-  const maxNum = existingInvoices.reduce((max, inv) => {
-    const match = inv.id.match(/INV-\d{4}-(\d+)/);
-    const num = match ? parseInt(match[1], 10) : 0;
-    return Math.max(max, num);
-  }, 0);
-  const nextNum = String(maxNum + 1).padStart(3, "0");
-  return `INV-${year}-${nextNum}`;
-}
+const calculateTotals = (base, gst) => {
+  const b = Number(base) || 0;
+  const g = Number(gst) || 0;
+  const gstAmount = Math.round(b * (g / 100));
+  return { gstAmount, totalAmount: b + gstAmount };
+};
+
+const generateInvoiceId = (existing) => {
+  const nextNum = existing.length + 1;
+  return `INV-2026-${String(nextNum).padStart(3, "0")}`;
+};
 
 function CreateInvoiceModal({ clients, onClose, onSubmit }) {
+  const [selectedType, setSelectedType] = useState("");
   const [formData, setFormData] = useState({
-    invoiceType: "Tax Invoice",
-    clientId: clients[0]?.id ?? "",
+    clientId: clients[0]?.id ? String(clients[0].id) : "",
     serviceDescription: "",
     baseAmount: "",
     gstPercentage: 18,
@@ -90,452 +94,342 @@ function CreateInvoiceModal({ clients, onClose, onSubmit }) {
     notes: "",
   });
 
-  const selectedClient = clients.find((c) => c.id === Number(formData.clientId));
-
-  const { gstAmount, totalAmount } = calculateTotals(
-    formData.baseAmount || 0,
-    formData.invoiceType === "Tax Invoice" ? formData.gstPercentage : 0
+  const selectedClient = useMemo(
+    () => clients.find((client) => String(client.id) === String(formData.clientId)),
+    [clients, formData.clientId]
   );
 
-  function handleChange(event) {
-    const { name, value, type, checked } = event.target;
-    setFormData((prev) => ({
-      ...prev,
-      [name]: type === "checkbox" ? checked : value,
-    }));
-  }
+  const gstRate = selectedType === "Tax Invoice" ? formData.gstPercentage : 0;
+  const { gstAmount, totalAmount } = calculateTotals(formData.baseAmount, gstRate);
 
-  function handleInvoiceTypeChange(type) {
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setFormData((prev) => ({ ...prev, [name]: value }));
+  };
+
+  const handleSelectType = (type) => {
+    setSelectedType(type);
     setFormData((prev) => ({
       ...prev,
-      invoiceType: type,
       gstPercentage: type === "Tax Invoice" ? 18 : 0,
     }));
-  }
+  };
 
-  function handleSubmit(event) {
-    event.preventDefault();
-    if (!formData.clientId || !formData.serviceDescription || !formData.baseAmount) {
+  const handleSubmit = (e) => {
+    e?.preventDefault();
+    if (!formData.serviceDescription.trim() || !formData.baseAmount || Number(formData.baseAmount) <= 0) {
       return;
     }
 
     const invoice = {
-      ...formData,
-      clientName: selectedClient?.name ?? "",
+      id: generateInvoiceId([]),
+      invoiceType: selectedType,
+      clientId: selectedClient ? selectedClient.id : 1,
+      clientName: selectedClient?.name ?? "Client",
       clientEmail: selectedClient?.email ?? "",
       clientPhone: selectedClient?.phone ?? "",
-      clientGst: selectedClient?.documentDetails?.find((d) => d.label === "GST Number")?.value ?? "",
+      clientGst: selectedClient?.gstNumber ?? "",
+      serviceDescription: formData.serviceDescription,
       baseAmount: Number(formData.baseAmount),
-      gstPercentage: formData.invoiceType === "Tax Invoice" ? Number(formData.gstPercentage) : 0,
+      gstPercentage: selectedType === "Tax Invoice" ? Number(formData.gstPercentage) : 0,
+      issueDate: formData.issueDate,
+      dueDate: formData.dueDate,
+      status: formData.status,
+      createdBy: "Sales Person",
+      notes: formData.notes,
     };
 
     onSubmit(invoice);
-  }
+    onClose();
+  };
 
   return (
-    <div className="cd-modal-backdrop" onMouseDown={onClose}>
-      <section
-        className="cd-modal"
-        style={{ maxWidth: 720, maxHeight: "calc(100vh - 40px)", overflowY: "auto" }}
-        onMouseDown={(e) => e.stopPropagation()}
-      >
-        <button type="button" className="cd-modal-close" onClick={onClose}>
-          ×
-        </button>
-        <p className="cd-modal-desc" style={{ color: "#9a74e9", fontSize: 13, fontWeight: 600, letterSpacing: 0.5 }}>
-          CREATE NEW INVOICE
-        </p>
-        <h2 style={{ marginBottom: 6 }}>Generate Invoice</h2>
-        <p className="cd-modal-desc" style={{ marginBottom: 20 }}>
-          Choose invoice type and fill in the details below.
-        </p>
-
-        <form onSubmit={handleSubmit} style={{ display: "grid", gap: 18 }}>
-          <div>
-            <label className="field-label" style={{ marginBottom: 10, display: "block" }}>
-              Invoice Type
-            </label>
-            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
-              <button
-                type="button"
-                onClick={() => handleInvoiceTypeChange("Tax Invoice")}
-                style={{
-                  padding: 16,
-                  borderRadius: 14,
-                  border: formData.invoiceType === "Tax Invoice" ? "2px solid #4e7cff" : "1px solid #e7e7f5",
-                  background: formData.invoiceType === "Tax Invoice" ? "rgba(78, 124, 255, 0.06)" : "#fff",
-                  cursor: "pointer",
-                  textAlign: "left",
-                }}
-              >
-                <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 6 }}>
-                  <div style={{
-                    width: 36, height: 36, borderRadius: 10,
-                    background: "rgba(78, 124, 255, 0.14)", color: "#4e7cff",
-                    display: "flex", alignItems: "center", justifyContent: "center",
-                  }}>
-                    <Icon name="invoice" size={18} />
+    <Modal title="Create Invoice" onClose={onClose} closeLabel="Close">
+      <div style={{ display: "grid", gap: 18, minWidth: 320, maxWidth: 680 }}>
+        {!selectedType ? (
+          <div style={{ display: "grid", gap: 14 }}>
+            <p className="dashboard-eyebrow">Select invoice type</p>
+            <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(180px, 1fr))", gap: 14 }}>
+              {INVOICE_TYPES.map((type) => (
+                <button
+                  key={type}
+                  type="button"
+                  className="table-action"
+                  style={{
+                    minHeight: 120,
+                    display: "grid",
+                    placeItems: "center",
+                    padding: 18,
+                    borderRadius: 20,
+                    border: "1px solid #e7e7f5",
+                    background: "#fff",
+                    color: "#1d2330",
+                    fontWeight: 700,
+                    fontSize: 16,
+                  }}
+                  onClick={() => handleSelectType(type)}
+                >
+                  <div>
+                    <div>{type}</div>
+                    <small style={{ color: "#7a748e", fontWeight: 400, marginTop: 4, display: "block" }}>
+                      {type === "Tax Invoice" ? "With 18% GST (B2B)" : "GST Exempt (B2C)"}
+                    </small>
                   </div>
-                  <strong style={{ fontSize: 15 }}>Tax Invoice</strong>
-                </div>
-                <small style={{ color: "#6b6b77" }}>With GST for registered businesses</small>
-              </button>
-
-              <button
-                type="button"
-                onClick={() => handleInvoiceTypeChange("Personal")}
-                style={{
-                  padding: 16,
-                  borderRadius: 14,
-                  border: formData.invoiceType === "Personal" ? "2px solid #9a74e9" : "1px solid #e7e7f5",
-                  background: formData.invoiceType === "Personal" ? "rgba(154, 116, 233, 0.06)" : "#fff",
-                  cursor: "pointer",
-                  textAlign: "left",
-                }}
-              >
-                <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 6 }}>
-                  <div style={{
-                    width: 36, height: 36, borderRadius: 10,
-                    background: "rgba(154, 116, 233, 0.14)", color: "#9a74e9",
-                    display: "flex", alignItems: "center", justifyContent: "center",
-                  }}>
-                    <Icon name="invoice" size={18} />
-                  </div>
-                  <strong style={{ fontSize: 15 }}>Personal</strong>
-                </div>
-                <small style={{ color: "#6b6b77" }}>No GST for individual clients</small>
-              </button>
+                </button>
+              ))}
             </div>
           </div>
+        ) : (
+          <div style={{ display: "grid", gap: 18 }}>
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: 12 }}>
+              <div>
+                <p className="dashboard-eyebrow">{selectedType}</p>
+                <h2 style={{ margin: 0 }}>
+                  {selectedType === "Tax Invoice" ? "Generate Tax Invoice" : "Generate Personal Invoice"}
+                </h2>
+              </div>
+              <button className="table-action" type="button" onClick={() => setSelectedType("")}>
+                Change type
+              </button>
+            </div>
 
-          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 18 }}>
             <label className="field-label">
               Client
-              <select
-                name="clientId"
-                value={formData.clientId}
-                onChange={handleChange}
-                required
-              >
+              <select name="clientId" value={formData.clientId} onChange={handleChange} required>
                 {clients.map((client) => (
                   <option key={client.id} value={client.id}>
-                    {client.name} ({client.company})
+                    {client.name} — {client.company}
                   </option>
                 ))}
               </select>
             </label>
 
             <label className="field-label">
-              Invoice Status
+              Service / Policy Description
+              <textarea
+                name="serviceDescription"
+                value={formData.serviceDescription}
+                onChange={handleChange}
+                rows={3}
+                placeholder="Explain the service or policy details"
+                style={{ resize: "vertical", minHeight: 90, padding: 12, borderRadius: 8, border: "1px solid #dedfe1", font: "inherit" }}
+                required
+              />
+            </label>
+
+            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 14 }}>
+              <label className="field-label">
+                Base Amount (₹)
+                <input
+                  type="number"
+                  name="baseAmount"
+                  value={formData.baseAmount}
+                  onChange={handleChange}
+                  placeholder="e.g. 50000"
+                  min="1"
+                  required
+                />
+              </label>
+
+              {selectedType === "Tax Invoice" ? (
+                <label className="field-label">
+                  GST Percentage (%)
+                  <input
+                    type="number"
+                    name="gstPercentage"
+                    value={formData.gstPercentage}
+                    onChange={handleChange}
+                    min="0"
+                    max="100"
+                  />
+                </label>
+              ) : (
+                <label className="field-label">
+                  GST Percentage (%)
+                  <input type="text" value="0% (Exempt)" disabled readOnly />
+                </label>
+              )}
+            </div>
+
+            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 14 }}>
+              <label className="field-label">
+                Issue Date
+                <input type="date" name="issueDate" value={formData.issueDate} onChange={handleChange} required />
+              </label>
+
+              <label className="field-label">
+                Due Date
+                <input type="date" name="dueDate" value={formData.dueDate} onChange={handleChange} required />
+              </label>
+            </div>
+
+            <label className="field-label">
+              Initial Status
               <select name="status" value={formData.status} onChange={handleChange}>
                 <option value="Pending">Pending</option>
                 <option value="Paid">Paid</option>
                 <option value="Overdue">Overdue</option>
-                <option value="Cancelled">Cancelled</option>
               </select>
             </label>
-          </div>
 
-          <label className="field-label">
-            Service / Policy Description
-            <textarea
-              name="serviceDescription"
-              value={formData.serviceDescription}
-              onChange={handleChange}
-              placeholder="e.g. Annual Health Insurance Premium - Group Plan"
-              rows={3}
-              required
-              style={{ resize: "vertical" }}
-            />
-          </label>
-
-          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 18 }}>
             <label className="field-label">
-              Base Amount (₹)
-              <input
-                type="number"
-                name="baseAmount"
-                value={formData.baseAmount}
+              Notes (optional)
+              <textarea
+                name="notes"
+                value={formData.notes}
                 onChange={handleChange}
-                placeholder="50000"
-                min="0"
-                step="1"
-                required
+                rows={2}
+                placeholder="Any special remarks or payment instructions..."
+                style={{ resize: "vertical", padding: 10, borderRadius: 8, border: "1px solid #dedfe1", font: "inherit" }}
               />
             </label>
 
-            {formData.invoiceType === "Tax Invoice" ? (
-              <label className="field-label">
-                GST Percentage (%)
-                <input
-                  type="number"
-                  name="gstPercentage"
-                  value={formData.gstPercentage}
-                  onChange={handleChange}
-                  min="0"
-                  max="100"
-                  step="0.01"
-                />
-              </label>
-            ) : (
-              <div />
-            )}
-          </div>
-
-          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 18 }}>
-            <label className="field-label">
-              Issue Date
-              <input
-                type="date"
-                name="issueDate"
-                value={formData.issueDate}
-                onChange={handleChange}
-                required
-              />
-            </label>
-
-            <label className="field-label">
-              Due Date
-              <input
-                type="date"
-                name="dueDate"
-                value={formData.dueDate}
-                onChange={handleChange}
-                required
-              />
-            </label>
-          </div>
-
-          <label className="field-label">
-            Notes (optional)
-            <textarea
-              name="notes"
-              value={formData.notes}
-              onChange={handleChange}
-              placeholder="Any additional notes or payment terms..."
-              rows={2}
-              style={{ resize: "vertical" }}
-            />
-          </label>
-
-          <div
-            style={{
-              padding: 18,
-              borderRadius: 14,
-              background: formData.invoiceType === "Tax Invoice"
-                ? "rgba(78, 124, 255, 0.06)"
-                : "rgba(154, 116, 233, 0.06)",
-              border: formData.invoiceType === "Tax Invoice"
-                ? "1px solid rgba(78, 124, 255, 0.2)"
-                : "1px solid rgba(154, 116, 233, 0.2)",
-            }}
-          >
-            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 16 }}>
+            {/* Live calculation box */}
+            <div style={{ background: "#fbfbfe", padding: 14, borderRadius: 12, border: "1px solid #e7e7f5", display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 12 }}>
               <div>
-                <p style={{ margin: 0, fontSize: 12, color: "#6b6b77" }}>Base Amount</p>
-                <strong style={{ fontSize: 17 }}>{formatCurrency(formData.baseAmount || 0)}</strong>
+                <p className="eyebrow" style={{ margin: "0 0 4px" }}>Base</p>
+                <strong>{formatCurrency(formData.baseAmount || 0)}</strong>
               </div>
-              {formData.invoiceType === "Tax Invoice" && (
-                <div>
-                  <p style={{ margin: 0, fontSize: 12, color: "#6b6b77" }}>GST ({formData.gstPercentage}%)</p>
-                  <strong style={{ fontSize: 17 }}>{formatCurrency(gstAmount)}</strong>
-                </div>
-              )}
               <div>
-                <p style={{ margin: 0, fontSize: 12, color: "#6b6b77" }}>Total Amount</p>
-                <strong style={{ fontSize: 17, color: formData.invoiceType === "Tax Invoice" ? "#4e7cff" : "#9a74e9" }}>
-                  {formatCurrency(totalAmount)}
-                </strong>
+                <p className="eyebrow" style={{ margin: "0 0 4px" }}>GST ({gstRate}%)</p>
+                <strong>{formatCurrency(gstAmount)}</strong>
+              </div>
+              <div>
+                <p className="eyebrow" style={{ margin: "0 0 4px" }}>Total Payable</p>
+                <strong style={{ color: "#4e7cff" }}>{formatCurrency(totalAmount)}</strong>
               </div>
             </div>
-          </div>
 
-          <div style={{ display: "flex", gap: 12, justifyContent: "flex-end", marginTop: 6 }}>
-            <button
-              type="button"
-              className="table-action"
-              onClick={onClose}
-              style={{ border: "1px solid #e7e7f5", background: "#fff", color: "#1d2330" }}
-            >
-              Cancel
-            </button>
-            <button type="submit" className="primary-button">
-              ✓ Create Invoice
-            </button>
+            <div style={{ display: "flex", justifyContent: "flex-end", flexWrap: "wrap", gap: 10, marginTop: 4 }}>
+              <button className="table-action" type="button" onClick={onClose}>
+                Cancel
+              </button>
+              <button
+                className="primary-button"
+                type="button"
+                onClick={handleSubmit}
+                disabled={!formData.serviceDescription.trim() || !formData.baseAmount}
+              >
+                Create Invoice
+              </button>
+            </div>
           </div>
-        </form>
-      </section>
-    </div>
+        )}
+      </div>
+    </Modal>
   );
 }
 
 function InvoiceDetailsModal({ invoice, onClose, onDownload }) {
+  if (!invoice) return null;
   const { gstAmount, totalAmount } = calculateTotals(invoice.baseAmount, invoice.gstPercentage);
 
   return (
-    <div className="cd-modal-backdrop" onMouseDown={onClose}>
-      <section
-        className="cd-modal"
-        style={{ maxWidth: 640, maxHeight: "calc(100vh - 40px)", overflowY: "auto" }}
-        onMouseDown={(e) => e.stopPropagation()}
-      >
-        <button type="button" className="cd-modal-close" onClick={onClose}>
-          ×
-        </button>
-        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 8 }}>
-          <span className={`cd-doc-status-badge ${invoice.status === "Paid" ? "verified" : invoice.status === "Pending" ? "pending" : "warning"}`}>
-            {invoice.status}
-          </span>
-          <span
-            className="cd-doc-status-badge"
-            style={{
-              background: invoice.invoiceType === "Tax Invoice" ? "rgba(78, 124, 255, 0.12)" : "rgba(154, 116, 233, 0.12)",
-              color: invoice.invoiceType === "Tax Invoice" ? "#4e7cff" : "#9a74e9",
-            }}
-          >
-            {invoice.invoiceType}
-          </span>
-        </div>
-        <h2 style={{ marginBottom: 4 }}>{invoice.id}</h2>
-        <p className="cd-modal-desc" style={{ marginBottom: 20 }}>
-          {invoice.serviceDescription}
-        </p>
-
-        <div className="cd-scheme-meta-box" style={{ gridTemplateColumns: "1fr 1fr", marginBottom: 20 }}>
-          <div>
-            <span>Client Name</span>
-            <strong>{invoice.clientName}</strong>
-          </div>
-          <div>
-            <span>Contact</span>
-            <strong>{invoice.clientPhone}</strong>
-          </div>
-          <div>
-            <span>Email</span>
-            <strong>{invoice.clientEmail}</strong>
-          </div>
-          {invoice.clientGst && (
+    <Modal title={`Invoice ${invoice.id}`} onClose={onClose} closeLabel="Close">
+      <div style={{ display: "grid", gap: 18, maxWidth: 680 }}>
+        <div style={{ display: "grid", gap: 10 }}>
+          <div style={{ display: "flex", justifyContent: "space-between", flexWrap: "wrap", gap: 12 }}>
             <div>
-              <span>GSTIN</span>
-              <strong>{invoice.clientGst}</strong>
+              <p className="eyebrow">Client</p>
+              <strong>{invoice.clientName}</strong>
             </div>
-          )}
-          <div>
-            <span>Issue Date</span>
-            <strong>{invoice.issueDate}</strong>
+            <div>
+              <p className="eyebrow">Invoice Type</p>
+              <strong>{invoice.invoiceType}</strong>
+            </div>
+            <div>
+              <p className="eyebrow">Status</p>
+              <span
+                style={{
+                  display: "inline-flex",
+                  alignItems: "center",
+                  padding: "4px 10px",
+                  borderRadius: 999,
+                  background: `${statusBadge[invoice.status] || "#f2aa38"}22`,
+                  color: statusBadge[invoice.status] || "#f2aa38",
+                  fontWeight: 700,
+                  fontSize: 12,
+                }}
+              >
+                {invoice.status}
+              </span>
+            </div>
           </div>
-          <div>
-            <span>Due Date</span>
-            <strong>{invoice.dueDate}</strong>
+
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(3, minmax(0, 1fr))", gap: 10 }}>
+            <div style={{ background: "#fbfbfe", padding: 14, borderRadius: 12, border: "1px solid #e7e7f5" }}>
+              <p className="eyebrow">Issue Date</p>
+              <strong>{invoice.issueDate}</strong>
+            </div>
+            <div style={{ background: "#fbfbfe", padding: 14, borderRadius: 12, border: "1px solid #e7e7f5" }}>
+              <p className="eyebrow">Due Date</p>
+              <strong>{invoice.dueDate}</strong>
+            </div>
+            <div style={{ background: "#fbfbfe", padding: 14, borderRadius: 12, border: "1px solid #e7e7f5" }}>
+              <p className="eyebrow">Total Amount</p>
+              <strong style={{ color: "#4e7cff" }}>{formatCurrency(totalAmount)}</strong>
+            </div>
           </div>
         </div>
 
-        <div
-          style={{
-            padding: 18,
-            borderRadius: 14,
-            background: invoice.invoiceType === "Tax Invoice"
-              ? "rgba(78, 124, 255, 0.06)"
-              : "rgba(154, 116, 233, 0.06)",
-            border: invoice.invoiceType === "Tax Invoice"
-              ? "1px solid rgba(78, 124, 255, 0.2)"
-              : "1px solid rgba(154, 116, 233, 0.2)",
-            marginBottom: 20,
-          }}
-        >
-          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16 }}>
-            <div>
-              <p style={{ margin: 0, fontSize: 12, color: "#6b6b77" }}>Base Amount</p>
-              <strong style={{ fontSize: 17 }}>{formatCurrency(invoice.baseAmount)}</strong>
-            </div>
-            {invoice.invoiceType === "Tax Invoice" && (
-              <div>
-                <p style={{ margin: 0, fontSize: 12, color: "#6b6b77" }}>GST ({invoice.gstPercentage}%)</p>
-                <strong style={{ fontSize: 17 }}>{formatCurrency(gstAmount)}</strong>
-              </div>
-            )}
-            <div style={{ gridColumn: invoice.invoiceType === "Tax Invoice" ? "1 / -1" : "2 / 3" }}>
-              <p style={{ margin: 0, fontSize: 12, color: "#6b6b77" }}>Total Amount</p>
-              <strong style={{ fontSize: 20, color: invoice.invoiceType === "Tax Invoice" ? "#4e7cff" : "#9a74e9" }}>
-                {formatCurrency(totalAmount)}
-              </strong>
-            </div>
+        <div style={{ background: "#fbfbfe", padding: 14, borderRadius: 12, border: "1px solid #e7e7f5" }}>
+          <p className="eyebrow">Service Description</p>
+          <div>{invoice.serviceDescription}</div>
+        </div>
+
+        <div style={{ display: "grid", gridTemplateColumns: "repeat(2, minmax(0, 1fr))", gap: 10 }}>
+          <div style={{ background: "#fbfbfe", padding: 14, borderRadius: 12, border: "1px solid #e7e7f5" }}>
+            <p className="eyebrow">Base Amount</p>
+            <strong>{formatCurrency(invoice.baseAmount)}</strong>
+          </div>
+          <div style={{ background: "#fbfbfe", padding: 14, borderRadius: 12, border: "1px solid #e7e7f5" }}>
+            <p className="eyebrow">GST ({invoice.gstPercentage}%)</p>
+            <strong>{formatCurrency(gstAmount)}</strong>
           </div>
         </div>
 
         {invoice.notes && (
-          <div style={{ marginBottom: 20 }}>
-            <p style={{ margin: 0, fontSize: 12, color: "#6b6b77", marginBottom: 6 }}>Notes</p>
-            <p style={{ margin: 0, fontSize: 14, color: "#1d2330" }}>{invoice.notes}</p>
+          <div style={{ background: "#fbfbfe", padding: 14, borderRadius: 12, border: "1px solid #e7e7f5" }}>
+            <p className="eyebrow">Notes</p>
+            <div>{invoice.notes}</div>
           </div>
         )}
 
-        <div style={{ display: "flex", gap: 12, justifyContent: "flex-end" }}>
-          <button
-            type="button"
-            className="cd-table-action-btn"
-            style={{ background: "rgba(68, 191, 176, 0.1)", color: "#44bfb0", borderColor: "rgba(68, 191, 176, 0.3)" }}
-            onClick={() => onDownload(invoice)}
-          >
-            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" style={{ marginRight: 4 }}>
-              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
-              <polyline points="7 10 12 15 17 10" />
-              <line x1="12" y1="15" x2="12" y2="3" />
-            </svg>
-            Download
+        <div style={{ display: "flex", justifyContent: "flex-end", gap: 10 }}>
+          <button className="table-action" type="button" onClick={() => onDownload(invoice)}>
+            Download TXT / Receipt
           </button>
-          <button type="button" className="table-action" onClick={onClose}>
+          <button className="primary-button" type="button" onClick={onClose}>
             Close
           </button>
         </div>
-      </section>
-    </div>
+      </div>
+    </Modal>
   );
 }
 
 export default function SalesInvoices() {
+  const [activeTab, setActiveTab] = useState("All Invoices");
   const [invoices, setInvoices] = useState(initialInvoices);
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [selectedInvoice, setSelectedInvoice] = useState(null);
   const [notification, setNotification] = useState("");
-  const [filterType, setFilterType] = useState("All");
 
   const filteredInvoices = useMemo(() => {
-    if (filterType === "All") return invoices;
-    return invoices.filter((inv) => inv.invoiceType === filterType);
-  }, [invoices, filterType]);
+    if (activeTab === "All Invoices") return invoices;
+    if (activeTab === "Tax Invoices") return invoices.filter((i) => i.invoiceType === "Tax Invoice");
+    if (activeTab === "Personal Invoices") return invoices.filter((i) => i.invoiceType === "Personal");
+    return invoices;
+  }, [invoices, activeTab]);
 
-  const metrics = useMemo(() => {
-    let totalBase = 0;
-    let totalGst = 0;
-    let pendingCount = 0;
-    let paidCount = 0;
-
-    invoices.forEach((inv) => {
-      totalBase += Number(inv.baseAmount);
-      const { gstAmount } = calculateTotals(inv.baseAmount, inv.gstPercentage);
-      totalGst += gstAmount;
-      if (inv.status === "Pending") pendingCount++;
-      if (inv.status === "Paid") paidCount++;
-    });
-
-    return {
-      totalBase,
-      totalGst,
-      totalAmount: totalBase + totalGst,
-      pendingCount,
-      paidCount,
-    };
-  }, [invoices]);
-
-  const addInvoice = (invoiceData) => {
-    const newInvoice = {
+  const addInvoice = (newInvoice) => {
+    const invWithId = {
+      ...newInvoice,
       id: generateInvoiceId(invoices),
-      ...invoiceData,
     };
-    setInvoices((prev) => [newInvoice, ...prev]);
+    setInvoices((prev) => [invWithId, ...prev]);
     setShowCreateModal(false);
-    setNotification(`Invoice ${newInvoice.id} created successfully!`);
+    setNotification(`Invoice ${invWithId.id} created successfully.`);
     setTimeout(() => setNotification(""), 4200);
   };
 
@@ -575,7 +469,7 @@ For queries contact: billing@agnicrm.com
     document.body.removeChild(link);
     URL.revokeObjectURL(url);
 
-    setNotification(`Invoice ${invoice.id} downloaded successfully!`);
+    setNotification(`Invoice ${invoice.id} downloaded successfully.`);
     setTimeout(() => setNotification(""), 4200);
   };
 
@@ -584,46 +478,30 @@ For queries contact: billing@agnicrm.com
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: 16, marginBottom: 24 }}>
         <div>
           <p className="dashboard-eyebrow">Invoices</p>
-          <h1>Invoice Management</h1>
+          <h1>My Invoices</h1>
         </div>
         <button type="button" className="primary-button" onClick={() => setShowCreateModal(true)}>
           + Create Invoice
         </button>
       </div>
 
-      <div className="scheme-grid" style={{ gridTemplateColumns: "repeat(4, minmax(0, 1fr))", marginBottom: 24 }}>
-        <article className="kpi-card">
-          <div className="kpi-card-accent" style={{ background: "#4e7cff" }} />
-          <div>
-            <span className="kpi-card-label">Total Invoices</span>
-            <h3 className="kpi-card-value">{invoices.length}</h3>
-            <span className="kpi-card-trend">Issued</span>
-          </div>
-        </article>
-        <article className="kpi-card">
-          <div className="kpi-card-accent" style={{ background: "#44bfb0" }} />
-          <div>
-            <span className="kpi-card-label">Total Billed</span>
-            <h3 className="kpi-card-value">{formatCurrency(metrics.totalAmount)}</h3>
-            <span className="kpi-card-trend">Base + GST</span>
-          </div>
-        </article>
-        <article className="kpi-card">
-          <div className="kpi-card-accent" style={{ background: "#f2aa38" }} />
-          <div>
-            <span className="kpi-card-label">Pending</span>
-            <h3 className="kpi-card-value">{metrics.pendingCount}</h3>
-            <span className="kpi-card-trend">Awaiting Payment</span>
-          </div>
-        </article>
-        <article className="kpi-card">
-          <div className="kpi-card-accent" style={{ background: "#9a74e9" }} />
-          <div>
-            <span className="kpi-card-label">Paid</span>
-            <h3 className="kpi-card-value">{metrics.paidCount}</h3>
-            <span className="kpi-card-trend">Completed</span>
-          </div>
-        </article>
+      <div style={{ display: "flex", flexWrap: "wrap", gap: 10, marginBottom: 20 }}>
+        {INVOICE_TABS.map((tab) => (
+          <button
+            key={tab}
+            type="button"
+            className="table-action"
+            style={{
+              background: activeTab === tab ? "#4e7cff" : "#fff",
+              color: activeTab === tab ? "#fff" : "#1d2330",
+              border: activeTab === tab ? "1px solid #4e7cff" : "1px solid #e7e7f5",
+              minWidth: 170,
+            }}
+            onClick={() => setActiveTab(tab)}
+          >
+            {tab}
+          </button>
+        ))}
       </div>
 
       {notification ? (
@@ -632,145 +510,70 @@ For queries contact: billing@agnicrm.com
         </div>
       ) : null}
 
-      <div style={{ display: "flex", flexWrap: "wrap", gap: 10, marginBottom: 20 }}>
-        {["All", "Tax Invoice", "Personal"].map((type) => (
-          <button
-            key={type}
-            type="button"
-            className="table-action"
-            style={{
-              background: filterType === type ? (type === "All" ? "#1d2330" : type === "Tax Invoice" ? "#4e7cff" : "#9a74e9") : "#fff",
-              color: filterType === type ? "#fff" : "#1d2330",
-              border: filterType === type ? "1px solid transparent" : "1px solid #e7e7f5",
-              minWidth: 140,
-            }}
-            onClick={() => setFilterType(type)}
-          >
-            {type === "All" ? "All Invoices" : type}
-            <span style={{ marginLeft: 8, fontSize: 12, opacity: 0.8 }}>
-              ({type === "All" ? invoices.length : invoices.filter((i) => i.invoiceType === type).length})
-            </span>
-          </button>
-        ))}
-      </div>
-
-      <div className="cd-section-card" style={{ padding: 0, overflow: "hidden" }}>
-        <div className="cd-section-head" style={{ padding: "24px 28px 16px", margin: 0 }}>
-          <div>
-            <span className="cd-kicker">INVOICE RECORDS</span>
-            <h2 style={{ fontSize: 20 }}>
-              {filterType === "All" ? "All Invoices" : `${filterType}s`}
-            </h2>
-          </div>
-          <span className="cd-count-pill">{filteredInvoices.length} records</span>
-        </div>
-
-        <div className="cd-table-wrap">
-          <table className="cd-invoices-table">
-            <thead>
-              <tr>
-                <th>Invoice ID</th>
-                <th>Type</th>
-                <th>Client</th>
-                <th>Service</th>
-                <th>Issue Date</th>
-                <th>Due Date</th>
-                <th>Total</th>
-                <th>Status</th>
-                <th>Actions</th>
-              </tr>
-            </thead>
-            <tbody>
-              {filteredInvoices.map((invoice) => {
-                const { totalAmount } = calculateTotals(invoice.baseAmount, invoice.gstPercentage);
-                return (
-                  <tr key={invoice.id}>
-                    <td>
-                      <strong className="cd-inv-id">{invoice.id}</strong>
-                    </td>
-                    <td>
-                      <span
-                        className="cd-doc-status-badge"
-                        style={{
-                          background: invoice.invoiceType === "Tax Invoice" ? "rgba(78, 124, 255, 0.12)" : "rgba(154, 116, 233, 0.12)",
-                          color: invoice.invoiceType === "Tax Invoice" ? "#4e7cff" : "#9a74e9",
-                        }}
-                      >
-                        {invoice.invoiceType}
-                      </span>
-                    </td>
-                    <td>
-                      <strong>{invoice.clientName}</strong>
-                    </td>
-                    <td style={{ maxWidth: 240 }}>
-                      {invoice.serviceDescription.length > 50
-                        ? invoice.serviceDescription.slice(0, 50) + "..."
-                        : invoice.serviceDescription}
-                    </td>
-                    <td>{invoice.issueDate}</td>
-                    <td>{invoice.dueDate}</td>
-                    <td>
-                      <strong className="cd-inv-amount">{formatCurrency(totalAmount)}</strong>
-                    </td>
-                    <td>
-                      <span className={`cd-doc-status-badge ${
-                        invoice.status === "Paid" ? "verified" :
-                        invoice.status === "Pending" ? "pending" :
-                        invoice.status === "Overdue" ? "warning" : "rejected"
-                      }`}>
-                        {invoice.status}
-                      </span>
-                    </td>
-                    <td>
-                      <div style={{ display: "flex", gap: 8 }}>
-                        <button
-                          type="button"
-                          className="cd-table-action-btn"
-                          onClick={() => setSelectedInvoice(invoice)}
-                        >
-                          View
-                        </button>
-                        <button
-                          type="button"
-                          className="cd-table-action-btn"
-                          style={{ background: "rgba(68, 191, 176, 0.1)", color: "#44bfb0", borderColor: "rgba(68, 191, 176, 0.3)" }}
-                          onClick={() => downloadInvoice(invoice)}
-                          title="Download Invoice"
-                        >
-                          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
-                            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
-                            <polyline points="7 10 12 15 17 10" />
-                            <line x1="12" y1="15" x2="12" y2="3" />
-                          </svg>
-                        </button>
-                      </div>
-                    </td>
-                  </tr>
-                );
-              })}
-              {filteredInvoices.length === 0 && (
-                <tr>
-                  <td colSpan="9" style={{ padding: "48px 20px", textAlign: "center", color: "#6b6b77" }}>
-                    <div style={{ marginBottom: 12 }}>
-                      <Icon name="invoice" size={40} />
-                    </div>
-                    <p style={{ margin: 0, fontSize: 15, fontWeight: 600, color: "#1d2330" }}>No invoices found</p>
-                    <p style={{ margin: "6px 0 16px", fontSize: 13 }}>
-                      {filterType === "All" ? "Click 'Create Invoice' to generate your first invoice." : `No ${filterType.toLowerCase()} invoices yet.`}
-                    </p>
-                    <button
-                      type="button"
-                      className="primary-button"
-                      onClick={() => setShowCreateModal(true)}
+      <div style={{ overflowX: "auto" }}>
+        <table className="clients-table" style={{ minWidth: 900 }}>
+          <thead>
+            <tr>
+              <th>Invoice ID</th>
+              <th>Client Name</th>
+              <th>Invoice Type</th>
+              <th>Issue Date</th>
+              <th>Due Date</th>
+              <th>Total Amount</th>
+              <th>Status</th>
+              <th style={{ textAlign: "right" }}>Action</th>
+            </tr>
+          </thead>
+          <tbody>
+            {filteredInvoices.map((invoice) => {
+              const { totalAmount } = calculateTotals(invoice.baseAmount, invoice.gstPercentage);
+              return (
+                <tr key={invoice.id}>
+                  <td><strong>{invoice.id}</strong></td>
+                  <td>{invoice.clientName}</td>
+                  <td>{invoice.invoiceType}</td>
+                  <td>{invoice.issueDate}</td>
+                  <td>{invoice.dueDate}</td>
+                  <td><strong>{formatCurrency(totalAmount)}</strong></td>
+                  <td>
+                    <span
+                      style={{
+                        display: "inline-flex",
+                        alignItems: "center",
+                        gap: 6,
+                        padding: "6px 10px",
+                        borderRadius: 999,
+                        background: `${statusBadge[invoice.status] || "#f2aa38"}22`,
+                        color: statusBadge[invoice.status] || "#f2aa38",
+                        fontWeight: 700,
+                        fontSize: 12,
+                      }}
                     >
-                      + Create Invoice
-                    </button>
+                      {invoice.status}
+                    </span>
+                  </td>
+                  <td style={{ textAlign: "right" }}>
+                    <div style={{ display: "inline-flex", gap: 8 }}>
+                      <button className="table-action" type="button" onClick={() => setSelectedInvoice(invoice)}>
+                        View
+                      </button>
+                      <button className="table-action" type="button" onClick={() => downloadInvoice(invoice)}>
+                        Download
+                      </button>
+                    </div>
                   </td>
                 </tr>
-              )}
-            </tbody>
-          </table>
-        </div>
+              );
+            })}
+            {filteredInvoices.length === 0 && (
+              <tr>
+                <td colSpan={8} style={{ textAlign: "center", padding: "36px 16px", color: "#6b6b77" }}>
+                  No invoices found under {activeTab}.
+                </td>
+              </tr>
+            )}
+          </tbody>
+        </table>
       </div>
 
       {showCreateModal && (

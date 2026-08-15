@@ -11,6 +11,8 @@ import Modal from "../../components/Modal";
 import EditForm from "../../components/EditForm";
 import ConfirmDialog from "../../components/ConfirmDialog";
 import TopPerformerLeaderboard from "../../components/TopPerformerLeaderboard";
+import ActivityStatusBar from "../../components/dashboard/ActivityStatusBar";
+import { ACTIVITY_STAGES } from "../Admin/mockAdminData";
 
 const navItems = [
   { icon: "dashboard", label: "Dashboard" },
@@ -343,13 +345,42 @@ export default function OwnerDashboard({ onSignOut, userEmail }) {
     { name: "IT" },
     { name: "Marketing" },
   ];
-  const [clients, setClients] = React.useState([
-    { id: 1, name: 'Acme Industries', company: 'Acme Industries Pvt. Ltd.', email: 'contact@acme.com', phone: '+91 98765 43210', serviceType: 'Certificate', serviceName: 'Mudra Export Certification', serviceStart: '2026-01-15', totalPayment: 120000, paymentReceived: 80000, branch: 'North', salesPerson: 'Mia Ross', progressPercent: 80 },
-    { id: 2, name: 'Summit Co', company: 'Summit Co.', email: 'hello@summitco.com', phone: '+91 91234 56789', serviceType: 'IT', serviceName: 'Enterprise CRM Setup', serviceStart: '2026-03-01', totalPayment: 85000, paymentReceived: 50000, branch: 'South', salesPerson: 'Mia Ross', progressPercent: 60 },
-    { id: 3, name: 'Blue Retail', company: 'Blue Retail Pvt Ltd', email: 'info@blueretail.com', phone: '+91 99876 54321', serviceType: 'Marketing', serviceName: 'Website & Brand Growth Suite', serviceStart: '2026-05-20', totalPayment: 60000, paymentReceived: 60000, branch: 'East', salesPerson: 'Mia Ross', progressPercent: 100 },
-    { id: 4, name: 'Nexus Logistics', company: 'Nexus Logistics Solutions', email: 'support@nexuslogistics.com', phone: '+91 98111 22233', serviceType: 'IT', serviceName: 'Supply Chain Analytics Platform', serviceStart: '2026-06-10', totalPayment: 150000, paymentReceived: 100000, branch: 'West', salesPerson: 'Alex Vance', progressPercent: 70 },
-    { id: 5, name: 'Apex Healthcare', company: 'Apex Healthcare Systems', email: 'info@apexhealth.com', phone: '+91 97222 33344', serviceType: 'Certificate', serviceName: 'Corporate Health Shield Annual', serviceStart: '2026-08-01', totalPayment: 42000, paymentReceived: 42000, branch: 'North', salesPerson: 'Alex Vance', progressPercent: 100 },
-  ]);
+  const [clients, setClients] = React.useState(() => {
+    try {
+      const saved = localStorage.getItem("agni_branch_clients");
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        if (Array.isArray(parsed) && parsed.length > 0) {
+          return parsed.map((c, i) => ({
+            id: c.id || i + 1,
+            name: c.name,
+            company: c.company,
+            email: c.email,
+            phone: c.phone,
+            serviceType: c.scheme ? (c.scheme.includes('Grant') ? 'IT' : c.scheme.includes('Certificate') ? 'Certificate' : 'Marketing') : 'Certificate',
+            serviceName: c.scheme || 'Mudra Export Certification',
+            serviceStart: c.submissionDate || '2026-01-15',
+            totalPayment: c.totalPayment || 120000,
+            paymentReceived: c.paymentStatus === 'Paid' ? (c.totalPayment || 120000) : Math.round((c.totalPayment || 120000) * 0.6),
+            branch: c.branch ? c.branch.split(' ')[0] : 'North',
+            salesPerson: c.assignedSalesPerson || 'Mia Ross',
+            progressPercent: c.progress || (c.completedSteps ? c.completedSteps.length * 20 : 60),
+            completedSteps: c.completedSteps || (c.progress ? ACTIVITY_STAGES.slice(0, Math.round(c.progress / 20)).map(s => s.name) : ["Submission", "Doc Audit", "Manager Review"]),
+            applicationStatus: c.applicationStatus || "Manager Review",
+          }));
+        }
+      }
+    } catch (e) {
+      console.warn("Failed to load clients in owner dashboard", e);
+    }
+    return [
+      { id: 1, name: 'Acme Industries', company: 'Acme Industries Pvt. Ltd.', email: 'contact@acme.com', phone: '+91 98765 43210', serviceType: 'Certificate', serviceName: 'Mudra Export Certification', serviceStart: '2026-01-15', totalPayment: 120000, paymentReceived: 80000, branch: 'North', salesPerson: 'Mia Ross', progressPercent: 80, completedSteps: ["Submission", "Doc Audit", "Manager Review", "Agreement"], applicationStatus: "Agreement" },
+      { id: 2, name: 'Summit Co', company: 'Summit Co.', email: 'hello@summitco.com', phone: '+91 91234 56789', serviceType: 'IT', serviceName: 'Enterprise CRM Setup', serviceStart: '2026-03-01', totalPayment: 85000, paymentReceived: 50000, branch: 'South', salesPerson: 'Mia Ross', progressPercent: 60, completedSteps: ["Submission", "Doc Audit", "Manager Review"], applicationStatus: "Manager Review" },
+      { id: 3, name: 'Blue Retail', company: 'Blue Retail Pvt Ltd', email: 'info@blueretail.com', phone: '+91 99876 54321', serviceType: 'Marketing', serviceName: 'Website & Brand Growth Suite', serviceStart: '2026-05-20', totalPayment: 60000, paymentReceived: 60000, branch: 'East', salesPerson: 'Mia Ross', progressPercent: 100, completedSteps: ["Submission", "Doc Audit", "Manager Review", "Agreement", "Final Approval"], applicationStatus: "Final Approval" },
+      { id: 4, name: 'Nexus Logistics', company: 'Nexus Logistics Solutions', email: 'support@nexuslogistics.com', phone: '+91 98111 22233', serviceType: 'IT', serviceName: 'Supply Chain Analytics Platform', serviceStart: '2026-06-10', totalPayment: 150000, paymentReceived: 100000, branch: 'West', salesPerson: 'Alex Vance', progressPercent: 40, completedSteps: ["Submission", "Doc Audit"], applicationStatus: "Doc Audit" },
+      { id: 5, name: 'Apex Healthcare', company: 'Apex Healthcare Systems', email: 'info@apexhealth.com', phone: '+91 97222 33344', serviceType: 'Certificate', serviceName: 'Corporate Health Shield Annual', serviceStart: '2026-08-01', totalPayment: 42000, paymentReceived: 42000, branch: 'North', salesPerson: 'Alex Vance', progressPercent: 100, completedSteps: ["Submission", "Doc Audit", "Manager Review", "Agreement", "Final Approval"], applicationStatus: "Final Approval" },
+    ];
+  });
   const [serviceFilter, setServiceFilter] = React.useState("");
   const [revenueRange, setRevenueRange] = React.useState("monthly");
   const [employeesList, setEmployeesList] = React.useState([
@@ -1226,28 +1257,96 @@ For billing support contact: billing@agnicrm.com
             <table className="clients-table">
               <thead>
                 <tr>
-                  <th>Name</th>
+                  <th>Client Name</th>
                   <th>Company</th>
-                  <th>Email</th>
-                  <th>Phone</th>
+                  <th>Contact Info</th>
                   <th>Service</th>
-                  <th></th>
+                  <th>Activity Status (5 Points)</th>
+                  <th>Progress (%)</th>
+                  <th style={{ textAlign: 'right' }}>Actions</th>
                 </tr>
               </thead>
               <tbody>
-                {clientsPageItems.map(client => (
-                  <tr key={client.id}>
-                    <td>{client.name}</td>
-                    <td>{client.company}</td>
-                    <td>{client.email}</td>
-                    <td>{client.phone}</td>
-                    <td>{client.serviceName}</td>
-                    <td style={{ textAlign: 'right' }}>
-                      <button className="table-action" onClick={() => openClientInfo(client)}>Info</button>
-                      <button className="table-action danger" onClick={() => openDeleteConfirm('client', client)}>Delete</button>
-                    </td>
-                  </tr>
-                ))}
+                {clientsPageItems.map(client => {
+                  const completed = client.completedSteps || (
+                    client.progressPercent ? ACTIVITY_STAGES.slice(0, Math.round(client.progressPercent / 20)).map(s => s.name) : ["Submission", "Doc Audit", "Manager Review"]
+                  );
+
+                  return (
+                    <tr key={client.id}>
+                      <td><strong style={{ color: '#1e293b' }}>{client.name}</strong></td>
+                      <td style={{ color: '#64748b' }}>{client.company}</td>
+                      <td>
+                        <div style={{ fontSize: 13 }}>{client.email}</div>
+                        <div style={{ fontSize: 12, color: '#7a748e' }}>{client.phone}</div>
+                      </td>
+                      <td>
+                        <span style={{ padding: '3px 8px', borderRadius: 6, background: '#f1f5f9', fontSize: 12, fontWeight: 600, color: '#475569' }}>
+                          {client.serviceName || client.serviceType}
+                        </span>
+                      </td>
+                      <td>
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
+                          <span
+                            style={{
+                              display: 'inline-flex',
+                              alignItems: 'center',
+                              padding: '2px 8px',
+                              borderRadius: 999,
+                              background: 'rgba(16, 185, 129, 0.12)',
+                              color: '#059669',
+                              fontWeight: 700,
+                              fontSize: 11.5,
+                              width: 'fit-content'
+                            }}
+                          >
+                            ● {client.applicationStatus || (completed.length > 0 ? completed[completed.length - 1] : "Submission")}
+                          </span>
+                          {/* 5 mini dots */}
+                          <div style={{ display: 'flex', gap: 4, alignItems: 'center' }}>
+                            {ACTIVITY_STAGES.map((st) => {
+                              const isDone = completed.includes(st.name);
+                              return (
+                                <span
+                                  key={st.name}
+                                  title={`${st.name} (${st.percent}%) - ${isDone ? "Completed" : "Pending"}`}
+                                  style={{
+                                    width: 8,
+                                    height: 8,
+                                    borderRadius: '50%',
+                                    background: isDone ? '#10b981' : '#cbd5e1'
+                                  }}
+                                />
+                              );
+                            })}
+                            <span style={{ fontSize: 10.5, color: '#64748b', marginLeft: 4 }}>
+                              {completed.length}/5 Points
+                            </span>
+                          </div>
+                        </div>
+                      </td>
+                      <td style={{ minWidth: 130 }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                          <div style={{ flex: 1, height: 8, background: '#e2e8f0', borderRadius: 999, overflow: 'hidden' }}>
+                            <div style={{
+                              width: `${client.progressPercent || 60}%`,
+                              height: '100%',
+                              background: (client.progressPercent || 60) === 100 ? '#10b981' : 'linear-gradient(90deg, #10b981 0%, #059669 100%)',
+                              borderRadius: 999
+                            }} />
+                          </div>
+                          <strong style={{ fontSize: 12, color: (client.progressPercent || 60) === 100 ? '#10b981' : '#1e293b' }}>
+                            {client.progressPercent || 60}%
+                          </strong>
+                        </div>
+                      </td>
+                      <td style={{ textAlign: 'right', whiteSpace: 'nowrap' }}>
+                        <button className="table-action" onClick={() => openClientInfo(client)}>Info &amp; Tracker</button>
+                        <button className="table-action danger" onClick={() => openDeleteConfirm('client', client)}>Delete</button>
+                      </td>
+                    </tr>
+                  );
+                })}
               </tbody>
             </table>
             <div className="table-pagination" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: 10 }}>
@@ -1638,23 +1737,45 @@ For billing support contact: billing@agnicrm.com
                                 </span>
                               </td>
                               <td>
-                                <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-                                  <div style={{ flex: 1, height: 8, background: '#e2e8f0', borderRadius: 999, overflow: 'hidden' }}>
-                                    <div style={{
-                                      width: `${progress}%`,
-                                      height: '100%',
-                                      background: progress === 100 ? '#2b9385' : 'linear-gradient(90deg, #6366f1 0%, #4e7cff 100%)',
-                                      borderRadius: 999
-                                    }} />
+                                <div>
+                                  <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 4 }}>
+                                    <div style={{ flex: 1, height: 8, background: '#e2e8f0', borderRadius: 999, overflow: 'hidden' }}>
+                                      <div style={{
+                                        width: `${progress}%`,
+                                        height: '100%',
+                                        background: progress === 100 ? '#10b981' : 'linear-gradient(90deg, #10b981 0%, #059669 100%)',
+                                        borderRadius: 999
+                                      }} />
+                                    </div>
+                                    <span style={{
+                                      fontSize: 12,
+                                      fontWeight: 700,
+                                      color: progress === 100 ? '#10b981' : '#1e293b',
+                                      minWidth: 38
+                                    }}>
+                                      {progress}%
+                                    </span>
                                   </div>
-                                  <span style={{
-                                    fontSize: 12,
-                                    fontWeight: 700,
-                                    color: progress === 100 ? '#147b6e' : '#4f46e5',
-                                    minWidth: 38
-                                  }}>
-                                    {progress}%
-                                  </span>
+                                  <div style={{ display: 'flex', gap: 4, alignItems: 'center' }}>
+                                    {ACTIVITY_STAGES.map((st) => {
+                                      const isDone = (client.completedSteps || ACTIVITY_STAGES.slice(0, Math.round(progress / 20)).map(s => s.name)).includes(st.name);
+                                      return (
+                                        <span
+                                          key={st.name}
+                                          title={`${st.name} (${st.percent}%)`}
+                                          style={{
+                                            width: 6,
+                                            height: 6,
+                                            borderRadius: '50%',
+                                            background: isDone ? '#10b981' : '#cbd5e1'
+                                          }}
+                                        />
+                                      );
+                                    })}
+                                    <span style={{ fontSize: 10, color: '#64748b', marginLeft: 2 }}>
+                                      {Math.round(progress / 20)}/5 Points
+                                    </span>
+                                  </div>
                                 </div>
                               </td>
                               <td style={{ textAlign: 'right', whiteSpace: 'nowrap' }}>
@@ -2470,6 +2591,41 @@ For billing support contact: billing@agnicrm.com
           </div>
 
           <aside className="owner-sidebar-widgets">
+            {/* 5-Point Activity Status Milestone Widget */}
+            <section className="activity-panel" style={{ marginBottom: 18 }}>
+              <div className="panel-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                <div>
+                  <p className="eyebrow">Milestone pipeline</p>
+                  <h2>5-Point Activity Status</h2>
+                </div>
+                <span style={{ fontSize: 11, fontWeight: 700, padding: '3px 8px', borderRadius: 999, background: 'rgba(16, 185, 129, 0.12)', color: '#059669' }}>
+                  20% / Step
+                </span>
+              </div>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 8, marginTop: 12 }}>
+                {ACTIVITY_STAGES.map((st) => {
+                  const clientsInStage = clients.filter(c => {
+                    const steps = c.completedSteps || ACTIVITY_STAGES.slice(0, Math.round((c.progressPercent || 60) / 20)).map(s => s.name);
+                    return steps.includes(st.name);
+                  }).length;
+                  const percentOfClients = Math.round((clientsInStage / Math.max(1, clients.length)) * 100);
+
+                  return (
+                    <div key={st.name} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '8px 10px', borderRadius: 8, background: '#f8fafc', border: '1px solid #f1f5f9' }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                        <span style={{ width: 8, height: 8, borderRadius: '50%', background: '#10b981' }} />
+                        <span style={{ fontSize: 12.5, fontWeight: 600, color: '#1e293b' }}>{st.name}</span>
+                        <span style={{ fontSize: 11, color: '#64748b' }}>({st.percent}%)</span>
+                      </div>
+                      <span style={{ fontSize: 12, fontWeight: 700, color: '#059669' }}>
+                        {clientsInStage} Clients ({percentOfClients}%)
+                      </span>
+                    </div>
+                  );
+                })}
+              </div>
+            </section>
+
             <section className="activity-panel">
               <div className="panel-header">
                 <div>
@@ -2517,16 +2673,10 @@ For billing support contact: billing@agnicrm.com
           const isPaid = (selectedClient.paymentReceived || 0) >= (selectedClient.totalPayment || 0);
           const remaining = Math.max(0, (selectedClient.totalPayment || 0) - (selectedClient.paymentReceived || 0));
 
-          const trackerSteps = [
-            { id: 1, label: "Lead Registration & Onboarding", desc: "Client registered & requirements gathered", status: "completed", date: selectedClient.serviceStart || "15 Jan 2026" },
-            { id: 2, label: "Document Audit & KYC Verification", desc: "GST & compliance documents audited", status: "completed", date: "Verified" },
-            { id: 3, label: "Branch Manager Approval", desc: "Approved for regional service execution", status: "completed", date: "Approved" },
-            { id: 4, label: "Service Fulfillment & Setup", desc: "Active processing of client service deliverables", status: isPaid ? "completed" : "in_progress", date: isPaid ? "Completed" : "In Progress" },
-            { id: 5, label: "Final Handover & Certification", desc: "Final verification seal & renewal setup", status: isPaid ? "completed" : "pending", date: isPaid ? "Completed" : "Pending" }
-          ];
-
-          const completedCount = trackerSteps.filter(s => s.status === 'completed').length;
-          const progressPercent = Math.round((completedCount / trackerSteps.length) * 100);
+          const completed = selectedClient.completedSteps || (
+            selectedClient.progressPercent ? ACTIVITY_STAGES.slice(0, Math.round(selectedClient.progressPercent / 20)).map(s => s.name) : ["Submission", "Doc Audit", "Manager Review"]
+          );
+          const clientProgress = selectedClient.progressPercent || (completed.length * 20);
 
           return (
             <SimpleModal onClose={closeClientInfo}>
@@ -2583,78 +2733,28 @@ For billing support contact: billing@agnicrm.com
                 </div>
               </div>
 
-              {/* Client Tracker Section */}
+              {/* 5-Points Activity Status Stepper (20% per point) */}
               <div style={{ marginTop: 20, paddingTop: 16, borderTop: '1px solid #eef0f5' }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                    <div style={{ background: 'rgba(99, 102, 241, 0.12)', color: '#6366f1', padding: '6px 8px', borderRadius: 6, display: 'flex' }}>
-                      <Icon name="overview" size={16} />
-                    </div>
-                    <h4 style={{ margin: 0, fontSize: 15, fontWeight: 700, color: '#1e293b' }}>Client Progress Tracker</h4>
-                  </div>
-                  <span style={{
-                    padding: '4px 10px',
-                    borderRadius: 999,
-                    fontSize: 12,
-                    fontWeight: 600,
-                    background: progressPercent === 100 ? 'rgba(68, 191, 176, 0.15)' : 'rgba(99, 102, 241, 0.15)',
-                    color: progressPercent === 100 ? '#147b6e' : '#4f46e5'
-                  }}>
-                    {progressPercent}% Completed ({completedCount}/{trackerSteps.length} Steps)
+                <div style={{ marginBottom: 12 }}>
+                  <span style={{ fontSize: 11, fontWeight: 700, letterSpacing: '0.05em', color: '#6366f1', textTransform: 'uppercase' }}>
+                    WORK COMPLETION PIPELINE
                   </span>
+                  <h4 style={{ margin: '4px 0 0', fontSize: 15, fontWeight: 700, color: '#1e293b' }}>
+                    5-Point Activity Status
+                  </h4>
                 </div>
-
-                {/* Progress Bar */}
-                <div style={{ width: '100%', height: 8, background: '#e2e8f0', borderRadius: 999, overflow: 'hidden', marginBottom: 16 }}>
-                  <div style={{
-                    width: `${progressPercent}%`,
-                    height: '100%',
-                    background: 'linear-gradient(90deg, #6366f1 0%, #44bfb0 100%)',
-                    borderRadius: 999,
-                    transition: 'width 0.4s ease'
-                  }} />
-                </div>
-
-                {/* Timeline Step List */}
-                <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
-                  {trackerSteps.map((step) => (
-                    <div key={step.id} style={{
-                      display: 'flex',
-                      alignItems: 'flex-start',
-                      gap: 12,
-                      padding: '10px 12px',
-                      borderRadius: 8,
-                      background: step.status === 'completed' ? '#f8fafc' : step.status === 'in_progress' ? 'rgba(99, 102, 241, 0.05)' : '#ffffff',
-                      border: step.status === 'in_progress' ? '1px solid rgba(99, 102, 241, 0.3)' : '1px solid #f1f5f9'
-                    }}>
-                      <div style={{
-                        width: 24,
-                        height: 24,
-                        borderRadius: 999,
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        fontSize: 12,
-                        fontWeight: 700,
-                        flexShrink: 0,
-                        background: step.status === 'completed' ? '#2b9385' : step.status === 'in_progress' ? '#6366f1' : '#cbd5e1',
-                        color: '#ffffff'
-                      }}>
-                        {step.status === 'completed' ? '✓' : step.id}
-                      </div>
-
-                      <div style={{ flex: 1 }}>
-                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                          <span style={{ fontWeight: 600, fontSize: 13, color: step.status === 'completed' ? '#1e293b' : step.status === 'in_progress' ? '#4338ca' : '#64748b' }}>
-                            {step.label}
-                          </span>
-                          <span style={{ fontSize: 11, color: '#94a3b8', fontWeight: 500 }}>{step.date}</span>
-                        </div>
-                        <div style={{ fontSize: 12, color: '#64748b', marginTop: 2 }}>{step.desc}</div>
-                      </div>
-                    </div>
-                  ))}
-                </div>
+                <ActivityStatusBar
+                  completedSteps={completed}
+                  progress={clientProgress}
+                  interactive={false}
+                  stepDates={{
+                    Submission: selectedClient.serviceStart ? selectedClient.serviceStart.slice(5) : "10 Aug",
+                    "Doc Audit": "12 Aug",
+                    "Manager Review": "14 Aug",
+                    Agreement: "Pending",
+                    "Final Approval": "Pending",
+                  }}
+                />
               </div>
 
               <div className="modal-actions" style={{ display: 'flex', gap: 8, justifyContent: 'flex-end', marginTop: 20 }}>

@@ -116,6 +116,7 @@ export default function AuthScreen({ onLogin }) {
               Select role
               <select name="role" required>
                 <option value="">Choose role</option>
+                <option value="Admin">Admin</option>
                 <option value="Owner">Owner</option>
                 <option value="Client">Client</option>
                 <option value="Manager">Manager</option>

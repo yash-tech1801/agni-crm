@@ -1,6 +1,7 @@
 import React from "react";
 import "./ClientDashboard.css";
 import DashboardSidebar from "./components/dashboard/DashboardSidebar";
+import ActivityStatusBar from "./components/dashboard/ActivityStatusBar";
 import MoreServicesPage from "./pages/MoreServicesPage";
 import EligibilityPage from "./pages/EligibilityPage";
 import DealsPage from "./pages/DealsPage";
@@ -242,6 +243,27 @@ export default function Dashboard({ onSignOut }) {
   const [requestService, setRequestService] = React.useState("Certificate");
   const [requestNotes, setRequestNotes] = React.useState("");
   const [requestSubmitted, setRequestSubmitted] = React.useState(false);
+
+  // Live Client Milestone Progress (syncable with Admin updates)
+  const clientCompletedSteps = React.useMemo(() => {
+    try {
+      const saved = localStorage.getItem("agni_branch_clients");
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        if (Array.isArray(parsed) && parsed.length > 0) {
+          const found = parsed[0];
+          if (found && Array.isArray(found.completedSteps)) {
+            return found.completedSteps;
+          }
+        }
+      }
+    } catch (e) {
+      console.warn("Error reading branch clients", e);
+    }
+    return ["Submission", "Doc Audit", "Manager Review"];
+  }, []);
+
+  const clientProgressPercent = Math.min(100, Math.max(0, clientCompletedSteps.length * 20));
 
   const filteredSchemes = activeSchemesData.filter((scheme) =>
     scheme.name.toLowerCase().includes(submittedQuery.trim().toLowerCase()) ||
@@ -564,30 +586,28 @@ export default function Dashboard({ onSignOut }) {
                             fill="none"
                             stroke="#4e7cff"
                             strokeWidth="3.5"
-                            strokeDasharray="60, 100"
+                            strokeDasharray={`${clientProgressPercent}, 100`}
                             strokeLinecap="round"
                           />
                         </svg>
-                        <span className="cd-tracker-percent-text">60%</span>
+                        <span className="cd-tracker-percent-text">{clientProgressPercent}%</span>
                       </div>
                     </div>
                   </div>
 
-                  <div className="cd-pipeline-steps">
-                    {pipelineSteps.map((step, idx) => (
-                      <div
-                        key={step.name}
-                        className={`cd-pipeline-step ${step.done ? "done" : idx === 3 ? "active" : ""}`}
-                      >
-                        <div className="cd-pipeline-dot">
-                          {step.done ? <DashboardIcon name="check" size={20} /> : <span>{idx + 1}</span>}
-                        </div>
-                        <div className="cd-pipeline-info">
-                          <strong>{step.name}</strong>
-                          <small>{step.done ? "Completed" : step.date}</small>
-                        </div>
-                      </div>
-                    ))}
+                  <div style={{ marginTop: 12 }}>
+                    <ActivityStatusBar
+                      completedSteps={clientCompletedSteps}
+                      progress={clientProgressPercent}
+                      interactive={false}
+                      stepDates={{
+                        Submission: "10 Aug",
+                        "Doc Audit": "12 Aug",
+                        "Manager Review": "14 Aug",
+                        Agreement: "Pending",
+                        "Final Approval": "Pending",
+                      }}
+                    />
                   </div>
                 </section>
 
