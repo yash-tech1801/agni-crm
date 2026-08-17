@@ -395,3 +395,22 @@ export const initialBranchTeam = [
     status: "Active",
   },
 ];
+
+export const stageBadgeColors = {
+  Submission: "#4e7cff",
+  "Doc Audit": "#9a74e9",
+  "Manager Review": "#f2aa38",
+  Agreement: "#26a69a",
+  "Final Approval": "#10b981",
+  "Active & Disbursed": "#10b981",
+  "Document Verification": "#9a74e9",
+  Underwriting: "#f2aa38",
+  Approved: "#26a69a",
+  Submitted: "#4e7cff",
+  "On Hold": "#ff9800",
+  Rejected: "#ff5757",
+};
+
+export const formatCurrency = (val) =>
+  new Intl.NumberFormat("en-IN", { style: "currency", currency: "INR", maximumFractionDigits: 0 }).format(val || 0);
+
