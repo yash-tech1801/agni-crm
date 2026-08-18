@@ -6011,3 +6011,172 @@ form {
     width: 90px;
   }
 }
+
+/* ==========================================================================
+   IT & Marketing Dashboards — Sidebar Glassmorphism Design Match
+   ========================================================================== */
+
+.dashboard-dark.it-dashboard,
+.dashboard-dark .it-dashboard,
+.dashboard-dark.marketing-dashboard,
+.dashboard-dark .marketing-dashboard {
+  color: #f1f5f9;
+}
+
+.dashboard-dark .it-dashboard .dashboard-content,
+.dashboard-dark .marketing-dashboard .dashboard-content {
+  background: transparent;
+}
+
+/* Glass Panels & Surfaces matching sidebar */
+.dashboard-dark .it-header-banner,
+.dashboard-dark .it-stat-card,
+.dashboard-dark .it-launchpad-card,
+.dashboard-dark .it-panel-card,
+.dashboard-dark .it-service-card,
+.dashboard-dark .it-filter-bar,
+.dashboard-dark .it-table-wrap,
+.dashboard-dark .modal-card.it-panel-card,
+.dashboard-dark .mkt-header-banner,
+.dashboard-dark .mkt-stat-card,
+.dashboard-dark .mkt-launchpad-card,
+.dashboard-dark .mkt-panel-card,
+.dashboard-dark .mkt-service-card,
+.dashboard-dark .mkt-filter-bar,
+.dashboard-dark .mkt-table-wrap,
+.dashboard-dark .modal-card.mkt-panel-card {
+  background: rgba(15, 21, 35, 0.75) !important;
+  backdrop-filter: blur(28px) saturate(180%) !important;
+  -webkit-backdrop-filter: blur(28px) saturate(180%) !important;
+  border: 1px solid rgba(255, 255, 255, 0.08) !important;
+  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.35), inset 0 1px 0 rgba(255, 255, 255, 0.06) !important;
+  color: #f1f5f9 !important;
+}
+
+.dashboard-dark .it-subcard,
+.dashboard-dark .mkt-subcard {
+  background: rgba(10, 15, 26, 0.65) !important;
+  backdrop-filter: blur(16px) !important;
+  -webkit-backdrop-filter: blur(16px) !important;
+  border: 1px solid rgba(255, 255, 255, 0.06) !important;
+  color: #e2e8f0 !important;
+}
+
+/* Inputs & Form Controls */
+.dashboard-dark .it-dashboard input,
+.dashboard-dark .it-dashboard select,
+.dashboard-dark .it-dashboard textarea,
+.dashboard-dark .marketing-dashboard input,
+.dashboard-dark .marketing-dashboard select,
+.dashboard-dark .marketing-dashboard textarea {
+  background: rgba(10, 15, 26, 0.7) !important;
+  backdrop-filter: blur(16px) !important;
+  -webkit-backdrop-filter: blur(16px) !important;
+  border: 1px solid rgba(255, 255, 255, 0.12) !important;
+  color: #f8fafc !important;
+}
+
+.dashboard-dark .it-dashboard input:focus,
+.dashboard-dark .it-dashboard select:focus,
+.dashboard-dark .it-dashboard textarea:focus,
+.dashboard-dark .marketing-dashboard input:focus,
+.dashboard-dark .marketing-dashboard select:focus,
+.dashboard-dark .marketing-dashboard textarea:focus {
+  border-color: #7aa2ff !important;
+  box-shadow: 0 0 0 3px rgba(122, 162, 255, 0.25) !important;
+}
+
+.dashboard-dark .it-dashboard input::placeholder,
+.dashboard-dark .it-dashboard textarea::placeholder,
+.dashboard-dark .marketing-dashboard input::placeholder,
+.dashboard-dark .marketing-dashboard textarea::placeholder {
+  color: #64748b !important;
+}
+
+.dashboard-dark .it-dashboard select option,
+.dashboard-dark .marketing-dashboard select option {
+  background: #0f1523 !important;
+  color: #f8fafc !important;
+}
+
+/* Typography & Headings */
+.dashboard-dark .it-dashboard h2,
+.dashboard-dark .it-dashboard h3,
+.dashboard-dark .it-dashboard h4,
+.dashboard-dark .it-dashboard strong,
+.dashboard-dark .marketing-dashboard h2,
+.dashboard-dark .marketing-dashboard h3,
+.dashboard-dark .marketing-dashboard h4,
+.dashboard-dark .marketing-dashboard strong {
+  color: #ffffff !important;
+}
+
+.dashboard-dark .it-dashboard p,
+.dashboard-dark .it-dashboard label,
+.dashboard-dark .it-dashboard span,
+.dashboard-dark .marketing-dashboard p,
+.dashboard-dark .marketing-dashboard label,
+.dashboard-dark .marketing-dashboard span {
+  color: #c9c3e0;
+}
+
+.dashboard-dark .it-dashboard .it-kicker,
+.dashboard-dark .marketing-dashboard .mkt-kicker,
+.dashboard-dark .it-dashboard .eyebrow,
+.dashboard-dark .marketing-dashboard .eyebrow {
+  color: #a891e8 !important;
+}
+
+/* Tables */
+.dashboard-dark .it-dashboard .it-table th,
+.dashboard-dark .marketing-dashboard .mkt-table th {
+  background: rgba(10, 15, 26, 0.8) !important;
+  color: #b8b1d4 !important;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08) !important;
+}
+
+.dashboard-dark .it-dashboard .it-table td,
+.dashboard-dark .marketing-dashboard .mkt-table td {
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06) !important;
+  color: #e2e8f0 !important;
+}
+
+.dashboard-dark .it-dashboard .it-table tbody tr:hover td,
+.dashboard-dark .marketing-dashboard .mkt-table tbody tr:hover td {
+  background: rgba(255, 255, 255, 0.04) !important;
+}
+
+/* Branch Filter Tabs & Buttons */
+.dashboard-dark .it-dashboard .it-branch-tab,
+.dashboard-dark .marketing-dashboard .mkt-branch-tab {
+  background: rgba(10, 15, 26, 0.65) !important;
+  border: 1px solid rgba(255, 255, 255, 0.1) !important;
+  color: #94a3b8 !important;
+}
+
+.dashboard-dark .it-dashboard .it-branch-tab:hover,
+.dashboard-dark .marketing-dashboard .mkt-branch-tab:hover {
+  background: rgba(30, 41, 59, 0.8) !important;
+  color: #f1f5f9 !important;
+}
+
+.dashboard-dark .it-dashboard .it-branch-tab.active,
+.dashboard-dark .marketing-dashboard .mkt-branch-tab.active {
+  background: #4e7cff !important;
+  border-color: #4e7cff !important;
+  color: #ffffff !important;
+  box-shadow: 0 2px 10px rgba(78, 124, 255, 0.4) !important;
+}
+
+.dashboard-dark .it-dashboard .it-btn-secondary,
+.dashboard-dark .marketing-dashboard .mkt-btn-secondary {
+  background: rgba(10, 15, 26, 0.65) !important;
+  border: 1px solid rgba(255, 255, 255, 0.1) !important;
+  color: #e2e8f0 !important;
+}
+
+.dashboard-dark .it-dashboard .it-btn-secondary:hover,
+.dashboard-dark .marketing-dashboard .mkt-btn-secondary:hover {
+  background: rgba(30, 41, 59, 0.8) !important;
+  color: #ffffff !important;
+}

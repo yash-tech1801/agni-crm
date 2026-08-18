@@ -1,0 +1,351 @@
+import React, { useState, useMemo, useRef, useEffect } from "react";
+import { Routes, Route, Navigate, useLocation, useNavigate } from "react-router-dom";
+import DashboardSidebar from "../../components/dashboard/DashboardSidebar";
+import DashboardHeader from "../../components/dashboard/DashboardHeader";
+import Icon from "../../components/Icon";
+
+// Modular Sub-pages
+import ITOverviewPage from "./ITOverviewPage";
+import ITClientFormPage from "./ITClientFormPage";
+import ITClientDetailsPage from "./ITClientDetailsPage";
+import ITServicesCatalogPage from "./ITServicesCatalogPage";
+import "./ITDashboard.css";
+
+// Mock Data
+import {
+  navItems,
+  initialITCreatedClients,
+  initialSalesPitchedITClients,
+} from "./mockITData";
+
+export default function ITDashboard({ onSignOut, userEmail }) {
+  const navigate = useNavigate();
+  const location = useLocation();
+
+  const urlToNavMap = useMemo(
+    () => ({
+      dashboard: "Dashboard",
+      overview: "Dashboard",
+      client: "Client",
+      "new-client": "Client",
+      details: "Details",
+      clients: "Details",
+      services: "Services",
+      service: "Services",
+    }),
+    []
+  );
+
+  const pathParts = location.pathname.split("/").filter(Boolean);
+  const currentSlug = pathParts[1] || "dashboard";
+  const activeNav = urlToNavMap[currentSlug.toLowerCase()] || "Dashboard";
+
+  const handleNavChange = (label) => {
+    const slug = label.toLowerCase();
+    navigate(`/it/${slug}`);
+  };
+
+  const [dark, setDark] = useState(false);
+  const [searchOpen, setSearchOpen] = useState(false);
+  const [notificationsOpen, setNotificationsOpen] = useState(false);
+  const [notificationsAutoScrollPaused, setNotificationsAutoScrollPaused] = useState(false);
+  const [query, setQuery] = useState("");
+
+  // Shared state for IT clients
+  const [createdClients, setCreatedClients] = useState(initialITCreatedClients);
+  const [salesPitchedClients, setSalesPitchedClients] = useState(initialSalesPitchedITClients);
+  const [preselectedService, setPreselectedService] = useState(null);
+
+  const handleCreateClientWithService = (serviceOrName) => {
+    setPreselectedService(serviceOrName);
+    handleNavChange("Client");
+  };
+
+  const notificationWrapRef = useRef(null);
+  const notificationsListRef = useRef(null);
+  const notificationsPauseTimer = useRef(null);
+
+  const itLeadName = useMemo(() => {
+    if (!userEmail) return "IT Administrator";
+    let raw = userEmail.split("@")[0];
+    // Strip trailing digits if any
+    raw = raw.replace(/\d+$/, "");
+    const parts = raw.split(/[^a-zA-Z]+/).filter(Boolean);
+    if (parts.length === 0) return "IT Administrator";
+    return parts
+      .map((part) => part.charAt(0).toUpperCase() + part.slice(1).toLowerCase())
+      .join(" ");
+  }, [userEmail]);
+
+  const handleClientCreated = (newClient) => {
+    setCreatedClients((prev) => [newClient, ...prev]);
+  };
+
+  // Notifications outside click handler
+  useEffect(() => {
+    function handleOutsideClick(event) {
+      if (
+        notificationsOpen &&
+        notificationWrapRef.current &&
+        !notificationWrapRef.current.contains(event.target)
+      ) {
+        setNotificationsOpen(false);
+      }
+    }
+
+    document.addEventListener("mousedown", handleOutsideClick);
+    return () => document.removeEventListener("mousedown", handleOutsideClick);
+  }, [notificationsOpen]);
+
+  // Notifications auto-scroll
+  useEffect(() => {
+    if (!notificationsOpen) return undefined;
+    const list = notificationsListRef.current;
+    if (!list) return undefined;
+
+    const intervalId = window.setInterval(() => {
+      if (notificationsAutoScrollPaused || !list) return;
+      const maxScroll = list.scrollHeight - list.clientHeight;
+      if (maxScroll <= 0) return;
+
+      const nextScrollTop = Math.min(list.scrollTop + 86, maxScroll);
+      if (list.scrollTop >= maxScroll - 2) {
+        list.scrollTo({ top: 0, behavior: "smooth" });
+      } else {
+        list.scrollTo({ top: nextScrollTop, behavior: "smooth" });
+      }
+    }, 2600);
+
+    return () => window.clearInterval(intervalId);
+  }, [notificationsOpen, notificationsAutoScrollPaused]);
+
+  useEffect(() => {
+    return () => {
+      if (notificationsPauseTimer.current) {
+        window.clearTimeout(notificationsPauseTimer.current);
+      }
+    };
+  }, []);
+
+  function handleNotificationsListScroll() {
+    if (notificationsPauseTimer.current) {
+      window.clearTimeout(notificationsPauseTimer.current);
+    }
+
+    setNotificationsAutoScrollPaused(true);
+    notificationsPauseTimer.current = window.setTimeout(() => {
+      setNotificationsAutoScrollPaused(false);
+      notificationsPauseTimer.current = null;
+    }, 3000);
+  }
+
+  return (
+    <main className={`owner-dashboard it-dashboard ${dark ? "dashboard-dark" : ""}`}>
+      <DashboardSidebar
+        navItems={navItems}
+        activeNav={activeNav}
+        onNavChange={handleNavChange}
+        dark={dark}
+        onToggleDark={() => setDark((val) => !val)}
+        onSignOut={onSignOut}
+        IconComponent={Icon}
+        brandMark="IT"
+        brandName={<strong>Agni CRM</strong>}
+        navLabel="IT dashboard navigation"
+      />
+
+      <section className="dashboard-content">
+        <DashboardHeader
+          ref={notificationWrapRef}
+          eyebrow="IT Operations &amp; Client Services"
+          title={`Hello, ${itLeadName}`}
+          copy="Enterprise IT client onboarding, branch sales request tracking, and company IT service catalog."
+          className="owner-dashboard-top"
+        >
+          <div className="top-actions owner-top-actions">
+            {searchOpen ? (
+              <div className="search-field">
+                <input
+                  value={query}
+                  onChange={(event) => setQuery(event.target.value)}
+                  placeholder="Search IT clients, services, branches..."
+                />
+                <button type="button" onClick={() => setSearchOpen(false)}>
+                  <Icon name="search" size={16} />
+                </button>
+              </div>
+            ) : (
+              <button type="button" onClick={() => setSearchOpen(true)}>
+                <Icon name="search" size={16} />
+              </button>
+            )}
+            <div className="notification-wrap">
+              <button
+                className="notification"
+                type="button"
+                onClick={() => setNotificationsOpen((open) => !open)}
+                aria-label="Notifications"
+              >
+                <Icon name="bell" size={16} />
+                <i />
+              </button>
+              {notificationsOpen && (
+                <section className="notifications-popover" aria-label="Notifications">
+                  <header>
+                    <h2>System Alerts</h2>
+                    <span>3 active</span>
+                  </header>
+                  <div
+                    className="notifications-scroll"
+                    ref={notificationsListRef}
+                    onScroll={handleNotificationsListScroll}
+                  >
+                    <article>
+                      <span className="notice-dot green" />
+                      <div>
+                        <strong>New IT Client Onboarded</strong>
+                        <p>Horizon FinTech Labs configured on 24/7 SLA retainer.</p>
+                      </div>
+                    </article>
+                    <article>
+                      <span className="notice-dot coral" />
+                      <div>
+                        <strong>Sales IT Pitch Received</strong>
+                        <p>East branch rep pitched Cybersecurity Audit to Bengal BioPharma.</p>
+                      </div>
+                    </article>
+                    <article>
+                      <span className="notice-dot violet" />
+                      <div>
+                        <strong>Service Catalog Refreshed</strong>
+                        <p>MDM Device Fleet Management added with zero-touch enrollment.</p>
+                      </div>
+                    </article>
+                  </div>
+                </section>
+              )}
+            </div>
+            <button className="profile" type="button">
+              IT
+            </button>
+            <span className="role-badge">IT Admin</span>
+          </div>
+        </DashboardHeader>
+
+        {/* Nested Routes for IT Dashboard */}
+        <Routes>
+          <Route
+            index
+            element={
+              <ITOverviewPage
+                dark={dark}
+                onNavigate={handleNavChange}
+                onPitchService={handleCreateClientWithService}
+                createdClients={createdClients}
+                salesPitchedClients={salesPitchedClients}
+              />
+            }
+          />
+          <Route
+            path="dashboard"
+            element={
+              <ITOverviewPage
+                dark={dark}
+                onNavigate={handleNavChange}
+                onPitchService={handleCreateClientWithService}
+                createdClients={createdClients}
+                salesPitchedClients={salesPitchedClients}
+              />
+            }
+          />
+          <Route
+            path="overview"
+            element={
+              <ITOverviewPage
+                dark={dark}
+                onNavigate={handleNavChange}
+                onPitchService={handleCreateClientWithService}
+                createdClients={createdClients}
+                salesPitchedClients={salesPitchedClients}
+              />
+            }
+          />
+          <Route
+            path="client"
+            element={
+              <ITClientFormPage
+                dark={dark}
+                preselectedService={preselectedService}
+                onClearPreselectedService={() => setPreselectedService(null)}
+                onClientCreated={handleClientCreated}
+                onNavigateToDetails={() => handleNavChange("Details")}
+              />
+            }
+          />
+          <Route
+            path="new-client"
+            element={
+              <ITClientFormPage
+                dark={dark}
+                preselectedService={preselectedService}
+                onClearPreselectedService={() => setPreselectedService(null)}
+                onClientCreated={handleClientCreated}
+                onNavigateToDetails={() => handleNavChange("Details")}
+              />
+            }
+          />
+          <Route
+            path="details"
+            element={
+              <ITClientDetailsPage
+                dark={dark}
+                createdClients={createdClients}
+                salesPitchedClients={salesPitchedClients}
+                onNavigateToCreateClient={() => {
+                  setPreselectedService(null);
+                  handleNavChange("Client");
+                }}
+              />
+            }
+          />
+          <Route
+            path="clients"
+            element={
+              <ITClientDetailsPage
+                dark={dark}
+                createdClients={createdClients}
+                salesPitchedClients={salesPitchedClients}
+                onNavigateToCreateClient={() => {
+                  setPreselectedService(null);
+                  handleNavChange("Client");
+                }}
+              />
+            }
+          />
+          <Route
+            path="services"
+            element={
+              <ITServicesCatalogPage
+                dark={dark}
+                onPitchService={handleCreateClientWithService}
+              />
+            }
+          />
+          <Route
+            path="service"
+            element={
+              <ITServicesCatalogPage
+                dark={dark}
+                onPitchService={handleCreateClientWithService}
+              />
+            }
+          />
+          <Route
+            path="*"
+            element={<Navigate to="/it/dashboard" replace />}
+          />
+        </Routes>
+      </section>
+    </main>
+  );
+}

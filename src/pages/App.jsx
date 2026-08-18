@@ -7,6 +7,8 @@ import ManagerDashboard from "./Manager/ManagerDashboard";
 import BranchManagerDashboard from "./BranchManager/BranchManagerDashboard";
 import SalesDashboard from "./Sales/SalesDashboard";
 import AdminDashboard from "./Admin/AdminDashboard";
+import MarketingDashboard from "./Marketing/MarketingDashboard";
+import ITDashboard from "./IT/ITDashboard";
 
 export default function App() {
   const navigate = useNavigate();
@@ -20,13 +22,15 @@ export default function App() {
     "Client": "/client",
     "Manager": "/manager",
     "Sales Person": "/sales",
-    "Branch Manager": "/branch-manager"
+    "Branch Manager": "/branch-manager",
+    "Marketing": "/marketing",
+    "IT": "/it",
   };
 
   React.useEffect(() => {
     const email = localStorage.getItem("agni_user_email");
     const role = localStorage.getItem("agni_user_role");
-    const validRoles = ["Admin", "Owner", "Client", "Manager", "Sales Person", "Branch Manager"];
+    const validRoles = ["Admin", "Owner", "Client", "Manager", "Sales Person", "Branch Manager", "Marketing", "IT"];
 
     if (email && validRoles.includes(role)) {
       setUserEmail(email);
@@ -117,6 +121,28 @@ export default function App() {
         element={
           userRole === "Sales Person" ? (
             <SalesDashboard onSignOut={handleSignOut} userEmail={userEmail} />
+          ) : (
+            <Navigate to={userRole ? (rolePathMap[userRole] || "/login") : "/login"} replace />
+          )
+        }
+      />
+
+      <Route
+        path="/marketing/*"
+        element={
+          userRole === "Marketing" ? (
+            <MarketingDashboard onSignOut={handleSignOut} userEmail={userEmail} />
+          ) : (
+            <Navigate to={userRole ? (rolePathMap[userRole] || "/login") : "/login"} replace />
+          )
+        }
+      />
+
+      <Route
+        path="/it/*"
+        element={
+          userRole === "IT" ? (
+            <ITDashboard onSignOut={handleSignOut} userEmail={userEmail} />
           ) : (
             <Navigate to={userRole ? (rolePathMap[userRole] || "/login") : "/login"} replace />
           )

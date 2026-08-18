@@ -2,20 +2,36 @@ import React from 'react';
 import Icon from './Icon';
 
 function hexToRgba(hex, alpha) {
-  if (!hex || !hex.startsWith('#')) return `rgba(78, 124, 255, ${alpha})`;
+  if (!hex || typeof hex !== 'string' || !hex.startsWith('#')) return `rgba(78, 124, 255, ${alpha})`;
   let c = hex.substring(1);
   if (c.length === 3) {
     c = c.split('').map((x) => x + x).join('');
   }
   const num = parseInt(c, 16);
+  if (isNaN(num)) return `rgba(78, 124, 255, ${alpha})`;
   const r = (num >> 16) & 255;
   const g = (num >> 8) & 255;
   const b = num & 255;
   return `rgba(${r}, ${g}, ${b}, ${alpha})`;
 }
 
-export default function KpiCard({ card, onAction, dark }) {
-  const accent = card.accent || "#4e7cff";
+export default function KpiCard({ card, onAction, onClick, dark, ...props }) {
+  // Support both `card` object and spread individual props
+  const data = card || props;
+  const accent = data.accent || "#4e7cff";
+  const label = data.label || "";
+  const value = data.value || "";
+  const trend = data.trend || "";
+  const description = data.description || "";
+  const icon = data.icon || null;
+
+  const handleClick = () => {
+    if (onClick) {
+      onClick();
+    } else if (onAction && card) {
+      onAction(card);
+    }
+  };
 
   const bgGradient = dark
     ? `linear-gradient(135deg, ${hexToRgba(accent, 0.35)} 0%, ${hexToRgba(accent, 0.16)} 55%, #353241 100%)`
@@ -29,47 +45,40 @@ export default function KpiCard({ card, onAction, dark }) {
     boxShadow: dark
       ? `0 14px 36px rgba(0, 0, 0, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.08)`
       : `0 14px 36px ${hexToRgba(accent, 0.22)}, 0 4px 12px rgba(23, 19, 43, 0.04), inset 0 1px 1px rgba(255, 255, 255, 0.9)`,
+    cursor: onClick || onAction ? 'pointer' : 'default',
   };
 
   return (
-    <article className="kpi-card" style={cardStyle}>
+    <article className="kpi-card" style={cardStyle} onClick={handleClick}>
       <div className="kpi-card-header">
         <div className="kpi-card-title">
-          {card.icon && (
+          {icon && (
             <span
               className="kpi-card-icon"
               style={{ background: hexToRgba(accent, 0.25), color: accent }}
             >
-              <Icon name={card.icon} size={18} />
+              <Icon name={icon} size={18} />
             </span>
           )}
-          <span>{card.label}</span>
+          <span>{label}</span>
         </div>
         <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-          <span
-            className="metric-chip"
-            style={{
-              background: hexToRgba(accent, 0.25),
-              color: accent,
-              border: `1px solid ${hexToRgba(accent, 0.4)}`,
-            }}
-          >
-            {card.trend}
-          </span>
-          {card.linkTo && (
-            <button
-              type="button"
-              className="kpi-link-button"
-              onClick={() => onAction && onAction(card)}
-              aria-label={`Open ${card.linkTo}`}
+          {trend && (
+            <span
+              className="metric-chip"
+              style={{
+                background: hexToRgba(accent, 0.2),
+                color: dark ? '#ffffff' : accent,
+                border: `1px solid ${hexToRgba(accent, 0.35)}`,
+              }}
             >
-              <Icon name="arrowUp" size={14} />
-            </button>
+              {trend}
+            </span>
           )}
         </div>
       </div>
-      <h2>{card.value}</h2>
-      <p>{card.description}</p>
+      <h2>{value}</h2>
+      {description && <p>{description}</p>}
     </article>
   );
 }
