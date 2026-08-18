@@ -187,6 +187,7 @@ export default function SalesDashboard({ onSignOut, userEmail }) {
         {activeNav === "Dashboard" && (
           <SalesOverview
             kpiCards={kpiCards}
+            dark={dark}
             onNavigate={(nav) => setActiveNav(nav)}
           />
         )}
