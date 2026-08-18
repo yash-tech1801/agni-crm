@@ -99,7 +99,13 @@ export default function ActivityStatusBar({
       )}
 
       {/* Stepper Container */}
-      <div className={`activity-status-points-container ${interactive ? "is-interactive" : ""}`}>
+      <div
+        className={`activity-status-points-container ${interactive ? "is-interactive" : ""}`}
+        style={{
+          gridTemplateColumns: `repeat(${totalStages}, minmax(0, 1fr))`,
+          "--stage-count": totalStages,
+        }}
+      >
         {stages.map((stage, idx) => {
           const isDone = currentCompleted.includes(stage.name);
           const isCurrentActive = stage.name === trackerState.currentStage;

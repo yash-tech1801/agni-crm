@@ -5,6 +5,7 @@ import {
   getTrackerState,
 } from "../../utils/schemeTracker";
 import { stageBadgeColors } from "./mockAdminData";
+import "./AdminDashboard.css";
 
 const PIPELINE_STAGES = [
   TRACKER_STAGES_DEFINITIONS[TRACKER_STAGE_IDS.CRM_CREATION],
@@ -21,19 +22,23 @@ export default function AdminPipelinePage({
   onOpenStatusUpdate,
 }) {
   return (
-    <section className="admin-page-section">
-      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: 16, marginBottom: 24 }}>
+    <div className="admin-page-container">
+      {/* Glass Header Banner */}
+      <div className="admin-header-banner">
         <div>
-          <p className="dashboard-eyebrow">{selectedBranch}</p>
-          <h1>Scheme-Based Workflow Pipeline</h1>
+          <span className="admin-kicker">WORKFLOW LIFECYCLE</span>
+          <h2 className="admin-title">{selectedBranch} Milestone Pipeline</h2>
+          <p className="admin-desc">
+            Visual stage progression across all active scheme milestones and client verification pipelines.
+          </p>
         </div>
       </div>
 
-      <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(240px, 1fr))", gap: 16, alignItems: "start" }}>
+      {/* Pipeline Grid (Strictly 3 cards per row) */}
+      <div className="admin-pipeline-grid-3">
         {PIPELINE_STAGES.map((stage, sIdx) => {
           const stageClients = branchClients.filter((c) => {
             const tracker = getTrackerState(c);
-            // Match current active stage or applicationStatus
             const status = c.applicationStatus || tracker.currentStage;
             return status === stage.name;
           });
@@ -41,39 +46,37 @@ export default function AdminPipelinePage({
           return (
             <div
               key={stage.id}
-              style={{
-                background: "#fff",
-                borderRadius: 16,
-                border: "1px solid #e7e7f5",
-                padding: 16,
-                display: "flex",
-                flexDirection: "column",
-                gap: 12,
-                minHeight: 380,
-              }}
+              className="admin-pipeline-column"
             >
-              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", paddingBottom: 10, borderBottom: "1px solid #f0f0f5" }}>
+              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", paddingBottom: 10, borderBottom: "1px solid rgba(154, 116, 233, 0.15)" }}>
                 <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
                   <span
                     style={{
-                      width: 22,
-                      height: 22,
+                      width: 24,
+                      height: 24,
                       borderRadius: "50%",
-                      background: stage.badgeColor || "#10b981",
+                      background: stage.badgeColor || "#4e7cff",
                       color: "#fff",
                       display: "grid",
                       placeItems: "center",
-                      fontSize: 11,
+                      fontSize: 11.5,
                       fontWeight: 800,
                     }}
                   >
                     {sIdx + 1}
                   </span>
                   <div>
-                    <strong style={{ fontSize: 13.5 }}>{stage.name}</strong>
+                    <strong style={{ fontSize: 14 }}>{stage.name}</strong>
                   </div>
                 </div>
-                <span style={{ background: "#f0f0fa", padding: "2px 8px", borderRadius: 999, fontSize: 12, fontWeight: 700 }}>
+                <span
+                  className="admin-badge"
+                  style={{
+                    background: "rgba(78, 124, 255, 0.12)",
+                    color: "#4e7cff",
+                    fontWeight: 700,
+                  }}
+                >
                   {stageClients.length}
                 </span>
               </div>
@@ -85,47 +88,46 @@ export default function AdminPipelinePage({
                   return (
                     <div
                       key={client.id}
+                      className="admin-subcard"
                       style={{
-                        padding: 12,
-                        borderRadius: 10,
-                        background: "#fbfbfe",
-                        border: "1px solid #e7e7f5",
                         display: "flex",
                         flexDirection: "column",
                         gap: 8,
+                        padding: "12px 14px",
                       }}
                     >
                       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start" }}>
                         <div>
-                          <strong style={{ fontSize: 13 }}>{client.name}</strong>
-                          <div style={{ fontSize: 11.5, color: "#7a748e" }}>{client.company}</div>
+                          <strong style={{ fontSize: 13.5 }}>{client.name}</strong>
+                          <div style={{ fontSize: 11.5, color: "#64748b" }}>{client.company}</div>
                         </div>
-                        <span style={{ fontSize: 11, color: "#10b981", fontWeight: 700 }}>
+                        <span style={{ fontSize: 11.5, color: "#10b981", fontWeight: 700 }}>
                           {tracker.progressPercent}%
                         </span>
                       </div>
 
-                      <div style={{ fontSize: 12, color: "#555" }}>
-                        Scheme: <strong>{client.scheme}</strong>
+                      <div style={{ fontSize: 12, color: "#64748b" }}>
+                        Scheme: <strong style={{ color: "inherit" }}>{client.scheme}</strong>
                       </div>
 
-                      <div style={{ height: 5, background: "#e7e7f5", borderRadius: 999, overflow: "hidden" }}>
+                      <div style={{ height: 6, background: "rgba(154, 116, 233, 0.15)", borderRadius: 999, overflow: "hidden" }}>
                         <div
                           style={{
                             width: `${tracker.progressPercent}%`,
                             height: "100%",
                             background: tracker.progressPercent === 100 ? "#10b981" : "linear-gradient(90deg, #4e7cff 0%, #10b981 100%)",
+                            borderRadius: 999,
                           }}
                         />
                       </div>
 
                       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginTop: 4 }}>
-                        <span style={{ fontSize: 11, color: "#9a94ad" }}>{client.assignedSalesPerson}</span>
+                        <span style={{ fontSize: 11, color: "#64748b" }}>{client.assignedSalesPerson}</span>
                         {onOpenStatusUpdate && (
                           <button
                             type="button"
-                            className="table-action"
-                            style={{ padding: "4px 10px", fontSize: 11 }}
+                            className="admin-btn-secondary"
+                            style={{ padding: "4px 8px", fontSize: 11 }}
                             onClick={() => onOpenStatusUpdate(client)}
                           >
                             Update Status
@@ -146,6 +148,6 @@ export default function AdminPipelinePage({
           );
         })}
       </div>
-    </section>
+    </div>
   );
 }

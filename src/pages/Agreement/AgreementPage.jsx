@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from "react";
+import React, { useState, useEffect, useCallback, useMemo } from "react";
 import Icon from "../../components/Icon";
 import {
   agreementService,
@@ -10,6 +10,7 @@ import AgreementHistoryTable from "./components/AgreementHistoryTable";
 import ClientAgreementFormModal from "./components/ClientAgreementFormModal";
 import AgreementDocumentViewer from "./components/AgreementDocumentViewer";
 import AdminClientDossierModal from "../Admin/AdminClientDossierModal";
+import "../Admin/AdminDashboard.css";
 
 export default function AgreementPage({
   clients = [],
@@ -21,6 +22,7 @@ export default function AgreementPage({
   const [agreements, setAgreements] = useState([]);
   const [loadingAgreements, setLoadingAgreements] = useState(true);
   const [viewMode, setViewMode] = useState("current"); // "current" | "history"
+  const [searchTerm, setSearchTerm] = useState("");
 
   // Modals state
   const [creatingClient, setCreatingClient] = useState(null);
@@ -125,49 +127,185 @@ export default function AgreementPage({
     }
   };
 
+  // Metrics computation
+  const metrics = useMemo(() => {
+    const totalClients = clients.length;
+    const sentCount = agreements.filter((a) => a.status === AGREEMENT_STATUSES.SENT || a.agreement?.status === AGREEMENT_STATUSES.SENT).length;
+    const readyCount = agreements.filter((a) => a.status === AGREEMENT_STATUSES.READY || a.agreement?.status === AGREEMENT_STATUSES.READY).length;
+    const pendingCount = Math.max(0, totalClients - agreements.length);
+
+    return {
+      totalClients,
+      sentCount,
+      readyCount,
+      pendingCount,
+      totalAgreements: agreements.length,
+    };
+  }, [clients, agreements]);
+
   return (
-    <section className="admin-page-section">
-      {/* ── Page Header with ONLY [ History ] at Top-Right ── */}
-      <div
-        style={{
-          display: "flex",
-          justifyContent: "space-between",
-          alignItems: "center",
-          flexWrap: "wrap",
-          gap: 16,
-          marginBottom: 24,
-        }}
-      >
+    <section className="admin-page-container">
+      {/* ── Frosted Glass Header Banner ── */}
+      <div className="admin-header-banner">
         <div>
-          <p className="dashboard-eyebrow">{selectedBranch || "Agni CRM"}</p>
-          <h1 style={{ margin: 0 }}>Agreement</h1>
-          <p style={{ margin: "4px 0 0", color: "#7a748e", fontSize: 13 }}>
-            Generate and manage legal agreement contracts from official templates for CRM client services.
+          <span className="admin-kicker">LEGAL &amp; COMMERCIAL CONTRACTS</span>
+          <h2 className="admin-title">Legal Agreements &amp; Contracts</h2>
+          <p className="admin-desc">
+            Generate official scheme and private funding contracts, review clauses, and dispatch documents with automated milestone tracking.
           </p>
         </div>
 
-        {/* Top-Right Action: Strictly [ History ] (or [ Active Agreements ]) */}
+        {/* View Mode Toggle Switch */}
         <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
           <button
             type="button"
-            className={viewMode === "history" ? "primary-button" : "table-action"}
+            className={viewMode === "current" ? "admin-btn-primary" : "admin-btn-secondary"}
             style={{
               display: "inline-flex",
               alignItems: "center",
               gap: 6,
-              padding: "8px 18px",
+              padding: "9px 18px",
               fontSize: 13,
-              fontWeight: 700,
-              borderRadius: 8,
-              height: 38,
             }}
-            onClick={() => setViewMode((prev) => (prev === "history" ? "current" : "history"))}
+            onClick={() => setViewMode("current")}
           >
-            <Icon name="requests" size={15} />
-            <span>
-              {viewMode === "history" ? "← Active Agreements" : `History (${agreements.length})`}
+            <span>Active Queue</span>
+            <span
+              style={{
+                fontSize: 11,
+                padding: "1px 6px",
+                borderRadius: 999,
+                background: viewMode === "current" ? "rgba(255, 255, 255, 0.25)" : "rgba(154, 116, 233, 0.2)",
+              }}
+            >
+              {clients.length}
             </span>
           </button>
+
+          <button
+            type="button"
+            className={viewMode === "history" ? "admin-btn-primary" : "admin-btn-secondary"}
+            style={{
+              display: "inline-flex",
+              alignItems: "center",
+              gap: 6,
+              padding: "9px 18px",
+              fontSize: 13,
+            }}
+            onClick={() => setViewMode("history")}
+          >
+            <Icon name="requests" size={15} />
+            <span>History Archive</span>
+            <span
+              style={{
+                fontSize: 11,
+                padding: "1px 6px",
+                borderRadius: 999,
+                background: viewMode === "history" ? "rgba(255, 255, 255, 0.25)" : "rgba(154, 116, 233, 0.2)",
+              }}
+            >
+              {agreements.length}
+            </span>
+          </button>
+        </div>
+      </div>
+
+      {/* ── KPI Stat Cards Strip ── */}
+      <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))", gap: 14 }}>
+        <div className="admin-subcard" style={{ padding: "14px 18px", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+          <div>
+            <span className="admin-kicker" style={{ fontSize: 11 }}>Client Roster</span>
+            <strong style={{ display: "block", fontSize: 22, color: "inherit", margin: "2px 0 0" }}>
+              {metrics.totalClients}
+            </strong>
+            <small style={{ color: "#64748b", fontSize: 11.5 }}>Total Registered Clients</small>
+          </div>
+          <div
+            style={{
+              width: 42,
+              height: 42,
+              borderRadius: 12,
+              background: "rgba(78, 124, 255, 0.12)",
+              color: "#4e7cff",
+              display: "grid",
+              placeItems: "center",
+              fontSize: 18,
+            }}
+          >
+            👥
+          </div>
+        </div>
+
+        <div className="admin-subcard" style={{ padding: "14px 18px", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+          <div>
+            <span className="admin-kicker" style={{ fontSize: 11, color: "#10b981" }}>Dispatched &amp; Live</span>
+            <strong style={{ display: "block", fontSize: 22, color: "#10b981", margin: "2px 0 0" }}>
+              {metrics.sentCount}
+            </strong>
+            <small style={{ color: "#64748b", fontSize: 11.5 }}>Sent to Client Email</small>
+          </div>
+          <div
+            style={{
+              width: 42,
+              height: 42,
+              borderRadius: 12,
+              background: "rgba(16, 185, 129, 0.12)",
+              color: "#10b981",
+              display: "grid",
+              placeItems: "center",
+              fontSize: 18,
+            }}
+          >
+            ✓
+          </div>
+        </div>
+
+        <div className="admin-subcard" style={{ padding: "14px 18px", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+          <div>
+            <span className="admin-kicker" style={{ fontSize: 11, color: "#6366f1" }}>Ready for Review</span>
+            <strong style={{ display: "block", fontSize: 22, color: "#6366f1", margin: "2px 0 0" }}>
+              {metrics.readyCount}
+            </strong>
+            <small style={{ color: "#64748b", fontSize: 11.5 }}>Generated &amp; Vetted</small>
+          </div>
+          <div
+            style={{
+              width: 42,
+              height: 42,
+              borderRadius: 12,
+              background: "rgba(99, 102, 241, 0.12)",
+              color: "#6366f1",
+              display: "grid",
+              placeItems: "center",
+              fontSize: 18,
+            }}
+          >
+            📄
+          </div>
+        </div>
+
+        <div className="admin-subcard" style={{ padding: "14px 18px", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+          <div>
+            <span className="admin-kicker" style={{ fontSize: 11, color: "#f59e0b" }}>Pending Inception</span>
+            <strong style={{ display: "block", fontSize: 22, color: "#f59e0b", margin: "2px 0 0" }}>
+              {metrics.pendingCount}
+            </strong>
+            <small style={{ color: "#64748b", fontSize: 11.5 }}>Awaiting Agreement Draft</small>
+          </div>
+          <div
+            style={{
+              width: 42,
+              height: 42,
+              borderRadius: 12,
+              background: "rgba(245, 158, 11, 0.12)",
+              color: "#f59e0b",
+              display: "grid",
+              placeItems: "center",
+              fontSize: 18,
+            }}
+          >
+            ⏳
+          </div>
         </div>
       </div>
 

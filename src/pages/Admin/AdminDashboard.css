@@ -1,0 +1,897 @@
+/* ==========================================================================
+   Agni CRM — Admin Dashboard Design System
+   100% Design Parity with IT Dashboard & Frosted Glass Design System
+   ========================================================================== */
+
+/* ---------------------------------------------------------
+   Container & Layout
+   --------------------------------------------------------- */
+.admin-page-container,
+.admin-page-section,
+.it-page-container {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  width: 100%;
+  animation: fadeIn 0.25s ease-out;
+  padding-bottom: 40px;
+}
+
+/* Glass Banner Header (matches IT Dashboard & sidebar glassmorphism) */
+.admin-header-banner,
+.it-header-banner {
+  background: rgba(255, 255, 255, 0.85);
+  backdrop-filter: blur(24px) saturate(180%);
+  -webkit-backdrop-filter: blur(24px) saturate(180%);
+  border: 1px solid rgba(154, 116, 233, 0.18);
+  border-radius: 18px;
+  padding: 22px 26px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 20px;
+  box-shadow: 0 12px 32px rgba(154, 116, 233, 0.08);
+}
+
+.admin-kicker,
+.it-kicker {
+  font-size: 11px;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 1.2px;
+  color: #4e7cff;
+  display: inline-block;
+  margin-bottom: 4px;
+}
+
+.admin-title,
+.it-title {
+  margin: 0 0 4px 0;
+  font-size: 24px;
+  font-weight: 700;
+  color: #0f172a;
+  letter-spacing: -0.3px;
+}
+
+.admin-desc,
+.it-desc {
+  margin: 0;
+  font-size: 13.5px;
+  color: #64748b;
+  line-height: 1.5;
+}
+
+/* ---------------------------------------------------------
+   High-Aesthetic KPI Stat Cards
+   --------------------------------------------------------- */
+.admin-kpi-grid,
+.it-kpi-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 16px;
+}
+
+@media (max-width: 1100px) {
+  .admin-kpi-grid,
+  .it-kpi-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 640px) {
+  .admin-kpi-grid,
+  .it-kpi-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.admin-stat-card,
+.it-stat-card {
+  background: rgba(255, 255, 255, 0.85);
+  backdrop-filter: blur(24px) saturate(180%);
+  -webkit-backdrop-filter: blur(24px) saturate(180%);
+  border: 1px solid rgba(154, 116, 233, 0.15);
+  border-radius: 18px;
+  padding: 20px 22px;
+  box-shadow: 0 12px 32px rgba(154, 116, 233, 0.06);
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+  position: relative;
+  overflow: hidden;
+}
+
+.admin-stat-card:hover,
+.it-stat-card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 16px 40px rgba(154, 116, 233, 0.12);
+  border-color: rgba(78, 124, 255, 0.4);
+}
+
+.admin-stat-top,
+.it-stat-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+}
+
+.admin-stat-icon-wrap,
+.it-stat-icon-wrap {
+  width: 38px;
+  height: 38px;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.admin-stat-label,
+.it-stat-label {
+  font-size: 12.5px;
+  font-weight: 600;
+  color: #64748b;
+}
+
+.admin-stat-value,
+.it-stat-value {
+  font-size: 26px;
+  font-weight: 800;
+  color: #0f172a;
+  letter-spacing: -0.5px;
+  margin: 2px 0 10px 0;
+  line-height: 1.15;
+}
+
+.admin-stat-pill,
+.it-stat-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 10px;
+  border-radius: 20px;
+  font-size: 11.5px;
+  font-weight: 700;
+  width: fit-content;
+}
+
+/* Color Accents for Stat Cards */
+.admin-stat-card.blue .admin-stat-icon-wrap,
+.it-stat-card.blue .it-stat-icon-wrap { background: rgba(78, 124, 255, 0.12); color: #4e7cff; }
+.admin-stat-card.blue .admin-stat-pill,
+.it-stat-card.blue .it-stat-pill { background: rgba(78, 124, 255, 0.1); color: #2563eb; }
+
+.admin-stat-card.green .admin-stat-icon-wrap,
+.it-stat-card.green .it-stat-icon-wrap { background: rgba(16, 185, 129, 0.12); color: #10b981; }
+.admin-stat-card.green .admin-stat-value,
+.it-stat-card.green .it-stat-value { color: #10b981; }
+.admin-stat-card.green .admin-stat-pill,
+.it-stat-card.green .it-stat-pill { background: rgba(16, 185, 129, 0.1); color: #059669; }
+
+.admin-stat-card.purple .admin-stat-icon-wrap,
+.it-stat-card.purple .it-stat-icon-wrap { background: rgba(168, 85, 247, 0.12); color: #9a74e9; }
+.admin-stat-card.purple .admin-stat-value,
+.it-stat-card.purple .it-stat-value { color: #9a74e9; }
+.admin-stat-card.purple .admin-stat-pill,
+.it-stat-card.purple .it-stat-pill { background: rgba(168, 85, 247, 0.1); color: #7c3aed; }
+
+.admin-stat-card.amber .admin-stat-icon-wrap,
+.it-stat-card.amber .it-stat-icon-wrap { background: rgba(245, 158, 11, 0.12); color: #f59e0b; }
+.admin-stat-card.amber .admin-stat-value,
+.it-stat-card.amber .it-stat-value { color: #d97706; }
+.admin-stat-card.amber .admin-stat-pill,
+.it-stat-card.amber .it-stat-pill { background: rgba(245, 158, 11, 0.1); color: #b45309; }
+
+/* ---------------------------------------------------------
+   Launchpad Quick Action Cards (Overview)
+   --------------------------------------------------------- */
+.admin-launchpad-grid,
+.it-launchpad-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
+  margin: 4px 0 8px 0;
+}
+
+@media (max-width: 900px) {
+  .admin-launchpad-grid,
+  .it-launchpad-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.admin-launchpad-card,
+.it-launchpad-card {
+  position: relative;
+  background: rgba(255, 255, 255, 0.92);
+  backdrop-filter: blur(24px) saturate(180%);
+  -webkit-backdrop-filter: blur(24px) saturate(180%);
+  border: 1px solid rgba(154, 116, 233, 0.2);
+  border-radius: 18px;
+  padding: 22px 24px;
+  cursor: pointer;
+  box-shadow: 0 12px 32px rgba(154, 116, 233, 0.08), inset 0 1px 1px rgba(255, 255, 255, 0.9);
+  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+  display: flex;
+  flex-direction: column;
+}
+
+.admin-launchpad-card:hover,
+.it-launchpad-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 18px 44px rgba(78, 124, 255, 0.18);
+  border-color: rgba(78, 124, 255, 0.5);
+}
+
+.admin-launchpad-card.blue,
+.it-launchpad-card.blue {
+  background: linear-gradient(135deg, rgba(78, 124, 255, 0.1) 0%, rgba(255, 255, 255, 0.95) 100%);
+  border-color: rgba(78, 124, 255, 0.28);
+}
+
+.admin-launchpad-card.green,
+.it-launchpad-card.green {
+  background: linear-gradient(135deg, rgba(16, 185, 129, 0.1) 0%, rgba(255, 255, 255, 0.95) 100%);
+  border-color: rgba(16, 185, 129, 0.28);
+}
+
+.admin-launchpad-card.purple,
+.it-launchpad-card.purple {
+  background: linear-gradient(135deg, rgba(154, 116, 233, 0.1) 0%, rgba(255, 255, 255, 0.95) 100%);
+  border-color: rgba(154, 116, 233, 0.28);
+}
+
+.admin-launchpad-top,
+.it-launchpad-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 14px;
+}
+
+.admin-launchpad-icon,
+.it-launchpad-icon {
+  width: 42px;
+  height: 42px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #ffffff;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.12);
+  transition: transform 0.2s ease;
+}
+
+.admin-launchpad-card:hover .admin-launchpad-icon,
+.it-launchpad-card:hover .it-launchpad-icon {
+  transform: scale(1.06);
+}
+
+.admin-launchpad-card.blue .admin-launchpad-icon,
+.it-launchpad-card.blue .it-launchpad-icon {
+  background: linear-gradient(135deg, #4e7cff 0%, #2563eb 100%);
+  box-shadow: 0 4px 14px rgba(78, 124, 255, 0.35);
+}
+.admin-launchpad-card.green .admin-launchpad-icon,
+.it-launchpad-card.green .it-launchpad-icon {
+  background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+  box-shadow: 0 4px 14px rgba(16, 185, 129, 0.35);
+}
+.admin-launchpad-card.purple .admin-launchpad-icon,
+.it-launchpad-card.purple .it-launchpad-icon {
+  background: linear-gradient(135deg, #9a74e9 0%, #7c3aed 100%);
+  box-shadow: 0 4px 14px rgba(154, 116, 233, 0.35);
+}
+
+.admin-launchpad-action-link,
+.it-launchpad-action-link {
+  font-size: 13px;
+  font-weight: 750;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  transition: transform 0.2s ease;
+}
+
+.admin-launchpad-card:hover .admin-launchpad-action-link,
+.it-launchpad-card:hover .it-launchpad-action-link {
+  transform: translateX(3px);
+}
+
+.admin-launchpad-card.blue .admin-launchpad-action-link,
+.it-launchpad-card.blue .it-launchpad-action-link { color: #2563eb; }
+.admin-launchpad-card.green .admin-launchpad-action-link,
+.it-launchpad-card.green .it-launchpad-action-link { color: #059669; }
+.admin-launchpad-card.purple .admin-launchpad-action-link,
+.it-launchpad-card.purple .it-launchpad-action-link { color: #7c3aed; }
+
+.admin-launchpad-title,
+.it-launchpad-title {
+  margin: 0 0 6px 0;
+  font-size: 17px;
+  font-weight: 750;
+  color: #0f172a;
+  letter-spacing: -0.3px;
+}
+
+.admin-launchpad-desc,
+.it-launchpad-desc {
+  margin: 0;
+  font-size: 13.5px;
+  color: #475569;
+  line-height: 1.55;
+  font-weight: 450;
+}
+
+/* ---------------------------------------------------------
+   Standard Panel & Surface Cards
+   --------------------------------------------------------- */
+.admin-panel-card,
+.it-panel-card {
+  background: rgba(255, 255, 255, 0.85);
+  backdrop-filter: blur(24px) saturate(180%);
+  -webkit-backdrop-filter: blur(24px) saturate(180%);
+  border: 1px solid rgba(154, 116, 233, 0.18);
+  border-radius: 18px;
+  padding: 24px;
+  box-shadow: 0 12px 32px rgba(154, 116, 233, 0.08);
+}
+
+.admin-panel-header,
+.it-panel-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 18px;
+}
+
+.admin-panel-header-title,
+.it-panel-header-title {
+  margin: 0;
+  font-size: 18px;
+  font-weight: 700;
+  color: #0f172a;
+}
+
+.admin-subcard,
+.it-subcard {
+  background: rgba(248, 250, 252, 0.8);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(154, 116, 233, 0.12);
+  border-radius: 14px;
+  padding: 16px;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.admin-subcard:hover {
+  border-color: rgba(78, 124, 255, 0.3);
+  box-shadow: 0 6px 20px rgba(154, 116, 233, 0.08);
+}
+
+/* ---------------------------------------------------------
+   Buttons & Action Pills
+   --------------------------------------------------------- */
+.admin-btn-primary,
+.it-btn-primary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 9px 18px;
+  background: linear-gradient(135deg, #4e7cff 0%, #3b66e8 100%);
+  color: #ffffff !important;
+  border: none;
+  border-radius: 12px;
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  box-shadow: 0 4px 16px rgba(78, 124, 255, 0.35);
+  text-decoration: none;
+}
+
+.admin-btn-primary:hover,
+.it-btn-primary:hover {
+  background: linear-gradient(135deg, #3f6fe0 0%, #2f56cc 100%);
+  transform: translateY(-1px);
+  box-shadow: 0 6px 20px rgba(78, 124, 255, 0.45);
+}
+
+.admin-btn-secondary,
+.it-btn-secondary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 8px 16px;
+  background: rgba(241, 245, 249, 0.85);
+  backdrop-filter: blur(12px);
+  color: #334155;
+  border: 1px solid rgba(154, 116, 233, 0.18);
+  border-radius: 12px;
+  font-size: 12.5px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  text-decoration: none;
+}
+
+.admin-btn-secondary:hover,
+.it-btn-secondary:hover {
+  background: rgba(226, 232, 240, 0.95);
+  color: #0f172a;
+  border-color: rgba(78, 124, 255, 0.35);
+}
+
+.admin-badge,
+.it-badge {
+  display: inline-block;
+  padding: 3px 10px;
+  border-radius: 12px;
+  font-size: 11px;
+  font-weight: 700;
+}
+
+/* ---------------------------------------------------------
+   Form Controls & Inputs
+   --------------------------------------------------------- */
+.admin-form-label,
+.it-form-label {
+  display: block;
+  font-size: 12.5px;
+  font-weight: 700;
+  color: #334155;
+  margin-bottom: 6px;
+}
+
+.admin-form-input,
+.it-form-input,
+.admin-form-select,
+.it-form-select,
+.admin-form-textarea,
+.it-form-textarea {
+  width: 100%;
+  padding: 10px 14px;
+  border-radius: 12px;
+  border: 1px solid rgba(154, 116, 233, 0.2);
+  background: rgba(255, 255, 255, 0.85);
+  color: #0f172a;
+  font-size: 13.5px;
+  font-family: inherit;
+  outline: none;
+  box-sizing: border-box;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease, background 0.15s ease;
+}
+
+.admin-form-textarea,
+.it-form-textarea {
+  resize: vertical;
+  min-height: 80px;
+  line-height: 1.5;
+}
+
+.admin-form-input:focus,
+.it-form-input:focus,
+.admin-form-select:focus,
+.it-form-select:focus,
+.admin-form-textarea:focus,
+.it-form-textarea:focus {
+  border-color: #4e7cff;
+  box-shadow: 0 0 0 3px rgba(78, 124, 255, 0.18);
+}
+
+.admin-preset-pill {
+  padding: 4px 11px;
+  border-radius: 20px;
+  font-size: 11.5px;
+  font-weight: 650;
+  background: rgba(78, 124, 255, 0.08);
+  color: #2563eb;
+  border: 1px solid rgba(78, 124, 255, 0.22);
+  cursor: pointer;
+  transition: all 0.18s ease;
+}
+
+.admin-preset-pill:hover {
+  background: rgba(78, 124, 255, 0.18);
+  border-color: rgba(78, 124, 255, 0.45);
+  color: #1d4ed8;
+  transform: translateY(-1px);
+}
+
+/* ---------------------------------------------------------
+   Table & Filter Controls
+   --------------------------------------------------------- */
+.admin-filter-bar,
+.it-filter-bar {
+  background: rgba(255, 255, 255, 0.85);
+  backdrop-filter: blur(24px) saturate(180%);
+  -webkit-backdrop-filter: blur(24px) saturate(180%);
+  border: 1px solid rgba(154, 116, 233, 0.18);
+  border-radius: 18px;
+  padding: 14px 18px;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  box-shadow: 0 12px 32px rgba(154, 116, 233, 0.08);
+}
+
+.admin-branch-tabs,
+.it-branch-tabs {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.admin-branch-tab,
+.it-branch-tab {
+  padding: 7px 16px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 700;
+  border: 1px solid rgba(154, 116, 233, 0.18);
+  background: rgba(248, 250, 252, 0.7);
+  color: #475569;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.admin-branch-tab:hover,
+.it-branch-tab:hover {
+  background: rgba(241, 245, 249, 0.9);
+  color: #1e293b;
+}
+
+.admin-branch-tab.active,
+.it-branch-tab.active {
+  background: #4e7cff;
+  color: #ffffff;
+  border-color: #4e7cff;
+  box-shadow: 0 2px 8px rgba(78, 124, 255, 0.28);
+}
+
+.admin-table-wrap,
+.it-table-wrap {
+  background: rgba(255, 255, 255, 0.85);
+  backdrop-filter: blur(24px) saturate(180%);
+  -webkit-backdrop-filter: blur(24px) saturate(180%);
+  border: 1px solid rgba(154, 116, 233, 0.18);
+  border-radius: 18px;
+  overflow: hidden;
+  box-shadow: 0 12px 32px rgba(154, 116, 233, 0.08);
+}
+
+.admin-table,
+.it-table {
+  width: 100%;
+  border-collapse: collapse;
+  text-align: left;
+}
+
+.admin-table th,
+.it-table th {
+  padding: 15px 18px;
+  font-size: 12px;
+  font-weight: 700;
+  color: #475569;
+  background: rgba(248, 250, 252, 0.8);
+  border-bottom: 1px solid rgba(154, 116, 233, 0.12);
+}
+
+.admin-table td,
+.it-table td {
+  padding: 15px 18px;
+  border-bottom: 1px solid rgba(154, 116, 233, 0.08);
+  font-size: 13px;
+  color: #1e293b;
+}
+
+.admin-table tbody tr:hover td,
+.it-table tbody tr:hover td {
+  background: rgba(154, 116, 233, 0.05);
+}
+
+/* ---------------------------------------------------------
+   Pipeline Board Columns & Cards (Strictly 3 per row)
+   --------------------------------------------------------- */
+.admin-pipeline-grid-3 {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 18px;
+  align-items: start;
+}
+
+@media (max-width: 1080px) {
+  .admin-pipeline-grid-3 {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 680px) {
+  .admin-pipeline-grid-3 {
+    grid-template-columns: 1fr;
+  }
+}
+
+.admin-pipeline-column {
+  background: rgba(255, 255, 255, 0.85);
+  backdrop-filter: blur(24px) saturate(180%);
+  -webkit-backdrop-filter: blur(24px) saturate(180%);
+  border: 1px solid rgba(154, 116, 233, 0.18);
+  border-radius: 18px;
+  padding: 18px;
+  box-shadow: 0 12px 32px rgba(154, 116, 233, 0.06);
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  min-height: 380px;
+}
+
+/* ---------------------------------------------------------
+   Hide Scrollbar Utility
+   --------------------------------------------------------- */
+.hide-scrollbar {
+  -ms-overflow-style: none !important;
+  scrollbar-width: none !important;
+}
+
+.hide-scrollbar::-webkit-scrollbar {
+  display: none !important;
+  width: 0 !important;
+  height: 0 !important;
+}
+
+/* ==========================================================================
+   DARK MODE OVERRIDES (.dashboard-dark)
+   ========================================================================== */
+.dashboard-dark .admin-title,
+.dashboard-dark .it-title {
+  color: #ffffff !important;
+}
+
+.dashboard-dark .admin-desc,
+.dashboard-dark .it-desc {
+  color: #94a3b8 !important;
+}
+
+.dashboard-dark .admin-panel-header-title,
+.dashboard-dark .it-panel-header-title {
+  color: #ffffff !important;
+}
+
+/* Header Banner in Dark Mode */
+.dashboard-dark .admin-header-banner,
+.dashboard-dark .it-header-banner {
+  background: rgba(15, 21, 35, 0.75) !important;
+  backdrop-filter: blur(28px) saturate(180%) !important;
+  -webkit-backdrop-filter: blur(28px) saturate(180%) !important;
+  border: 1px solid rgba(255, 255, 255, 0.08) !important;
+  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.35), inset 0 1px 0 rgba(255, 255, 255, 0.06) !important;
+}
+
+/* Panels & Cards in Dark Mode */
+.dashboard-dark .admin-panel-card,
+.dashboard-dark .it-panel-card,
+.dashboard-dark .admin-pipeline-column {
+  background: rgba(15, 21, 35, 0.75) !important;
+  backdrop-filter: blur(28px) saturate(180%) !important;
+  -webkit-backdrop-filter: blur(28px) saturate(180%) !important;
+  border: 1px solid rgba(255, 255, 255, 0.08) !important;
+  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.35), inset 0 1px 0 rgba(255, 255, 255, 0.06) !important;
+}
+
+.dashboard-dark .admin-subcard,
+.dashboard-dark .it-subcard {
+  background: rgba(22, 30, 49, 0.75) !important;
+  border-color: rgba(255, 255, 255, 0.06) !important;
+  color: #e2e8f0 !important;
+}
+
+.dashboard-dark .admin-subcard:hover {
+  border-color: rgba(78, 124, 255, 0.4) !important;
+}
+
+.dashboard-dark .admin-table-wrap,
+.dashboard-dark .it-table-wrap,
+.dashboard-dark .admin-filter-bar,
+.dashboard-dark .it-filter-bar {
+  background: rgba(15, 21, 35, 0.75) !important;
+  border-color: rgba(255, 255, 255, 0.08) !important;
+}
+
+.dashboard-dark .admin-table th,
+.dashboard-dark .it-table th {
+  background: rgba(22, 30, 49, 0.8) !important;
+  color: #94a3b8 !important;
+  border-bottom-color: rgba(255, 255, 255, 0.06) !important;
+}
+
+.dashboard-dark .admin-table td,
+.dashboard-dark .it-table td {
+  color: #e2e8f0 !important;
+  border-bottom-color: rgba(255, 255, 255, 0.04) !important;
+}
+
+.dashboard-dark .admin-table tbody tr:hover td,
+.dashboard-dark .it-table tbody tr:hover td {
+  background: rgba(78, 124, 255, 0.08) !important;
+}
+
+.dashboard-dark .admin-form-input,
+.dashboard-dark .it-form-input,
+.dashboard-dark .admin-form-select,
+.dashboard-dark .it-form-select,
+.dashboard-dark .admin-form-textarea,
+.dashboard-dark .it-form-textarea,
+.dashboard-dark textarea {
+  background: rgba(15, 23, 42, 0.8) !important;
+  color: #ffffff !important;
+  border: 1px solid rgba(255, 255, 255, 0.14) !important;
+}
+
+.dashboard-dark .admin-form-textarea:focus,
+.dashboard-dark .admin-form-input:focus,
+.dashboard-dark .it-form-textarea:focus,
+.dashboard-dark textarea:focus {
+  background: rgba(15, 23, 42, 0.95) !important;
+  border-color: #60a5fa !important;
+  box-shadow: 0 0 0 3px rgba(96, 165, 250, 0.25) !important;
+}
+
+.dashboard-dark .admin-form-label,
+.dashboard-dark .it-form-label {
+  color: #e2e8f0 !important;
+}
+
+.dashboard-dark .admin-preset-pill {
+  background: rgba(78, 124, 255, 0.15) !important;
+  color: #93c5fd !important;
+  border: 1px solid rgba(78, 124, 255, 0.35) !important;
+}
+
+.dashboard-dark .admin-preset-pill:hover {
+  background: rgba(78, 124, 255, 0.28) !important;
+  border-color: rgba(78, 124, 255, 0.6) !important;
+  color: #ffffff !important;
+}
+
+.dashboard-dark .admin-branch-tab,
+.dashboard-dark .it-branch-tab {
+  background: rgba(22, 30, 49, 0.7) !important;
+  color: #94a3b8 !important;
+  border-color: rgba(255, 255, 255, 0.08) !important;
+}
+
+.dashboard-dark .admin-branch-tab.active,
+.dashboard-dark .it-branch-tab.active {
+  background: #4e7cff !important;
+  color: #ffffff !important;
+}
+
+/* Launchpad Action Cards in Dark Mode */
+.dashboard-dark .admin-launchpad-title,
+.dashboard-dark .it-launchpad-title,
+.dashboard-dark .mkt-launchpad-title {
+  color: #ffffff !important;
+  font-weight: 750 !important;
+}
+
+.dashboard-dark .admin-launchpad-desc,
+.dashboard-dark .it-launchpad-desc,
+.dashboard-dark .mkt-launchpad-desc {
+  color: #cbd5e1 !important;
+  line-height: 1.55 !important;
+  font-size: 13.5px !important;
+  font-weight: 400 !important;
+}
+
+.dashboard-dark .admin-launchpad-card,
+.dashboard-dark .it-launchpad-card,
+.dashboard-dark .mkt-launchpad-card {
+  background: rgba(15, 23, 42, 0.8) !important;
+  backdrop-filter: blur(28px) saturate(180%) !important;
+  -webkit-backdrop-filter: blur(28px) saturate(180%) !important;
+  border: 1px solid rgba(255, 255, 255, 0.1) !important;
+  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.08) !important;
+}
+
+.dashboard-dark .admin-launchpad-card.blue,
+.dashboard-dark .it-launchpad-card.blue,
+.dashboard-dark .mkt-launchpad-card.blue {
+  background: linear-gradient(135deg, rgba(78, 124, 255, 0.18) 0%, rgba(15, 23, 42, 0.88) 100%) !important;
+  border-color: rgba(78, 124, 255, 0.35) !important;
+  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.35), 0 0 24px rgba(78, 124, 255, 0.12), inset 0 1px 0 rgba(255, 255, 255, 0.1) !important;
+}
+
+.dashboard-dark .admin-launchpad-card.green,
+.dashboard-dark .it-launchpad-card.green,
+.dashboard-dark .mkt-launchpad-card.green {
+  background: linear-gradient(135deg, rgba(16, 185, 129, 0.18) 0%, rgba(15, 23, 42, 0.88) 100%) !important;
+  border-color: rgba(16, 185, 129, 0.35) !important;
+  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.35), 0 0 24px rgba(16, 185, 129, 0.12), inset 0 1px 0 rgba(255, 255, 255, 0.1) !important;
+}
+
+.dashboard-dark .admin-launchpad-card.purple,
+.dashboard-dark .it-launchpad-card.purple,
+.dashboard-dark .mkt-launchpad-card.purple {
+  background: linear-gradient(135deg, rgba(168, 85, 247, 0.18) 0%, rgba(15, 23, 42, 0.88) 100%) !important;
+  border-color: rgba(168, 85, 247, 0.35) !important;
+  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.35), 0 0 24px rgba(168, 85, 247, 0.12), inset 0 1px 0 rgba(255, 255, 255, 0.1) !important;
+}
+
+.dashboard-dark .admin-launchpad-card:hover,
+.dashboard-dark .it-launchpad-card:hover,
+.dashboard-dark .mkt-launchpad-card:hover {
+  transform: translateY(-5px) !important;
+}
+
+.dashboard-dark .admin-launchpad-card.blue:hover,
+.dashboard-dark .it-launchpad-card.blue:hover,
+.dashboard-dark .mkt-launchpad-card.blue:hover {
+  border-color: rgba(96, 165, 250, 0.7) !important;
+  box-shadow: 0 24px 50px rgba(0, 0, 0, 0.5), 0 0 32px rgba(78, 124, 255, 0.3) !important;
+}
+
+.dashboard-dark .admin-launchpad-card.green:hover,
+.dashboard-dark .it-launchpad-card.green:hover,
+.dashboard-dark .mkt-launchpad-card.green:hover {
+  border-color: rgba(52, 211, 153, 0.7) !important;
+  box-shadow: 0 24px 50px rgba(0, 0, 0, 0.5), 0 0 32px rgba(16, 185, 129, 0.3) !important;
+}
+
+.dashboard-dark .admin-launchpad-card.purple:hover,
+.dashboard-dark .it-launchpad-card.purple:hover,
+.dashboard-dark .mkt-launchpad-card.purple:hover {
+  border-color: rgba(192, 132, 252, 0.7) !important;
+  box-shadow: 0 24px 50px rgba(0, 0, 0, 0.5), 0 0 32px rgba(168, 85, 247, 0.3) !important;
+}
+
+.dashboard-dark .admin-launchpad-card.blue .admin-launchpad-icon,
+.dashboard-dark .it-launchpad-card.blue .it-launchpad-icon,
+.dashboard-dark .mkt-launchpad-card.blue .mkt-launchpad-icon {
+  background: linear-gradient(135deg, rgba(78, 124, 255, 0.35) 0%, rgba(37, 99, 235, 0.25) 100%) !important;
+  border: 1px solid rgba(78, 124, 255, 0.5) !important;
+  color: #60a5fa !important;
+  box-shadow: 0 4px 14px rgba(78, 124, 255, 0.3) !important;
+}
+
+.dashboard-dark .admin-launchpad-card.green .admin-launchpad-icon,
+.dashboard-dark .it-launchpad-card.green .it-launchpad-icon,
+.dashboard-dark .mkt-launchpad-card.green .mkt-launchpad-icon {
+  background: linear-gradient(135deg, rgba(16, 185, 129, 0.35) 0%, rgba(5, 150, 105, 0.25) 100%) !important;
+  border: 1px solid rgba(16, 185, 129, 0.5) !important;
+  color: #34d399 !important;
+  box-shadow: 0 4px 14px rgba(16, 185, 129, 0.3) !important;
+}
+
+.dashboard-dark .admin-launchpad-card.purple .admin-launchpad-icon,
+.dashboard-dark .it-launchpad-card.purple .it-launchpad-icon,
+.dashboard-dark .mkt-launchpad-card.purple .mkt-launchpad-icon {
+  background: linear-gradient(135deg, rgba(168, 85, 247, 0.35) 0%, rgba(124, 58, 237, 0.25) 100%) !important;
+  border: 1px solid rgba(168, 85, 247, 0.5) !important;
+  color: #c084fc !important;
+  box-shadow: 0 4px 14px rgba(168, 85, 247, 0.3) !important;
+}
+
+.dashboard-dark .admin-launchpad-card.blue .admin-launchpad-action-link,
+.dashboard-dark .it-launchpad-card.blue .it-launchpad-action-link,
+.dashboard-dark .mkt-launchpad-card.blue .mkt-launchpad-action-link {
+  color: #60a5fa !important;
+}
+
+.dashboard-dark .admin-launchpad-card.green .admin-launchpad-action-link,
+.dashboard-dark .it-launchpad-card.green .it-launchpad-action-link,
+.dashboard-dark .mkt-launchpad-card.green .mkt-launchpad-action-link {
+  color: #34d399 !important;
+}
+
+.dashboard-dark .admin-launchpad-card.purple .admin-launchpad-action-link,
+.dashboard-dark .it-launchpad-card.purple .it-launchpad-action-link,
+.dashboard-dark .mkt-launchpad-card.purple .mkt-launchpad-action-link {
+  color: #c084fc !important;
+}

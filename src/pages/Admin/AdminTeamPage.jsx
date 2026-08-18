@@ -1,5 +1,6 @@
 import React, { useState, useMemo } from "react";
 import { ACTIVITY_STAGES, stageBadgeColors, formatCurrency, getTrackerState } from "./mockAdminData";
+import "./AdminDashboard.css";
 
 export default function AdminTeamPage({
   selectedBranch,
@@ -31,7 +32,6 @@ export default function AdminTeamPage({
         c.assignedSalesPerson.toLowerCase().trim() === normalizedName
     );
 
-    // If no exact match, return branch clients
     if (matched.length > 0) return matched;
     return branchClients;
   };
@@ -54,27 +54,23 @@ export default function AdminTeamPage({
     });
 
     return (
-      <section className="admin-page-section">
+      <div className="admin-page-container">
         {/* Header with Back button */}
-        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: 16, marginBottom: 24 }}>
+        <div className="admin-header-banner">
           <div>
-            <p className="dashboard-eyebrow">{selectedBranch} • Sales Representative</p>
-            <h1>Clients under {selectedSalesPerson.name}</h1>
+            <span className="admin-kicker">{selectedBranch} • SALES REPRESENTATIVE</span>
+            <h2 className="admin-title">Clients under {selectedSalesPerson.name}</h2>
+            <p className="admin-desc">
+              Managing {spClients.length} assigned branch client portfolios and scheme progress.
+            </p>
           </div>
           <button
             type="button"
-            className="table-action"
+            className="admin-btn-secondary"
             onClick={() => {
               setSelectedSalesPerson(null);
               setClientSearch("");
               setStatusTab("All");
-            }}
-            style={{
-              background: "#fff",
-              color: "#1d2330",
-              border: "1px solid #e7e7f5",
-              padding: "8px 16px",
-              fontWeight: 600,
             }}
           >
             ← Back to Team Roster
@@ -82,19 +78,13 @@ export default function AdminTeamPage({
         </div>
 
         {/* Filter Tabs & Search matching AdminClientsPage */}
-        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: 12, marginBottom: 20 }}>
-          <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
+        <div className="admin-filter-bar">
+          <div className="admin-branch-tabs">
             {["All", ...ACTIVITY_STAGES.map((s) => s.name)].map((tab) => (
               <button
                 key={tab}
                 type="button"
-                className="table-action"
-                style={{
-                  background: statusTab === tab ? "#4e7cff" : "#fff",
-                  color: statusTab === tab ? "#fff" : "#1d2330",
-                  border: statusTab === tab ? "1px solid #4e7cff" : "1px solid #e7e7f5",
-                  minWidth: 100,
-                }}
+                className={`admin-branch-tab ${statusTab === tab ? "active" : ""}`}
                 onClick={() => setStatusTab(tab)}
               >
                 {tab}
@@ -102,27 +92,26 @@ export default function AdminTeamPage({
             ))}
           </div>
 
-          <div style={{ minWidth: 260 }}>
+          <div style={{ minWidth: 280 }}>
             <input
               type="text"
-              placeholder="Search client, company, app ID..."
+              className="admin-form-input"
+              placeholder="Search officer clients..."
               value={clientSearch}
               onChange={(e) => setClientSearch(e.target.value)}
-              style={{ width: "100%", padding: "9px 14px", borderRadius: 8, border: "1px solid #dedfe1" }}
             />
           </div>
         </div>
 
-        {/* Clients Table matching AdminClientsPage styling */}
-        <div style={{ overflowX: "auto" }}>
-          <table className="clients-table" style={{ minWidth: 980 }}>
+        {/* Table Wrap */}
+        <div className="admin-table-wrap" style={{ overflowX: "auto" }}>
+          <table className="admin-table" style={{ minWidth: 980 }}>
             <thead>
               <tr>
                 <th>Application ID</th>
-                <th>Client & Company</th>
+                <th>Client &amp; Company</th>
                 <th>Scheme / Value</th>
-                <th>Sales Officer</th>
-                <th>Activity Status (5 Points)</th>
+                <th>Activity Status</th>
                 <th>Progress (%)</th>
                 <th>Last Verified</th>
                 <th style={{ textAlign: "right" }}>Admin Actions</th>
@@ -134,34 +123,28 @@ export default function AdminTeamPage({
 
                 return (
                   <tr key={client.id}>
-                    <td><strong>{client.appId}</strong></td>
+                    <td><code style={{ color: "#4e7cff", fontWeight: 700 }}>{client.appId}</code></td>
                     <td>
                       <strong>{client.name}</strong>
-                      <div style={{ fontSize: 12, color: "#7a748e" }}>{client.company}</div>
+                      <div style={{ fontSize: 12, color: "#64748b" }}>{client.company}</div>
                     </td>
                     <td>
                       <div>{client.scheme}</div>
                       <strong style={{ color: "#4e7cff", fontSize: 12.5 }}>{formatCurrency(client.totalPayment)}</strong>
                     </td>
-                    <td>{client.assignedSalesPerson || selectedSalesPerson.name}</td>
                     <td>
                       <div style={{ display: "flex", flexDirection: "column", gap: 4 }}>
                         <span
+                          className="admin-badge"
                           style={{
-                            display: "inline-flex",
-                            alignItems: "center",
-                            padding: "3px 9px",
-                            borderRadius: 999,
                             background: `${stageBadgeColors[client.applicationStatus || tracker.currentStage] || "#10b981"}18`,
                             color: stageBadgeColors[client.applicationStatus || tracker.currentStage] || "#10b981",
-                            fontWeight: 700,
-                            fontSize: 11.5,
+                            border: `1px solid ${stageBadgeColors[client.applicationStatus || tracker.currentStage] || "#10b981"}33`,
                             width: "fit-content",
                           }}
                         >
                           ● {client.applicationStatus || tracker.currentStage}
                         </span>
-                        {/* Dynamic scheme mini dots indicator */}
                         <div style={{ display: "flex", gap: 4, alignItems: "center" }}>
                           {tracker.stages.map((st) => {
                             const isDone = tracker.completedStages.includes(st.name);
@@ -173,7 +156,7 @@ export default function AdminTeamPage({
                                   width: 8,
                                   height: 8,
                                   borderRadius: "50%",
-                                  background: isDone ? "#10b981" : "#cbd5e1",
+                                  background: isDone ? "#10b981" : "rgba(148, 163, 184, 0.4)",
                                 }}
                               />
                             );
@@ -186,40 +169,29 @@ export default function AdminTeamPage({
                     </td>
                     <td style={{ minWidth: 130 }}>
                       <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-                        <div style={{ flex: 1, height: 8, background: "#e7e7f5", borderRadius: 999, overflow: "hidden" }}>
+                        <div style={{ flex: 1, height: 8, background: "rgba(154, 116, 233, 0.15)", borderRadius: 999, overflow: "hidden" }}>
                           <div
                             style={{
                               width: `${tracker.progressPercent}%`,
                               height: "100%",
-                              background: tracker.progressPercent === 100 ? "#10b981" : "linear-gradient(90deg, #10b981, #059669)",
+                              background: tracker.progressPercent === 100 ? "#10b981" : "linear-gradient(90deg, #4e7cff, #10b981)",
                               borderRadius: 999,
                             }}
                           />
                         </div>
-                        <strong style={{ fontSize: 12, color: tracker.progressPercent === 100 ? "#10b981" : "#1e293b" }}>
+                        <strong style={{ fontSize: 12, color: tracker.progressPercent === 100 ? "#10b981" : "inherit" }}>
                           {tracker.progressPercent}%
                         </strong>
                       </div>
                     </td>
-                    <td style={{ fontSize: 12, color: "#7a748e" }}>{client.lastUpdated}</td>
+                    <td style={{ fontSize: 12, color: "#64748b" }}>{client.lastUpdated}</td>
                     <td style={{ textAlign: "right" }}>
                       <div style={{ display: "inline-flex", gap: 6, alignItems: "center" }}>
                         {onOpenStatusUpdate && (
                           <button
-                            className="primary-button"
+                            className="admin-btn-primary"
                             type="button"
-                            style={{
-                              display: "inline-flex",
-                              alignItems: "center",
-                              justifyContent: "center",
-                              height: 32,
-                              padding: "0 12px",
-                              fontSize: 12,
-                              fontWeight: 700,
-                              borderRadius: 8,
-                              margin: 0,
-                              boxSizing: "border-box",
-                            }}
+                            style={{ padding: "6px 12px", fontSize: 12 }}
                             onClick={() => onOpenStatusUpdate(client)}
                           >
                             Update Status
@@ -227,36 +199,9 @@ export default function AdminTeamPage({
                         )}
                         {onOpenDossier && (
                           <button
-                            className="admin-dossier-btn"
+                            className="admin-btn-secondary"
                             type="button"
-                            style={{
-                              display: "inline-flex",
-                              alignItems: "center",
-                              justifyContent: "center",
-                              gap: 5,
-                              height: 32,
-                              padding: "0 12px",
-                              fontSize: 12,
-                              fontWeight: 700,
-                              borderRadius: 8,
-                              background: "#f0f4ff",
-                              color: "#3730a3",
-                              border: "1px solid #c7d2fe",
-                              cursor: "pointer",
-                              margin: 0,
-                              boxSizing: "border-box",
-                              transition: "all 0.2s cubic-bezier(0.4, 0, 0.2, 1)",
-                            }}
-                            onMouseEnter={(e) => {
-                              e.currentTarget.style.background = "#4338ca";
-                              e.currentTarget.style.color = "#ffffff";
-                              e.currentTarget.style.borderColor = "#4338ca";
-                            }}
-                            onMouseLeave={(e) => {
-                              e.currentTarget.style.background = "#f0f4ff";
-                              e.currentTarget.style.color = "#3730a3";
-                              e.currentTarget.style.borderColor = "#c7d2fe";
-                            }}
+                            style={{ padding: "6px 12px", fontSize: 12 }}
                             onClick={() => onOpenDossier(client)}
                           >
                             <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
@@ -275,7 +220,7 @@ export default function AdminTeamPage({
               })}
               {filteredSpClients.length === 0 && (
                 <tr>
-                  <td colSpan={8} style={{ textAlign: "center", padding: "36px 16px", color: "#7a748e" }}>
+                  <td colSpan={7} style={{ textAlign: "center", padding: "36px 16px", color: "#64748b" }}>
                     No clients found for {selectedSalesPerson.name} under {statusTab}.
                   </td>
                 </tr>
@@ -283,22 +228,26 @@ export default function AdminTeamPage({
             </tbody>
           </table>
         </div>
-      </section>
+      </div>
     );
   }
 
   // MAIN TEAM VIEW: List of Sales Persons of the selected branch
   return (
-    <section className="admin-page-section">
-      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: 16, marginBottom: 24 }}>
+    <div className="admin-page-container">
+      {/* Glass Header Banner */}
+      <div className="admin-header-banner">
         <div>
-          <p className="dashboard-eyebrow">{selectedBranch}</p>
-          <h1>Branch Sales Team</h1>
+          <span className="admin-kicker">TEAM ROSTER &amp; ASSIGNMENTS</span>
+          <h2 className="admin-title">{selectedBranch} Sales Team</h2>
+          <p className="admin-desc">
+            Directly inspect sales officer portfolios, client accounts, and milestone progression quotas.
+          </p>
         </div>
       </div>
 
-      <div style={{ overflowX: "auto" }}>
-        <table className="clients-table" style={{ minWidth: 860 }}>
+      <div className="admin-table-wrap" style={{ overflowX: "auto" }}>
+        <table className="admin-table" style={{ minWidth: 860 }}>
           <thead>
             <tr>
               <th>Team Member</th>
@@ -320,10 +269,10 @@ export default function AdminTeamPage({
                     <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
                       <div
                         style={{
-                          width: 34,
-                          height: 34,
-                          borderRadius: 999,
-                          background: "#4e7cff22",
+                          width: 36,
+                          height: 36,
+                          borderRadius: 10,
+                          background: "rgba(78, 124, 255, 0.15)",
                           color: "#4e7cff",
                           display: "flex",
                           alignItems: "center",
@@ -347,15 +296,10 @@ export default function AdminTeamPage({
                   </td>
                   <td>
                     <span
+                      className="admin-badge"
                       style={{
-                        display: "inline-flex",
-                        alignItems: "center",
-                        padding: "4px 10px",
-                        borderRadius: 999,
-                        background: "#44bfb022",
-                        color: "#44bfb0",
-                        fontWeight: 700,
-                        fontSize: 12,
+                        background: "rgba(16, 185, 129, 0.12)",
+                        color: "#10b981",
                       }}
                     >
                       {m.status || "Active"}
@@ -363,12 +307,12 @@ export default function AdminTeamPage({
                   </td>
                   <td style={{ textAlign: "right" }}>
                     <button
-                      className="primary-button"
+                      className="admin-btn-primary"
                       type="button"
                       style={{ padding: "6px 14px", fontSize: 12 }}
                       onClick={() => setSelectedSalesPerson(m)}
                     >
-                      View Clients
+                      View Clients →
                     </button>
                   </td>
                 </tr>
@@ -376,7 +320,7 @@ export default function AdminTeamPage({
             })}
             {branchSalesPersons.length === 0 && (
               <tr>
-                <td colSpan={7} style={{ textAlign: "center", padding: "36px 16px", color: "#7a748e" }}>
+                <td colSpan={7} style={{ textAlign: "center", padding: "36px 16px", color: "#64748b" }}>
                   No sales personnel found assigned to {selectedBranch}.
                 </td>
               </tr>
@@ -384,6 +328,6 @@ export default function AdminTeamPage({
           </tbody>
         </table>
       </div>
-    </section>
+    </div>
   );
 }

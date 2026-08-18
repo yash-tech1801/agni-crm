@@ -7,6 +7,7 @@ import {
   getTemplateTypeForService,
   normalizeAgreementData,
 } from "../../../services/agreementService";
+import "../../Admin/AdminDashboard.css";
 
 export default function CurrentAgreementsTable({
   clients = [],
@@ -28,47 +29,47 @@ export default function CurrentAgreementsTable({
   });
 
   return (
-    <div style={{ background: "#ffffff", borderRadius: 16, border: "1px solid #e7e7f5", overflow: "hidden" }}>
+    <div className="admin-table-wrap">
       <div
         style={{
-          padding: "16px 20px",
-          borderBottom: "1px solid #eef2f6",
+          padding: "18px 22px",
+          borderBottom: "1px solid rgba(154, 116, 233, 0.15)",
           display: "flex",
           justifyContent: "space-between",
           alignItems: "center",
           flexWrap: "wrap",
-          gap: 10,
+          gap: 12,
         }}
       >
         <div>
-          <h3 style={{ margin: 0, fontSize: 16, color: "#1e293b" }}>Agreement Records &amp; Queue</h3>
-          <p style={{ margin: "3px 0 0", color: "#7a748e", fontSize: 12.5 }}>
-            Client agreement generation, backend-ready review, and client dispatch.
+          <h3 style={{ margin: 0, fontSize: 16, fontWeight: 800, color: "inherit" }}>
+            Active Agreement Generation Queue
+          </h3>
+          <p className="admin-desc" style={{ fontSize: 12.5, margin: "2px 0 0" }}>
+            Real-time client pipeline for automated contract creation, legal clause verification, and client dispatch.
           </p>
         </div>
         <span
+          className="admin-badge"
           style={{
-            fontSize: 12,
+            background: "rgba(78, 124, 255, 0.15)",
+            color: "#4e7cff",
             fontWeight: 800,
-            padding: "4px 12px",
-            borderRadius: 999,
-            background: "rgba(79, 70, 229, 0.12)",
-            color: "#4338ca",
-            border: "1px solid #c7d2fe",
+            fontSize: 12,
           }}
         >
-          {clients.length} Clients
+          {clients.length} Clients in Roster
         </span>
       </div>
 
       <div style={{ overflowX: "auto" }}>
-        <table className="clients-table" style={{ minWidth: 860, margin: 0 }}>
+        <table className="admin-table" style={{ minWidth: 860, margin: 0 }}>
           <thead>
             <tr>
-              <th>Client</th>
-              <th>Company</th>
+              <th>Client Information</th>
+              <th>Enterprise / Company</th>
               <th>Service / Scheme</th>
-              <th>Agreement Status</th>
+              <th>Contract Status</th>
               <th style={{ textAlign: "right" }}>Actions</th>
             </tr>
           </thead>
@@ -92,27 +93,27 @@ export default function CurrentAgreementsTable({
               return (
                 <tr key={client.id || client.appId}>
                   <td>
-                    <strong>{client.name}</strong>
-                    <div style={{ fontSize: 11.5, color: "#7a748e" }}>
-                      ID: <code>{client.appId}</code>
+                    <strong style={{ fontSize: 13.5, color: "inherit" }}>{client.name}</strong>
+                    <div style={{ fontSize: 11.5, color: "#64748b" }}>
+                      App ID: <code style={{ color: "#4e7cff" }}>{client.appId}</code>
                     </div>
                   </td>
                   <td>
-                    <strong>{client.company || "—"}</strong>
-                    <div style={{ fontSize: 11.5, color: "#7a748e" }}>{client.email}</div>
+                    <strong style={{ fontSize: 13, color: "inherit" }}>{client.company || "—"}</strong>
+                    <div style={{ fontSize: 11.5, color: "#64748b" }}>{client.email}</div>
                   </td>
                   <td>
                     <span
                       style={{
                         display: "inline-flex",
                         alignItems: "center",
-                        padding: "3px 9px",
+                        padding: "4px 11px",
                         borderRadius: 999,
-                        fontSize: 12,
-                        fontWeight: 750,
-                        background: isPrivate ? "rgba(236, 72, 153, 0.12)" : "rgba(79, 70, 229, 0.12)",
-                        color: isPrivate ? "#be185d" : "#4338ca",
-                        border: `1px solid ${isPrivate ? "#fbcfe8" : "#c7d2fe"}`,
+                        fontSize: 11.5,
+                        fontWeight: 700,
+                        background: isPrivate ? "rgba(236, 72, 153, 0.12)" : "rgba(78, 124, 255, 0.12)",
+                        color: isPrivate ? "#ec4899" : "#60a5fa",
+                        border: `1px solid ${isPrivate ? "rgba(236, 72, 153, 0.28)" : "rgba(78, 124, 255, 0.28)"}`,
                       }}
                     >
                       {serviceName}
@@ -123,16 +124,18 @@ export default function CurrentAgreementsTable({
                       style={{
                         display: "inline-flex",
                         alignItems: "center",
-                        padding: "3px 10px",
+                        gap: 5,
+                        padding: "4px 11px",
                         borderRadius: 999,
-                        fontSize: 12,
-                        fontWeight: 750,
+                        fontSize: 11.5,
+                        fontWeight: 700,
                         background: statusStyle.bg,
                         color: statusStyle.color,
                         border: `1px solid ${statusStyle.border}`,
                       }}
                     >
-                      ● {status}
+                      <span style={{ fontSize: 8 }}>●</span>
+                      <span>{status}</span>
                     </span>
                   </td>
                   <td style={{ textAlign: "right", whiteSpace: "nowrap" }}>
@@ -141,47 +144,24 @@ export default function CurrentAgreementsTable({
                       <div style={{ display: "inline-flex", gap: 8, alignItems: "center" }}>
                         <button
                           type="button"
-                          className="admin-dossier-btn"
+                          className="admin-btn-secondary"
                           style={{
-                            display: "inline-flex",
-                            alignItems: "center",
-                            justifyContent: "center",
-                            gap: 5,
-                            height: 32,
-                            padding: "0 12px",
+                            padding: "6px 12px",
                             fontSize: 12,
-                            fontWeight: 700,
-                            borderRadius: 8,
-                            background: "#f0f4ff",
-                            color: "#3730a3",
-                            border: "1px solid #c7d2fe",
-                            cursor: "pointer",
-                            margin: 0,
-                            boxSizing: "border-box",
                           }}
                           onClick={() => onViewDetails(client)}
                           title={`View CRM and service details for ${client.name}`}
                         >
                           <Icon name="eye" size={13} />
-                          <span>View Details</span>
+                          <span>Dossier</span>
                         </button>
 
                         <button
                           type="button"
-                          className="primary-button"
+                          className="admin-btn-primary"
                           style={{
-                            display: "inline-flex",
-                            alignItems: "center",
-                            justifyContent: "center",
-                            gap: 5,
-                            height: 32,
-                            padding: "0 12px",
+                            padding: "6px 14px",
                             fontSize: 12,
-                            fontWeight: 700,
-                            borderRadius: 8,
-                            margin: 0,
-                            boxSizing: "border-box",
-                            background: "#4f46e5",
                           }}
                           onClick={() => onCreateAgreement(client)}
                           title={`Generate agreement for ${client.company || client.name}`}
@@ -199,8 +179,8 @@ export default function CurrentAgreementsTable({
                             alignItems: "center",
                             gap: 6,
                             fontSize: 12,
-                            color: "#2563eb",
-                            fontWeight: 600,
+                            color: "#4e7cff",
+                            fontWeight: 700,
                           }}
                         >
                           <span
@@ -208,13 +188,13 @@ export default function CurrentAgreementsTable({
                               display: "inline-block",
                               width: 12,
                               height: 12,
-                              border: "2px solid #93c5fd",
-                              borderTopColor: "#2563eb",
+                              border: "2px solid rgba(78, 124, 255, 0.3)",
+                              borderTopColor: "#4e7cff",
                               borderRadius: "50%",
                               animation: "spin 0.8s linear infinite",
                             }}
                           />
-                          Generating Agreement...
+                          Generating Contract...
                         </span>
                       </div>
                     ) : isFailed ? (
@@ -222,22 +202,15 @@ export default function CurrentAgreementsTable({
                       <div style={{ display: "inline-flex", gap: 8, alignItems: "center" }}>
                         <button
                           type="button"
-                          className="primary-button"
+                          className="admin-btn-primary"
                           style={{
-                            display: "inline-flex",
-                            alignItems: "center",
-                            justifyContent: "center",
-                            gap: 5,
-                            height: 32,
-                            padding: "0 12px",
+                            padding: "6px 14px",
                             fontSize: 12,
-                            fontWeight: 700,
-                            borderRadius: 8,
-                            background: "#ef4444",
+                            background: "linear-gradient(135deg, #ef4444 0%, #dc2626 100%)",
                           }}
                           onClick={() => onRetryAgreement && onRetryAgreement(agreement)}
                         >
-                          <span>Retry</span>
+                          <span>Retry Draft</span>
                         </button>
                       </div>
                     ) : (
@@ -245,19 +218,10 @@ export default function CurrentAgreementsTable({
                       <div style={{ display: "inline-flex", gap: 8, alignItems: "center" }}>
                         <button
                           type="button"
-                          className="table-action"
+                          className="admin-btn-secondary"
                           style={{
-                            display: "inline-flex",
-                            alignItems: "center",
-                            justifyContent: "center",
-                            gap: 5,
-                            height: 32,
-                            padding: "0 12px",
+                            padding: "6px 12px",
                             fontSize: 12,
-                            fontWeight: 700,
-                            borderRadius: 8,
-                            margin: 0,
-                            boxSizing: "border-box",
                           }}
                           onClick={() => onReviewAgreement(agreement)}
                           title={`Review agreement document for ${agreement.client?.companyName || agreement.companyName}`}
@@ -268,22 +232,13 @@ export default function CurrentAgreementsTable({
 
                         <button
                           type="button"
-                          className={isSent ? "table-action" : "primary-button"}
+                          className={isSent ? "admin-btn-secondary" : "admin-btn-primary"}
                           style={{
-                            display: "inline-flex",
-                            alignItems: "center",
-                            justifyContent: "center",
-                            gap: 5,
-                            height: 32,
-                            padding: "0 12px",
+                            padding: "6px 14px",
                             fontSize: 12,
-                            fontWeight: 700,
-                            borderRadius: 8,
-                            margin: 0,
-                            boxSizing: "border-box",
-                            background: isSent ? "rgba(16, 185, 129, 0.1)" : undefined,
-                            color: isSent ? "#059669" : undefined,
-                            borderColor: isSent ? "#a7f3d0" : undefined,
+                            background: isSent ? "rgba(16, 185, 129, 0.12)" : "linear-gradient(135deg, #10b981 0%, #059669 100%)",
+                            color: isSent ? "#10b981" : "#ffffff",
+                            borderColor: isSent ? "rgba(16, 185, 129, 0.3)" : undefined,
                             cursor: isSent ? "default" : "pointer",
                           }}
                           disabled={isSent}
@@ -299,7 +254,7 @@ export default function CurrentAgreementsTable({
                           {isSent ? (
                             <>
                               <Icon name="check" size={13} />
-                              <span>Sent ✓</span>
+                              <span>Dispatched ✓</span>
                             </>
                           ) : (
                             <>
@@ -317,8 +272,8 @@ export default function CurrentAgreementsTable({
 
             {clients.length === 0 && (
               <tr>
-                <td colSpan={5} style={{ textAlign: "center", padding: "40px 16px", color: "#7a748e" }}>
-                  No clients found.
+                <td colSpan={5} style={{ textAlign: "center", padding: "40px 16px", color: "#64748b" }}>
+                  No clients currently found in agreement queue.
                 </td>
               </tr>
             )}

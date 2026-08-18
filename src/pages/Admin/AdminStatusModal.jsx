@@ -1,12 +1,15 @@
 import React from "react";
-import Modal from "../../components/Modal";
+import Icon from "../../components/Icon";
 import ActivityStatusBar from "../../components/dashboard/ActivityStatusBar";
-import { formatCurrency } from "./mockAdminData";
+import { formatCurrency, stageBadgeColors } from "./mockAdminData";
 import {
   getTrackerStages,
   normalizeCompletedStages,
   canCompleteStage,
+  getProcessTypeForScheme,
+  getProcessTypeLabel,
 } from "../../utils/schemeTracker";
+import "./AdminDashboard.css";
 
 export default function AdminStatusModal({
   updatingClient,
@@ -20,6 +23,8 @@ export default function AdminStatusModal({
   // Resolve dynamic stages from client's assigned scheme
   const stages = getTrackerStages(updatingClient.scheme);
   const totalStages = stages.length;
+  const processType = getProcessTypeForScheme(updatingClient.scheme);
+  const processLabel = getProcessTypeLabel(processType);
 
   const currentCompleted = statusFormData.completedSteps || [];
   const firstUncompletedIndex = stages.findIndex((s) => !currentCompleted.includes(s.name));
@@ -80,109 +85,292 @@ export default function AdminStatusModal({
   const completedCount = (statusFormData.completedSteps || []).length;
   const currentPct = statusFormData.progress || Math.round((completedCount / totalStages) * 100);
 
+  const quickNotes = [
+    "KYC & document audits verified by Branch Admin.",
+    "Manager commercial clearance granted.",
+    "Legal agreement executed and dispatched to client.",
+    "Final approval processed & milestones cleared.",
+  ];
+
   return (
-    <Modal
-      title={`Update Milestones: ${updatingClient.name} (${updatingClient.appId})`}
-      onClose={onClose}
-      closeLabel="Close"
+    <div
+      className="modal-backdrop"
+      style={{
+        position: "fixed",
+        inset: 0,
+        backgroundColor: "rgba(15, 23, 42, 0.75)",
+        backdropFilter: "blur(12px)",
+        WebkitBackdropFilter: "blur(12px)",
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        zIndex: 1000,
+        padding: "20px 16px",
+        animation: "fadeIn 0.2s ease-out",
+      }}
+      onClick={onClose}
     >
-      <form onSubmit={onSave} style={{ display: "grid", gap: 18, minWidth: 320, maxWidth: 660 }}>
-        <div style={{ background: "#fbfbfe", padding: 14, borderRadius: 12, border: "1px solid #e7e7f5", display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10 }}>
+      <div
+        className="admin-panel-card hide-scrollbar"
+        style={{
+          width: "100%",
+          maxWidth: 720,
+          maxHeight: "92vh",
+          overflowY: "auto",
+          scrollbarWidth: "none",
+          msOverflowStyle: "none",
+          padding: 0,
+          borderRadius: 22,
+          boxShadow: "0 24px 60px rgba(0, 0, 0, 0.4), 0 0 32px rgba(78, 124, 255, 0.12)",
+          border: "1px solid rgba(154, 116, 233, 0.25)",
+        }}
+        onClick={(e) => e.stopPropagation()}
+      >
+        {/* Header Bar */}
+        <div
+          style={{
+            padding: "22px 26px 18px",
+            borderBottom: "1px solid rgba(154, 116, 233, 0.15)",
+            display: "flex",
+            justifyContent: "space-between",
+            alignItems: "flex-start",
+            gap: 16,
+          }}
+        >
           <div>
-            <p className="eyebrow" style={{ margin: "0 0 2px" }}>Client & Company</p>
-            <strong>{updatingClient.name}</strong> — {updatingClient.company}
+            <div style={{ display: "flex", alignItems: "center", gap: 8, flexWrap: "wrap", marginBottom: 6 }}>
+              <span
+                className="admin-badge"
+                style={{
+                  background: "linear-gradient(135deg, #4e7cff 0%, #3b66e8 100%)",
+                  color: "#ffffff",
+                  fontSize: 11,
+                  padding: "3px 10px",
+                }}
+              >
+                MILESTONE VERIFICATION
+              </span>
+              <span
+                className="admin-badge"
+                style={{
+                  background: "rgba(78, 124, 255, 0.12)",
+                  color: "#4e7cff",
+                  fontWeight: 700,
+                  fontSize: 11,
+                }}
+              >
+                ID: {updatingClient.appId}
+              </span>
+              <span
+                className="admin-badge"
+                style={{
+                  background: "rgba(16, 185, 129, 0.12)",
+                  color: "#10b981",
+                  fontSize: 11,
+                }}
+              >
+                {updatingClient.branch || "West Zone"} Branch
+              </span>
+            </div>
+            <h3 style={{ margin: "2px 0 4px", fontSize: 20, fontWeight: 800, color: "inherit", letterSpacing: -0.3 }}>
+              {updatingClient.name}
+            </h3>
+            <p className="admin-desc" style={{ fontSize: 13 }}>
+              {updatingClient.company} • Officer: <strong>{updatingClient.assignedSalesPerson}</strong>
+            </p>
           </div>
-          <div>
-            <p className="eyebrow" style={{ margin: "0 0 2px" }}>Assigned Scheme</p>
-            <strong>{updatingClient.scheme}</strong> ({formatCurrency(updatingClient.totalPayment)})
-          </div>
+
+          <button
+            type="button"
+            onClick={onClose}
+            style={{
+              background: "rgba(241, 245, 249, 0.6)",
+              border: "1px solid rgba(154, 116, 233, 0.15)",
+              borderRadius: "50%",
+              width: 34,
+              height: 34,
+              display: "grid",
+              placeItems: "center",
+              cursor: "pointer",
+              color: "#64748b",
+              transition: "all 0.2s ease",
+            }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.background = "rgba(239, 68, 68, 0.12)";
+              e.currentTarget.style.color = "#ef4444";
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.background = "rgba(241, 245, 249, 0.6)";
+              e.currentTarget.style.color = "#64748b";
+            }}
+          >
+            ✕
+          </button>
         </div>
 
-        {/* Dynamic Activity Points Live Interactive Checklist & Visual Stepper */}
-        <div>
-          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 8 }}>
-            <label className="field-label" style={{ margin: 0 }}>
-              {totalStages} Activity Milestone Points (Sequential Workflow):
-            </label>
-            <span style={{ fontSize: 13, fontWeight: 800, color: "#10b981" }}>
-              {completedCount} of {totalStages} Points ({currentPct}%)
-            </span>
+        {/* Modal Body Form */}
+        <form onSubmit={onSave} style={{ padding: "22px 26px 26px", display: "flex", flexDirection: "column", gap: 20 }}>
+          {/* Key Metrics Strip */}
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(140px, 1fr))", gap: 10 }}>
+            <div className="admin-subcard" style={{ padding: "10px 14px" }}>
+              <span className="admin-kicker" style={{ fontSize: 10.5 }}>Assigned Scheme</span>
+              <strong style={{ display: "block", fontSize: 13.5, color: "inherit" }}>{updatingClient.scheme}</strong>
+              <small style={{ color: "#64748b", fontSize: 11 }}>{processLabel}</small>
+            </div>
+            <div className="admin-subcard" style={{ padding: "10px 14px" }}>
+              <span className="admin-kicker" style={{ fontSize: 10.5, color: "#10b981" }}>Deal Value</span>
+              <strong style={{ display: "block", fontSize: 14, color: "#10b981" }}>
+                {formatCurrency(updatingClient.totalPayment)}
+              </strong>
+              <small style={{ color: "#64748b", fontSize: 11 }}>Commercial Total</small>
+            </div>
+            <div className="admin-subcard" style={{ padding: "10px 14px" }}>
+              <span className="admin-kicker" style={{ fontSize: 10.5, color: "#9a74e9" }}>Milestones</span>
+              <strong style={{ display: "block", fontSize: 14, color: "#9a74e9" }}>
+                {completedCount} / {totalStages} Points
+              </strong>
+              <small style={{ color: "#64748b", fontSize: 11 }}>{currentPct}% Completed</small>
+            </div>
           </div>
 
-          {/* Checklist Cards */}
-          <div style={{ display: "grid", gap: 8, marginBottom: 14 }}>
-            {stages.map((s, idx) => {
-              const isChecked = currentCompleted.includes(s.name);
-              const isNextAvailable = !isChecked && idx === firstUncompletedIndex;
-              const isLocked = !isChecked && firstUncompletedIndex !== -1 && idx > firstUncompletedIndex;
+          {/* Dynamic Activity Points Live Checklist */}
+          <div>
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 10 }}>
+              <div>
+                <label className="admin-form-label" style={{ margin: 0, fontSize: 13 }}>
+                  {totalStages} Sequential Milestone Checkpoints:
+                </label>
+                <small style={{ color: "#64748b", fontSize: 11.5 }}>
+                  Click to complete or toggle stages sequentially.
+                </small>
+              </div>
+              <span
+                className="admin-badge"
+                style={{
+                  background: currentPct === 100 ? "rgba(16, 185, 129, 0.15)" : "rgba(78, 124, 255, 0.15)",
+                  color: currentPct === 100 ? "#10b981" : "#4e7cff",
+                  fontWeight: 800,
+                  fontSize: 12,
+                }}
+              >
+                {currentPct}% Finished
+              </span>
+            </div>
 
-              return (
-                <div
-                  key={s.name}
-                  className={`activity-modal-step-card ${isChecked ? "is-checked" : isLocked ? "is-locked" : ""}`}
-                  style={{
-                    opacity: isLocked ? 0.75 : 1,
-                    cursor: isLocked ? "not-allowed" : "pointer",
-                    borderStyle: isLocked ? "dashed" : "solid",
-                  }}
-                  onClick={() => {
-                    if (isLocked) {
-                      // Selecting a locked stage completes all prerequisites up to it
-                      handleModalStageSelect(s.name, idx);
-                    } else {
-                      handleModalStepCheckboxToggle(s.name, idx);
-                    }
-                  }}
-                  title={isLocked ? `Complete ${stages[idx - 1]?.name} first or click to advance pipeline to this stage` : undefined}
-                >
-                  <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
-                    <div
-                      className="activity-modal-step-checkbox"
-                      style={{
-                        background: isChecked ? "#10b981" : isLocked ? "#f1f5f9" : "#fff",
-                        color: isChecked ? "#fff" : isLocked ? "#94a3b8" : "#d97706",
-                        borderColor: isChecked ? "#10b981" : isLocked ? "#cbd5e1" : "#f59e0b",
-                      }}
-                    >
-                      {isChecked ? "✓" : isLocked ? "🔒" : idx + 1}
-                    </div>
-                    <div>
-                      <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-                        <strong style={{ fontSize: 13.5, color: isLocked ? "#64748b" : "#1e293b" }}>{s.name}</strong>
-                        <span style={{ fontSize: 11, fontWeight: 750, color: isChecked ? "#10b981" : isLocked ? "#94a3b8" : "#d97706" }}>
-                          {isChecked ? "✓ Completed" : isNextAvailable ? "● In Progress" : "🔒 Locked"}
-                        </span>
-                      </div>
-                      <small style={{ color: "#7a748e", display: "block" }}>{s.description}</small>
-                    </div>
-                  </div>
+            {/* Checklist Cards */}
+            <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+              {stages.map((s, idx) => {
+                const isChecked = currentCompleted.includes(s.name);
+                const isNextAvailable = !isChecked && idx === firstUncompletedIndex;
+                const isLocked = !isChecked && firstUncompletedIndex !== -1 && idx > firstUncompletedIndex;
 
-                  <button
-                    type="button"
-                    className="table-action"
+                return (
+                  <div
+                    key={s.name}
+                    className="admin-subcard"
                     style={{
-                      fontSize: 11,
-                      padding: "4px 10px",
-                      background: isChecked ? "rgba(16, 185, 129, 0.12)" : isNextAvailable ? "rgba(245, 158, 11, 0.12)" : "#f1f5f9",
-                      color: isChecked ? "#059669" : isNextAvailable ? "#b45309" : "#64748b",
-                      borderColor: isChecked ? "#10b981" : isNextAvailable ? "#f59e0b" : "#cbd5e1",
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "space-between",
+                      padding: "10px 14px",
+                      borderRadius: 14,
+                      cursor: "pointer",
+                      border: isChecked
+                        ? "1.5px solid rgba(16, 185, 129, 0.45)"
+                        : isNextAvailable
+                        ? "1.5px solid rgba(245, 158, 11, 0.45)"
+                        : "1px dashed rgba(154, 116, 233, 0.18)",
+                      background: isChecked
+                        ? "rgba(16, 185, 129, 0.08)"
+                        : isNextAvailable
+                        ? "rgba(245, 158, 11, 0.08)"
+                        : undefined,
+                      transition: "all 0.2s ease",
                     }}
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      handleModalStageSelect(s.name, idx);
+                    onClick={() => {
+                      if (isLocked) {
+                        handleModalStageSelect(s.name, idx);
+                      } else {
+                        handleModalStepCheckboxToggle(s.name, idx);
+                      }
                     }}
                   >
-                    {isChecked ? "Completed ✓" : isNextAvailable ? `Complete Stage ${idx + 1}` : `Set to Stage ${idx + 1}`}
-                  </button>
-                </div>
-              );
-            })}
+                    <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+                      <div
+                        style={{
+                          width: 28,
+                          height: 28,
+                          borderRadius: "50%",
+                          display: "grid",
+                          placeItems: "center",
+                          fontWeight: 800,
+                          fontSize: 12,
+                          background: isChecked
+                            ? "linear-gradient(135deg, #10b981 0%, #059669 100%)"
+                            : isNextAvailable
+                            ? "#f59e0b"
+                            : "rgba(148, 163, 184, 0.2)",
+                          color: isChecked || isNextAvailable ? "#ffffff" : "#64748b",
+                          boxShadow: isChecked
+                            ? "0 2px 8px rgba(16, 185, 129, 0.35)"
+                            : isNextAvailable
+                            ? "0 2px 8px rgba(245, 158, 11, 0.35)"
+                            : "none",
+                          flexShrink: 0,
+                        }}
+                      >
+                        {isChecked ? "✓" : isLocked ? "🔒" : idx + 1}
+                      </div>
+                      <div>
+                        <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                          <strong style={{ fontSize: 13.5, color: "inherit" }}>{s.name}</strong>
+                          <span
+                            className="admin-badge"
+                            style={{
+                              fontSize: 10,
+                              padding: "1px 6px",
+                              background: isChecked
+                                ? "rgba(16, 185, 129, 0.15)"
+                                : isNextAvailable
+                                ? "rgba(245, 158, 11, 0.15)"
+                                : "rgba(148, 163, 184, 0.15)",
+                              color: isChecked ? "#10b981" : isNextAvailable ? "#f59e0b" : "#64748b",
+                            }}
+                          >
+                            {isChecked ? "Completed" : isNextAvailable ? "In Progress" : "Pending"}
+                          </span>
+                        </div>
+                        <small style={{ color: "#64748b", fontSize: 11.5, display: "block" }}>
+                          {s.description}
+                        </small>
+                      </div>
+                    </div>
+
+                    <button
+                      type="button"
+                      className={isChecked ? "admin-btn-secondary" : "admin-btn-primary"}
+                      style={{
+                        padding: "5px 12px",
+                        fontSize: 11.5,
+                        flexShrink: 0,
+                      }}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleModalStageSelect(s.name, idx);
+                      }}
+                    >
+                      {isChecked ? "Completed ✓" : isNextAvailable ? "Mark Done →" : "Set Stage →"}
+                    </button>
+                  </div>
+                );
+              })}
+            </div>
           </div>
 
-          {/* Live Stepper Preview */}
-          <div style={{ background: "#f8fafc", padding: 14, borderRadius: 14, border: "1px solid #e2e8f0" }}>
-            <span style={{ fontSize: 11, fontWeight: 800, textTransform: "uppercase", letterSpacing: 0.8, color: "#64748b", display: "block", marginBottom: 10 }}>
-              Live Stepper Preview:
+          {/* Live 1-Row Stepper Preview */}
+          <div className="admin-subcard" style={{ padding: "14px 16px" }}>
+            <span className="admin-kicker" style={{ fontSize: 11, display: "block", marginBottom: 8 }}>
+              Real-Time Stepper Pipeline Preview
             </span>
             <ActivityStatusBar
               scheme={updatingClient.scheme}
@@ -191,84 +379,110 @@ export default function AdminStatusModal({
               progress={statusFormData.progress}
               interactive={false}
               size="compact"
+              showTrack={false}
             />
           </div>
-        </div>
 
-        {/* Document Verification Checklist */}
-        {updatingClient.documents && updatingClient.documents.length > 0 && (
-          <div>
-            <label className="field-label" style={{ marginBottom: 8, display: "block" }}>
-              Uploaded Document Audits:
-            </label>
-            <div style={{ display: "grid", gap: 8 }}>
-              {updatingClient.documents.map((doc) => (
-                <div
-                  key={doc.name}
-                  style={{
-                    display: "flex",
-                    justifyContent: "space-between",
-                    alignItems: "center",
-                    padding: "9px 12px",
-                    borderRadius: 8,
-                    background: "#ffffff",
-                    border: "1px solid #e7e7f5",
-                  }}
-                >
-                  <div>
-                    <span style={{ fontWeight: 600, fontSize: 13 }}>{doc.name}</span>
-                    <div style={{ fontSize: 11.5, color: "#7a748e" }}>Ref: {doc.number}</div>
-                  </div>
-                  <span
+          {/* Document Verification Audits */}
+          {updatingClient.documents && updatingClient.documents.length > 0 && (
+            <div>
+              <label className="admin-form-label" style={{ marginBottom: 8 }}>
+                Compliance &amp; Document Audits:
+              </label>
+              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 8 }}>
+                {updatingClient.documents.map((doc) => (
+                  <div
+                    key={doc.name}
+                    className="admin-subcard"
                     style={{
-                      fontSize: 11.5,
-                      fontWeight: 700,
-                      padding: "2px 8px",
-                      borderRadius: 6,
-                      background: doc.status === "Verified" ? "rgba(16, 185, 129, 0.1)" : "rgba(245, 158, 11, 0.1)",
-                      color: doc.status === "Verified" ? "#059669" : "#d97706",
+                      display: "flex",
+                      justifyContent: "space-between",
+                      alignItems: "center",
+                      padding: "8px 12px",
                     }}
                   >
-                    {doc.status}
-                  </span>
-                </div>
+                    <div>
+                      <span style={{ fontWeight: 700, fontSize: 12.5 }}>{doc.name}</span>
+                      <div style={{ fontSize: 11, color: "#64748b" }}>Ref: {doc.number}</div>
+                    </div>
+                    <span
+                      className="admin-badge"
+                      style={{
+                        fontSize: 10.5,
+                        padding: "2px 7px",
+                        background: doc.status === "Verified" ? "rgba(16, 185, 129, 0.12)" : "rgba(245, 158, 11, 0.12)",
+                        color: doc.status === "Verified" ? "#10b981" : "#f59e0b",
+                      }}
+                    >
+                      {doc.status}
+                    </span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* Admin Milestone Notes & Quick Presets */}
+          <div>
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 6 }}>
+              <label className="admin-form-label" style={{ margin: 0 }}>
+                Admin Milestone Audit Notes:
+              </label>
+              <span style={{ fontSize: 11, color: "#64748b" }}>Logged to audit history</span>
+            </div>
+
+            {/* Quick Note Presets */}
+            <div style={{ display: "flex", gap: 6, flexWrap: "wrap", marginBottom: 8 }}>
+              {quickNotes.map((preset, pIdx) => (
+                <button
+                  key={pIdx}
+                  type="button"
+                  onClick={() => setStatusFormData((prev) => ({ ...prev, notes: preset }))}
+                  className="admin-preset-pill"
+                >
+                  + {preset.split(" ")[0]} {preset.split(" ")[1]}...
+                </button>
               ))}
             </div>
+
+            <textarea
+              className="admin-form-textarea"
+              value={statusFormData.notes || ""}
+              onChange={(e) => setStatusFormData((prev) => ({ ...prev, notes: e.target.value }))}
+              placeholder="Add verification remarks, committee audit notes, or next milestone directives..."
+              rows={3}
+            />
           </div>
-        )}
 
-        {/* Admin Notes */}
-        <div>
-          <label className="field-label" style={{ marginBottom: 6, display: "block" }}>
-            Admin Milestone Notes:
-          </label>
-          <textarea
-            value={statusFormData.notes || ""}
-            onChange={(e) => setStatusFormData((prev) => ({ ...prev, notes: e.target.value }))}
-            placeholder="Add verification notes, board review comments, or next action items..."
-            rows={3}
+          {/* Modal Action Buttons */}
+          <div
             style={{
-              width: "100%",
-              padding: 10,
-              borderRadius: 8,
-              border: "1px solid #dedfe1",
-              fontSize: 13,
-              fontFamily: "inherit",
-              boxSizing: "border-box",
+              display: "flex",
+              justifyContent: "flex-end",
+              gap: 12,
+              paddingTop: 10,
+              borderTop: "1px solid rgba(154, 116, 233, 0.15)",
             }}
-          />
-        </div>
-
-        {/* Modal Action Buttons */}
-        <div style={{ display: "flex", justifyContent: "flex-end", gap: 10, marginTop: 8 }}>
-          <button type="button" className="table-action" onClick={onClose}>
-            Cancel
-          </button>
-          <button type="submit" className="primary-button" style={{ padding: "8px 20px" }}>
-            Save Milestone Status
-          </button>
-        </div>
-      </form>
-    </Modal>
+          >
+            <button
+              type="button"
+              className="admin-btn-secondary"
+              onClick={onClose}
+              style={{ padding: "10px 20px" }}
+            >
+              Cancel
+            </button>
+            <button
+              type="submit"
+              className="admin-btn-primary"
+              style={{ padding: "10px 24px" }}
+            >
+              <Icon name="check" size={16} />
+              <span>Save Milestone Status</span>
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
   );
 }

@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from "react";
-import Modal from "../../../components/Modal";
 import Icon from "../../../components/Icon";
 import {
   agreementService,
@@ -7,6 +6,7 @@ import {
   TEMPLATE_TYPES,
   TEMPLATE_NAMES,
 } from "../../../services/agreementService";
+import "../../Admin/AdminDashboard.css";
 
 export default function ClientAgreementFormModal({
   isOpen,
@@ -35,7 +35,7 @@ export default function ClientAgreementFormModal({
       const yyyy = today.getFullYear();
       setAgreementDate(`${dd}/${mm}/${yyyy}`);
       setCompanyName(client.company || client.name || "");
-      setCompanyAddress(client.address || "Corporate Office, Business District");
+      setCompanyAddress(client.address || "Corporate Business District, Registered Office");
       setPitchedMoney(
         client.totalPayment
           ? `₹${client.totalPayment.toLocaleString("en-IN")}`
@@ -109,275 +109,355 @@ export default function ClientAgreementFormModal({
   };
 
   return (
-    <Modal
-      title={`Create Agreement: ${client.name} (${client.company || ""})`}
-      onClose={onClose}
-      closeLabel="Cancel"
+    <div
+      className="modal-backdrop"
+      style={{
+        position: "fixed",
+        inset: 0,
+        backgroundColor: "rgba(15, 23, 42, 0.78)",
+        backdropFilter: "blur(14px)",
+        WebkitBackdropFilter: "blur(14px)",
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        zIndex: 1000,
+        padding: "20px 16px",
+        animation: "fadeIn 0.2s ease-out",
+      }}
+      onClick={onClose}
     >
-      <form onSubmit={handleSubmit} style={{ display: "grid", gap: 14, minWidth: 320, maxWidth: 540 }}>
-        {/* Template Indicator */}
+      <div
+        className="admin-panel-card hide-scrollbar"
+        style={{
+          width: "100%",
+          maxWidth: 600,
+          maxHeight: "92vh",
+          overflowY: "auto",
+          scrollbarWidth: "none",
+          msOverflowStyle: "none",
+          padding: 0,
+          borderRadius: 22,
+          boxShadow: "0 24px 60px rgba(0, 0, 0, 0.45), 0 0 32px rgba(78, 124, 255, 0.15)",
+          border: "1px solid rgba(154, 116, 233, 0.25)",
+        }}
+        onClick={(e) => e.stopPropagation()}
+      >
+        {/* Header */}
         <div
           style={{
-            background: isPrivate ? "#fffafc" : "#f8faff",
-            padding: "8px 12px",
-            borderRadius: 8,
-            border: `1px solid ${isPrivate ? "#fce7f3" : "#e0e7ff"}`,
+            padding: "22px 26px 18px",
+            borderBottom: "1px solid rgba(154, 116, 233, 0.15)",
             display: "flex",
             justifyContent: "space-between",
-            alignItems: "center",
+            alignItems: "flex-start",
+            gap: 16,
           }}
         >
           <div>
-            <span style={{ fontSize: 11, fontWeight: 800, textTransform: "uppercase", color: isPrivate ? "#db2777" : "#4f46e5" }}>
-              Selected Template ({serviceName}):
+            <div style={{ display: "flex", alignItems: "center", gap: 8, flexWrap: "wrap", marginBottom: 6 }}>
+              <span
+                className="admin-badge"
+                style={{
+                  background: isPrivate
+                    ? "linear-gradient(135deg, #ec4899 0%, #db2777 100%)"
+                    : "linear-gradient(135deg, #4e7cff 0%, #3b66e8 100%)",
+                  color: "#ffffff",
+                  fontSize: 11,
+                  padding: "3px 10px",
+                }}
+              >
+                CREATE LEGAL CONTRACT
+              </span>
+              <span
+                className="admin-badge"
+                style={{
+                  background: "rgba(78, 124, 255, 0.12)",
+                  color: "#4e7cff",
+                  fontWeight: 750,
+                  fontSize: 11,
+                }}
+              >
+                ID: {client.appId}
+              </span>
+            </div>
+            <h3 style={{ margin: "2px 0 4px", fontSize: 19, fontWeight: 800, color: "inherit", letterSpacing: -0.3 }}>
+              {client.name}
+            </h3>
+            <p className="admin-desc" style={{ fontSize: 13 }}>
+              {client.company || "Enterprise Client"} • Scheme: <strong>{serviceName}</strong>
+            </p>
+          </div>
+
+          <button
+            type="button"
+            onClick={onClose}
+            style={{
+              background: "rgba(241, 245, 249, 0.6)",
+              border: "1px solid rgba(154, 116, 233, 0.15)",
+              borderRadius: "50%",
+              width: 34,
+              height: 34,
+              display: "grid",
+              placeItems: "center",
+              cursor: "pointer",
+              color: "#64748b",
+              transition: "all 0.2s ease",
+            }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.background = "rgba(239, 68, 68, 0.12)";
+              e.currentTarget.style.color = "#ef4444";
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.background = "rgba(241, 245, 249, 0.6)";
+              e.currentTarget.style.color = "#64748b";
+            }}
+          >
+            ✕
+          </button>
+        </div>
+
+        {/* Modal Form Body */}
+        <form onSubmit={handleSubmit} style={{ padding: "22px 26px 26px", display: "flex", flexDirection: "column", gap: 16 }}>
+          {/* Template Indicator */}
+          <div
+            className="admin-subcard"
+            style={{
+              padding: "10px 14px",
+              display: "flex",
+              justifyContent: "space-between",
+              alignItems: "center",
+              border: `1.5px solid ${isPrivate ? "rgba(236, 72, 153, 0.35)" : "rgba(78, 124, 255, 0.35)"}`,
+              background: isPrivate ? "rgba(236, 72, 153, 0.08)" : "rgba(78, 124, 255, 0.08)",
+            }}
+          >
+            <div>
+              <span className="admin-kicker" style={{ fontSize: 10.5, color: isPrivate ? "#ec4899" : "#4e7cff" }}>
+                Auto-Matched Contract Template ({serviceName}):
+              </span>
+              <div style={{ fontSize: 13, fontWeight: 800, color: "inherit", marginTop: 2 }}>
+                📄 {templateDisplayName} (.docx)
+              </div>
+            </div>
+            <span
+              className="admin-badge"
+              style={{
+                fontSize: 11,
+                background: isPrivate ? "rgba(236, 72, 153, 0.18)" : "rgba(78, 124, 255, 0.18)",
+                color: isPrivate ? "#ec4899" : "#4e7cff",
+              }}
+            >
+              Verified Template
             </span>
-            <div style={{ fontSize: 12.5, fontWeight: 700, color: "#1e293b", marginTop: 2 }}>
-              📄 {templateDisplayName} (.docx)
+          </div>
+
+          {errors.form && (
+            <div
+              style={{
+                padding: "8px 12px",
+                borderRadius: 8,
+                background: "rgba(239, 68, 68, 0.12)",
+                color: "#ef4444",
+                border: "1px solid rgba(239, 68, 68, 0.3)",
+                fontSize: 12.5,
+              }}
+            >
+              {errors.form}
+            </div>
+          )}
+
+          {/* 1. Agreement Date */}
+          <div>
+            <label className="admin-form-label">
+              Agreement Execution Date <span style={{ color: "#ef4444" }}>*</span>
+            </label>
+            <input
+              type="text"
+              className="admin-form-input"
+              placeholder="e.g. 17/08/2026"
+              value={agreementDate}
+              disabled={loading}
+              onChange={(e) => {
+                setAgreementDate(e.target.value);
+                setErrors((prev) => ({ ...prev, agreementDate: null }));
+              }}
+              style={{ borderColor: errors.agreementDate ? "#ef4444" : undefined }}
+            />
+            {errors.agreementDate && <span style={{ color: "#ef4444", fontSize: 11.5, marginTop: 2, display: "block" }}>{errors.agreementDate}</span>}
+          </div>
+
+          {/* 2. Company Name */}
+          <div>
+            <label className="admin-form-label">
+              Registered Company / Enterprise Name <span style={{ color: "#ef4444" }}>*</span>
+            </label>
+            <input
+              type="text"
+              className="admin-form-input"
+              placeholder="e.g. Test Enterprise Pvt Ltd"
+              value={companyName}
+              disabled={loading}
+              onChange={(e) => {
+                setCompanyName(e.target.value);
+                setErrors((prev) => ({ ...prev, companyName: null }));
+              }}
+              style={{ borderColor: errors.companyName ? "#ef4444" : undefined }}
+            />
+            {errors.companyName && <span style={{ color: "#ef4444", fontSize: 11.5, marginTop: 2, display: "block" }}>{errors.companyName}</span>}
+          </div>
+
+          {/* 3. Company Address */}
+          <div>
+            <label className="admin-form-label">
+              Principal Place of Business / Registered Address <span style={{ color: "#ef4444" }}>*</span>
+            </label>
+            <input
+              type="text"
+              className="admin-form-input"
+              placeholder="e.g. Corporate Address, Industrial Estate"
+              value={companyAddress}
+              disabled={loading}
+              onChange={(e) => {
+                setCompanyAddress(e.target.value);
+                setErrors((prev) => ({ ...prev, companyAddress: null }));
+              }}
+              style={{ borderColor: errors.companyAddress ? "#ef4444" : undefined }}
+            />
+            {errors.companyAddress && <span style={{ color: "#ef4444", fontSize: 11.5, marginTop: 2, display: "block" }}>{errors.companyAddress}</span>}
+          </div>
+
+          {/* 4 & 5. Pitched Money & Payment Received */}
+          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
+            <div>
+              <label className="admin-form-label">
+                Total Pitched Commercial <span style={{ color: "#ef4444" }}>*</span>
+              </label>
+              <input
+                type="text"
+                className="admin-form-input"
+                placeholder="e.g. ₹50,000"
+                value={pitchedMoney}
+                disabled={loading}
+                onChange={(e) => {
+                  setPitchedMoney(e.target.value);
+                  setErrors((prev) => ({ ...prev, pitchedMoney: null }));
+                }}
+                style={{ borderColor: errors.pitchedMoney ? "#ef4444" : undefined }}
+              />
+              {errors.pitchedMoney && <span style={{ color: "#ef4444", fontSize: 11.5, marginTop: 2, display: "block" }}>{errors.pitchedMoney}</span>}
+            </div>
+
+            <div>
+              <label className="admin-form-label">
+                Upfront Inception Received <span style={{ color: "#ef4444" }}>*</span>
+              </label>
+              <input
+                type="text"
+                className="admin-form-input"
+                placeholder="e.g. ₹20,000"
+                value={paymentReceived}
+                disabled={loading}
+                onChange={(e) => {
+                  setPaymentReceived(e.target.value);
+                  setErrors((prev) => ({ ...prev, paymentReceived: null }));
+                }}
+                style={{ borderColor: errors.paymentReceived ? "#ef4444" : undefined }}
+              />
+              {errors.paymentReceived && <span style={{ color: "#ef4444", fontSize: 11.5, marginTop: 2, display: "block" }}>{errors.paymentReceived}</span>}
             </div>
           </div>
-          <span
+
+          {/* 6 & 7. Payment Left & Disbursement Rate */}
+          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
+            <div>
+              <label className="admin-form-label">
+                Balance Payment Left <span style={{ color: "#ef4444" }}>*</span>
+              </label>
+              <input
+                type="text"
+                className="admin-form-input"
+                placeholder="e.g. ₹30,000"
+                value={paymentLeft}
+                disabled={loading}
+                onChange={(e) => {
+                  setPaymentLeft(e.target.value);
+                  setErrors((prev) => ({ ...prev, paymentLeft: null }));
+                }}
+                style={{ borderColor: errors.paymentLeft ? "#ef4444" : undefined }}
+              />
+              {errors.paymentLeft && <span style={{ color: "#ef4444", fontSize: 11.5, marginTop: 2, display: "block" }}>{errors.paymentLeft}</span>}
+            </div>
+
+            <div>
+              <label className="admin-form-label">
+                Disbursement Success Fee <span style={{ color: "#ef4444" }}>*</span>
+              </label>
+              <input
+                type="text"
+                className="admin-form-input"
+                placeholder="e.g. 5%"
+                value={disbursementRate}
+                disabled={loading}
+                onChange={(e) => {
+                  setDisbursementRate(e.target.value);
+                  setErrors((prev) => ({ ...prev, disbursementRate: null }));
+                }}
+                style={{ borderColor: errors.disbursementRate ? "#ef4444" : undefined }}
+              />
+              {errors.disbursementRate && <span style={{ color: "#ef4444", fontSize: 11.5, marginTop: 2, display: "block" }}>{errors.disbursementRate}</span>}
+            </div>
+          </div>
+
+          {/* Submit Actions */}
+          <div
             style={{
-              fontSize: 11,
-              fontWeight: 750,
-              padding: "2px 8px",
-              borderRadius: 6,
-              background: isPrivate ? "rgba(236, 72, 153, 0.15)" : "rgba(79, 70, 229, 0.12)",
-              color: isPrivate ? "#be185d" : "#4338ca",
+              display: "flex",
+              justifyContent: "flex-end",
+              gap: 12,
+              paddingTop: 10,
+              borderTop: "1px solid rgba(154, 116, 233, 0.15)",
             }}
           >
-            Auto-Selected
-          </span>
-        </div>
-
-        {errors.form && (
-          <div style={{ padding: "8px 12px", borderRadius: 8, background: "#fee2e2", color: "#b91c1c", fontSize: 12.5 }}>
-            {errors.form}
-          </div>
-        )}
-
-        {/* 1. Agreement Date */}
-        <div>
-          <label className="field-label" style={{ display: "block", marginBottom: 4 }}>
-            Agreement Date <span style={{ color: "#e11d48" }}>*</span>
-          </label>
-          <input
-            type="text"
-            placeholder="e.g. 17/08/2026"
-            value={agreementDate}
-            disabled={loading}
-            onChange={(e) => {
-              setAgreementDate(e.target.value);
-              setErrors((prev) => ({ ...prev, agreementDate: null }));
-            }}
-            style={{
-              width: "100%",
-              padding: "8px 12px",
-              borderRadius: 8,
-              border: errors.agreementDate ? "1.5px solid #e11d48" : "1px solid #dcdfe6",
-              fontSize: 13,
-              boxSizing: "border-box",
-            }}
-          />
-          {errors.agreementDate && <span style={{ color: "#e11d48", fontSize: 11.5, marginTop: 2, display: "block" }}>{errors.agreementDate}</span>}
-        </div>
-
-        {/* 2. Company Name */}
-        <div>
-          <label className="field-label" style={{ display: "block", marginBottom: 4 }}>
-            Company Name <span style={{ color: "#e11d48" }}>*</span>
-          </label>
-          <input
-            type="text"
-            placeholder="e.g. Test Company Pvt Ltd"
-            value={companyName}
-            disabled={loading}
-            onChange={(e) => {
-              setCompanyName(e.target.value);
-              setErrors((prev) => ({ ...prev, companyName: null }));
-            }}
-            style={{
-              width: "100%",
-              padding: "8px 12px",
-              borderRadius: 8,
-              border: errors.companyName ? "1.5px solid #e11d48" : "1px solid #dcdfe6",
-              fontSize: 13,
-              boxSizing: "border-box",
-            }}
-          />
-          {errors.companyName && <span style={{ color: "#e11d48", fontSize: 11.5, marginTop: 2, display: "block" }}>{errors.companyName}</span>}
-        </div>
-
-        {/* 3. Company Address */}
-        <div>
-          <label className="field-label" style={{ display: "block", marginBottom: 4 }}>
-            Company Address <span style={{ color: "#e11d48" }}>*</span>
-          </label>
-          <input
-            type="text"
-            placeholder="e.g. Delhi or Principal place of business address"
-            value={companyAddress}
-            disabled={loading}
-            onChange={(e) => {
-              setCompanyAddress(e.target.value);
-              setErrors((prev) => ({ ...prev, companyAddress: null }));
-            }}
-            style={{
-              width: "100%",
-              padding: "8px 12px",
-              borderRadius: 8,
-              border: errors.companyAddress ? "1.5px solid #e11d48" : "1px solid #dcdfe6",
-              fontSize: 13,
-              boxSizing: "border-box",
-            }}
-          />
-          {errors.companyAddress && <span style={{ color: "#e11d48", fontSize: 11.5, marginTop: 2, display: "block" }}>{errors.companyAddress}</span>}
-        </div>
-
-        {/* 4 & 5. Pitched Money & Payment Received in 2 columns */}
-        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
-          <div>
-            <label className="field-label" style={{ display: "block", marginBottom: 4 }}>
-              Pitched Money <span style={{ color: "#e11d48" }}>*</span>
-            </label>
-            <input
-              type="text"
-              placeholder="e.g. ₹50,000"
-              value={pitchedMoney}
-              disabled={loading}
-              onChange={(e) => {
-                setPitchedMoney(e.target.value);
-                setErrors((prev) => ({ ...prev, pitchedMoney: null }));
-              }}
+            <button type="button" className="admin-btn-secondary" onClick={onClose} disabled={loading} style={{ padding: "10px 20px" }}>
+              Cancel
+            </button>
+            <button
+              type="submit"
+              className="admin-btn-primary"
               style={{
-                width: "100%",
-                padding: "8px 12px",
-                borderRadius: 8,
-                border: errors.pitchedMoney ? "1.5px solid #e11d48" : "1px solid #dcdfe6",
-                fontSize: 13,
-                boxSizing: "border-box",
+                padding: "10px 24px",
+                minWidth: 180,
+                display: "inline-flex",
+                alignItems: "center",
+                justifyContent: "center",
+                gap: 6,
               }}
-            />
-            {errors.pitchedMoney && <span style={{ color: "#e11d48", fontSize: 11.5, marginTop: 2, display: "block" }}>{errors.pitchedMoney}</span>}
-          </div>
-
-          <div>
-            <label className="field-label" style={{ display: "block", marginBottom: 4 }}>
-              Payment Received <span style={{ color: "#e11d48" }}>*</span>
-            </label>
-            <input
-              type="text"
-              placeholder="e.g. ₹20,000"
-              value={paymentReceived}
               disabled={loading}
-              onChange={(e) => {
-                setPaymentReceived(e.target.value);
-                setErrors((prev) => ({ ...prev, paymentReceived: null }));
-              }}
-              style={{
-                width: "100%",
-                padding: "8px 12px",
-                borderRadius: 8,
-                border: errors.paymentReceived ? "1.5px solid #e11d48" : "1px solid #dcdfe6",
-                fontSize: 13,
-                boxSizing: "border-box",
-              }}
-            />
-            {errors.paymentReceived && <span style={{ color: "#e11d48", fontSize: 11.5, marginTop: 2, display: "block" }}>{errors.paymentReceived}</span>}
+            >
+              {loading ? (
+                <>
+                  <span
+                    style={{
+                      display: "inline-block",
+                      width: 12,
+                      height: 12,
+                      border: "2px solid rgba(255,255,255,0.4)",
+                      borderTopColor: "#fff",
+                      borderRadius: "50%",
+                      animation: "spin 0.8s linear infinite",
+                    }}
+                  />
+                  <span>Generating Contract...</span>
+                </>
+              ) : (
+                <>
+                  <Icon name="check" size={16} />
+                  <span>Generate Agreement</span>
+                </>
+              )}
+            </button>
           </div>
-        </div>
-
-        {/* 6 & 7. Payment Left & Disbursement Rate in 2 columns */}
-        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
-          <div>
-            <label className="field-label" style={{ display: "block", marginBottom: 4 }}>
-              Payment Left <span style={{ color: "#e11d48" }}>*</span>
-            </label>
-            <input
-              type="text"
-              placeholder="e.g. ₹30,000"
-              value={paymentLeft}
-              disabled={loading}
-              onChange={(e) => {
-                setPaymentLeft(e.target.value);
-                setErrors((prev) => ({ ...prev, paymentLeft: null }));
-              }}
-              style={{
-                width: "100%",
-                padding: "8px 12px",
-                borderRadius: 8,
-                border: errors.paymentLeft ? "1.5px solid #e11d48" : "1px solid #dcdfe6",
-                fontSize: 13,
-                boxSizing: "border-box",
-              }}
-            />
-            {errors.paymentLeft && <span style={{ color: "#e11d48", fontSize: 11.5, marginTop: 2, display: "block" }}>{errors.paymentLeft}</span>}
-          </div>
-
-          <div>
-            <label className="field-label" style={{ display: "block", marginBottom: 4 }}>
-              Disbursement Rate <span style={{ color: "#e11d48" }}>*</span>
-            </label>
-            <input
-              type="text"
-              placeholder="e.g. 5%"
-              value={disbursementRate}
-              disabled={loading}
-              onChange={(e) => {
-                setDisbursementRate(e.target.value);
-                setErrors((prev) => ({ ...prev, disbursementRate: null }));
-              }}
-              style={{
-                width: "100%",
-                padding: "8px 12px",
-                borderRadius: 8,
-                border: errors.disbursementRate ? "1.5px solid #e11d48" : "1px solid #dcdfe6",
-                fontSize: 13,
-                boxSizing: "border-box",
-              }}
-            />
-            {errors.disbursementRate && <span style={{ color: "#e11d48", fontSize: 11.5, marginTop: 2, display: "block" }}>{errors.disbursementRate}</span>}
-          </div>
-        </div>
-
-        {/* Submit Actions */}
-        <div style={{ display: "flex", justifyContent: "flex-end", gap: 10, marginTop: 8 }}>
-          <button type="button" className="table-action" onClick={onClose} disabled={loading}>
-            Cancel
-          </button>
-          <button
-            type="submit"
-            className="primary-button"
-            style={{
-              padding: "8px 24px",
-              minWidth: 160,
-              display: "inline-flex",
-              alignItems: "center",
-              justifyContent: "center",
-              gap: 6,
-            }}
-            disabled={loading}
-          >
-            {loading ? (
-              <>
-                <span
-                  style={{
-                    display: "inline-block",
-                    width: 12,
-                    height: 12,
-                    border: "2px solid rgba(255,255,255,0.4)",
-                    borderTopColor: "#fff",
-                    borderRadius: "50%",
-                    animation: "spin 0.8s linear infinite",
-                  }}
-                />
-                <span>Generating Agreement...</span>
-              </>
-            ) : (
-              <span>Generate Agreement</span>
-            )}
-          </button>
-        </div>
-      </form>
-    </Modal>
+        </form>
+      </div>
+    </div>
   );
 }

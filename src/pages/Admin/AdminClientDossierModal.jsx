@@ -1,8 +1,9 @@
 import React from "react";
-import Modal from "../../components/Modal";
+import Icon from "../../components/Icon";
 import ActivityStatusBar from "../../components/dashboard/ActivityStatusBar";
 import { stageBadgeColors, formatCurrency } from "./mockAdminData";
-import { getTrackerState, getProcessTypeLabel } from "../../utils/schemeTracker";
+import { getTrackerState, getProcessTypeForScheme, getProcessTypeLabel } from "../../utils/schemeTracker";
+import "./AdminDashboard.css";
 
 export default function AdminClientDossierModal({
   selectedClientForDossier,
@@ -13,139 +14,266 @@ export default function AdminClientDossierModal({
 
   const tracker = getTrackerState(selectedClientForDossier);
   const schemeName = selectedClientForDossier.scheme || tracker.schemeName;
-  const processLabel = tracker.processTypeLabel || getProcessTypeLabel(tracker.processType);
+  const processType = getProcessTypeForScheme(schemeName);
+  const processLabel = tracker.processTypeLabel || getProcessTypeLabel(processType);
 
   return (
-    <Modal
-      title={`Application Dossier: ${selectedClientForDossier.name}`}
-      onClose={onClose}
-      closeLabel="Close"
+    <div
+      className="modal-backdrop"
+      style={{
+        position: "fixed",
+        inset: 0,
+        backgroundColor: "rgba(15, 23, 42, 0.75)",
+        backdropFilter: "blur(12px)",
+        WebkitBackdropFilter: "blur(12px)",
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        zIndex: 1000,
+        padding: "20px 16px",
+        animation: "fadeIn 0.2s ease-out",
+      }}
+      onClick={onClose}
     >
-      <div style={{ display: "grid", gap: 18, maxWidth: 680 }}>
-        {/* Header Info Banner */}
-        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", flexWrap: "wrap", gap: 12, background: "#fbfbfe", padding: 14, borderRadius: 12, border: "1px solid #e7e7f5" }}>
+      <div
+        className="admin-panel-card hide-scrollbar"
+        style={{
+          width: "100%",
+          maxWidth: 720,
+          maxHeight: "92vh",
+          overflowY: "auto",
+          scrollbarWidth: "none",
+          msOverflowStyle: "none",
+          padding: 0,
+          borderRadius: 22,
+          boxShadow: "0 24px 60px rgba(0, 0, 0, 0.4), 0 0 32px rgba(154, 116, 233, 0.12)",
+          border: "1px solid rgba(154, 116, 233, 0.25)",
+        }}
+        onClick={(e) => e.stopPropagation()}
+      >
+        {/* Header */}
+        <div
+          style={{
+            padding: "22px 26px 18px",
+            borderBottom: "1px solid rgba(154, 116, 233, 0.15)",
+            display: "flex",
+            justifyContent: "space-between",
+            alignItems: "flex-start",
+            gap: 16,
+          }}
+        >
           <div>
-            <span style={{ fontSize: 11, fontWeight: 800, textTransform: "uppercase", letterSpacing: 0.8, color: "#8c5ff8" }}>
-              CLIENT APPLICATION DOSSIER
-            </span>
-            <h2 style={{ margin: "2px 0 0", fontSize: 20 }}>{selectedClientForDossier.name}</h2>
-            <p style={{ margin: "2px 0 0", color: "#7a748e", fontSize: 13 }}>
-              {selectedClientForDossier.company} • <strong>App ID:</strong> <code>{selectedClientForDossier.appId}</code>
+            <div style={{ display: "flex", alignItems: "center", gap: 8, flexWrap: "wrap", marginBottom: 6 }}>
+              <span
+                className="admin-badge"
+                style={{
+                  background: "linear-gradient(135deg, #9a74e9 0%, #7c3aed 100%)",
+                  color: "#ffffff",
+                  fontSize: 11,
+                  padding: "3px 10px",
+                }}
+              >
+                CLIENT DOSSIER
+              </span>
+              <span
+                className="admin-badge"
+                style={{
+                  background: "rgba(78, 124, 255, 0.12)",
+                  color: "#4e7cff",
+                  fontWeight: 750,
+                  fontSize: 11,
+                }}
+              >
+                ID: {selectedClientForDossier.appId}
+              </span>
+              <span
+                className="admin-badge"
+                style={{
+                  background: `${stageBadgeColors[selectedClientForDossier.applicationStatus || tracker.currentStage] || "#10b981"}18`,
+                  color: stageBadgeColors[selectedClientForDossier.applicationStatus || tracker.currentStage] || "#10b981",
+                  border: `1px solid ${stageBadgeColors[selectedClientForDossier.applicationStatus || tracker.currentStage] || "#10b981"}33`,
+                  fontSize: 11,
+                }}
+              >
+                ● {selectedClientForDossier.applicationStatus || tracker.currentStage}
+              </span>
+            </div>
+            <h3 style={{ margin: "2px 0 4px", fontSize: 20, fontWeight: 800, color: "inherit", letterSpacing: -0.3 }}>
+              {selectedClientForDossier.name}
+            </h3>
+            <p className="admin-desc" style={{ fontSize: 13 }}>
+              {selectedClientForDossier.company} • Registered: {selectedClientForDossier.submissionDate || "2026-08-18"}
             </p>
           </div>
-          <div style={{ textAlign: "right" }}>
-            <span
-              style={{
-                display: "inline-flex",
-                alignItems: "center",
-                padding: "4px 12px",
-                borderRadius: 999,
-                background: `${stageBadgeColors[selectedClientForDossier.applicationStatus || tracker.currentStage] || "#10b981"}22`,
-                color: stageBadgeColors[selectedClientForDossier.applicationStatus || tracker.currentStage] || "#10b981",
-                fontWeight: 700,
-                fontSize: 13,
-              }}
-            >
-              ● {selectedClientForDossier.applicationStatus || tracker.currentStage}
-            </span>
-            <div style={{ fontSize: 12, color: "#10b981", fontWeight: 700, marginTop: 4 }}>
-              {tracker.progressPercent}% Completed ({tracker.completedStages.length}/{tracker.totalStages} Points)
+
+          <button
+            type="button"
+            onClick={onClose}
+            style={{
+              background: "rgba(241, 245, 249, 0.6)",
+              border: "1px solid rgba(154, 116, 233, 0.15)",
+              borderRadius: "50%",
+              width: 34,
+              height: 34,
+              display: "grid",
+              placeItems: "center",
+              cursor: "pointer",
+              color: "#64748b",
+              transition: "all 0.2s ease",
+            }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.background = "rgba(239, 68, 68, 0.12)";
+              e.currentTarget.style.color = "#ef4444";
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.background = "rgba(241, 245, 249, 0.6)";
+              e.currentTarget.style.color = "#64748b";
+            }}
+          >
+            ✕
+          </button>
+        </div>
+
+        {/* Modal Body */}
+        <div style={{ padding: "22px 26px 26px", display: "flex", flexDirection: "column", gap: 18 }}>
+          {/* Key Details Grid */}
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(140px, 1fr))", gap: 10 }}>
+            <div className="admin-subcard" style={{ padding: "10px 14px" }}>
+              <span className="admin-kicker" style={{ fontSize: 10.5, color: "#9a74e9" }}>Assigned Scheme</span>
+              <strong style={{ display: "block", fontSize: 13.5, color: "inherit" }}>{schemeName}</strong>
+              <small style={{ color: "#64748b", fontSize: 11 }}>{processLabel}</small>
+            </div>
+            <div className="admin-subcard" style={{ padding: "10px 14px" }}>
+              <span className="admin-kicker" style={{ fontSize: 10.5, color: "#10b981" }}>Total Commercial</span>
+              <strong style={{ display: "block", fontSize: 14, color: "#10b981" }}>
+                {formatCurrency(selectedClientForDossier.totalPayment)}
+              </strong>
+              <small style={{ color: "#64748b", fontSize: 11 }}>Agreed Deal Value</small>
+            </div>
+            <div className="admin-subcard" style={{ padding: "10px 14px" }}>
+              <span className="admin-kicker" style={{ fontSize: 10.5, color: "#4e7cff" }}>Progress Level</span>
+              <strong style={{ display: "block", fontSize: 14, color: "#4e7cff" }}>
+                {tracker.progressPercent}% ({tracker.completedStages.length}/{tracker.totalStages})
+              </strong>
+              <small style={{ color: "#64748b", fontSize: 11 }}>Points Completed</small>
+            </div>
+            <div className="admin-subcard" style={{ padding: "10px 14px" }}>
+              <span className="admin-kicker" style={{ fontSize: 10.5 }}>Assigned Officer</span>
+              <strong style={{ display: "block", fontSize: 13.5, color: "inherit" }}>
+                {selectedClientForDossier.assignedSalesPerson || "Branch Sales"}
+              </strong>
+              <small style={{ color: "#64748b", fontSize: 11 }}>Branch Representative</small>
             </div>
           </div>
-        </div>
 
-        {/* Selected Scheme & Process Type Cards */}
-        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(140px, 1fr))", gap: 10 }}>
-          <div style={{ background: "#ffffff", padding: 12, borderRadius: 10, border: "1.5px solid #8c5ff833" }}>
-            <p className="eyebrow" style={{ margin: "0 0 2px", color: "#8c5ff8", fontWeight: 800 }}>Selected Scheme</p>
-            <strong style={{ fontSize: 14, color: "#1e293b" }}>{schemeName}</strong>
-          </div>
-          <div style={{ background: "#ffffff", padding: 12, borderRadius: 10, border: "1.5px solid #4e7cff33" }}>
-            <p className="eyebrow" style={{ margin: "0 0 2px", color: "#4e7cff", fontWeight: 800 }}>Process Type</p>
-            <strong style={{ fontSize: 14, color: "#4e7cff" }}>{processLabel}</strong>
-            <div style={{ fontSize: 11, color: "#64748b", marginTop: 2 }}>{tracker.totalStages} Sequential Stages</div>
-          </div>
-          <div style={{ background: "#ffffff", padding: 12, borderRadius: 10, border: "1px solid #e7e7f5" }}>
-            <p className="eyebrow" style={{ margin: "0 0 2px" }}>Total Commercial</p>
-            <strong style={{ color: "#10b981", fontSize: 14 }}>{formatCurrency(selectedClientForDossier.totalPayment)}</strong>
-          </div>
-          <div style={{ background: "#ffffff", padding: 12, borderRadius: 10, border: "1px solid #e7e7f5" }}>
-            <p className="eyebrow" style={{ margin: "0 0 2px" }}>Assigned Officer</p>
-            <strong style={{ color: "#1e293b", fontSize: 13.5 }}>{selectedClientForDossier.assignedSalesPerson || "Branch Sales"}</strong>
-          </div>
-        </div>
-
-        {/* Dynamic Activity Stepper Bar */}
-        <div>
-          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 8 }}>
-            <label className="field-label" style={{ margin: 0 }}>
-              Activity Progress Pipeline ({schemeName}):
-            </label>
-            <span style={{ fontSize: 12, color: "#64748b", fontWeight: 700 }}>
-              Stage: <strong>{tracker.currentStage}</strong>
+          {/* Stepper Bar in 1 Row */}
+          <div className="admin-subcard" style={{ padding: "14px 16px" }}>
+            <span className="admin-kicker" style={{ fontSize: 11, display: "block", marginBottom: 8 }}>
+              Activity Progress Pipeline ({schemeName})
             </span>
+            <ActivityStatusBar
+              scheme={schemeName}
+              stages={tracker.stages}
+              completedSteps={tracker.completedStages}
+              progress={tracker.progressPercent}
+              interactive={false}
+              size="normal"
+              showTrack={false}
+            />
           </div>
-          <ActivityStatusBar
-            scheme={schemeName}
-            stages={tracker.stages}
-            completedSteps={tracker.completedStages}
-            progress={tracker.progressPercent}
-            interactive={false}
-          />
-        </div>
 
-        {/* Verified Documents */}
-        <div style={{ background: "#fbfbfe", padding: 14, borderRadius: 12, border: "1px solid #e7e7f5" }}>
-          <p className="eyebrow" style={{ margin: "0 0 8px" }}>Compliance & Verified Documents</p>
-          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10 }}>
-            {(selectedClientForDossier.documents || []).map((doc) => (
-              <div key={doc.name} style={{ background: "#fff", padding: 10, borderRadius: 8, border: "1px solid #e7e7f5" }}>
-                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 2 }}>
-                  <strong>{doc.name}</strong>
-                  <span style={{ fontSize: 11, fontWeight: 700, color: doc.status === "Verified" ? "#44bfb0" : "#f2aa38" }}>
+          {/* Verified Documents */}
+          <div>
+            <span className="admin-kicker" style={{ fontSize: 11, display: "block", marginBottom: 8 }}>
+              Compliance &amp; Verified Documents
+            </span>
+            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 8 }}>
+              {(selectedClientForDossier.documents || []).map((doc) => (
+                <div
+                  key={doc.name}
+                  className="admin-subcard"
+                  style={{
+                    display: "flex",
+                    justifyContent: "space-between",
+                    alignItems: "center",
+                    padding: "8px 12px",
+                  }}
+                >
+                  <div>
+                    <strong style={{ fontSize: 12.5 }}>{doc.name}</strong>
+                    <div style={{ fontSize: 11, color: "#64748b" }}>Ref: {doc.number}</div>
+                  </div>
+                  <span
+                    className="admin-badge"
+                    style={{
+                      fontSize: 10.5,
+                      padding: "2px 7px",
+                      background: doc.status === "Verified" ? "rgba(16, 185, 129, 0.12)" : "rgba(245, 158, 11, 0.12)",
+                      color: doc.status === "Verified" ? "#10b981" : "#f59e0b",
+                    }}
+                  >
                     {doc.status}
                   </span>
                 </div>
-                <small style={{ color: "#7a748e" }}>{doc.number}</small>
-              </div>
-            ))}
+              ))}
+            </div>
           </div>
-        </div>
 
-        {/* Status History Timeline */}
-        <div style={{ background: "#fbfbfe", padding: 14, borderRadius: 12, border: "1px solid #e7e7f5" }}>
-          <p className="eyebrow" style={{ margin: "0 0 8px" }}>Application Timeline & History</p>
-          <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
-            {(selectedClientForDossier.history || []).map((h, i) => (
-              <div key={i} style={{ padding: 8, background: "#fff", borderRadius: 6, border: "1px solid #eee", fontSize: 12 }}>
-                <div style={{ display: "flex", justifyContent: "space-between", fontWeight: 700 }}>
-                  <span style={{ color: stageBadgeColors[h.status] || "#10b981" }}>{h.status}</span>
-                  <span style={{ color: "#9a94ad" }}>{h.date}</span>
+          {/* Status History Timeline */}
+          <div>
+            <span className="admin-kicker" style={{ fontSize: 11, display: "block", marginBottom: 8 }}>
+              Application Milestone Timeline &amp; History
+            </span>
+            <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+              {(selectedClientForDossier.history || []).map((h, i) => (
+                <div
+                  key={i}
+                  className="admin-subcard"
+                  style={{
+                    padding: "10px 12px",
+                    fontSize: 12,
+                  }}
+                >
+                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", fontWeight: 700 }}>
+                    <span style={{ color: stageBadgeColors[h.status] || "#10b981" }}>{h.status}</span>
+                    <span style={{ color: "#94a3b8", fontSize: 11 }}>{h.date}</span>
+                  </div>
+                  <p style={{ margin: "2px 0 2px", color: "#64748b", fontSize: 11.5 }}>{h.notes}</p>
+                  <small style={{ color: "#94a3b8", fontSize: 10.5 }}>By {h.updatedBy}</small>
                 </div>
-                <p style={{ margin: "2px 0 0", color: "#555" }}>{h.notes}</p>
-                <small style={{ color: "#888" }}>By {h.updatedBy}</small>
-              </div>
-            ))}
+              ))}
+            </div>
           </div>
-        </div>
 
-        <div style={{ display: "flex", justifyContent: "flex-end", gap: 10 }}>
-          {onOpenStatusUpdate && (
-            <button
-              className="primary-button"
-              type="button"
-              onClick={() => {
-                onOpenStatusUpdate(selectedClientForDossier);
-              }}
-            >
-              Update Application Status
+          {/* Action Buttons */}
+          <div
+            style={{
+              display: "flex",
+              justifyContent: "flex-end",
+              gap: 12,
+              paddingTop: 10,
+              borderTop: "1px solid rgba(154, 116, 233, 0.15)",
+            }}
+          >
+            <button className="admin-btn-secondary" type="button" onClick={onClose} style={{ padding: "10px 20px" }}>
+              Close Dossier
             </button>
-          )}
-          <button className="table-action" type="button" onClick={onClose}>
-            Close Dossier
-          </button>
+            {onOpenStatusUpdate && (
+              <button
+                className="admin-btn-primary"
+                type="button"
+                style={{ padding: "10px 24px" }}
+                onClick={() => {
+                  onOpenStatusUpdate(selectedClientForDossier);
+                }}
+              >
+                <Icon name="check" size={16} />
+                <span>Update Status</span>
+              </button>
+            )}
+          </div>
         </div>
       </div>
-    </Modal>
+    </div>
   );
 }

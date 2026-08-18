@@ -1,5 +1,6 @@
 import React from "react";
 import { ACTIVITY_STAGES, stageBadgeColors, formatCurrency, getTrackerState } from "./mockAdminData";
+import "./AdminDashboard.css";
 
 export default function AdminClientsPage({
   selectedBranch,
@@ -7,33 +8,31 @@ export default function AdminClientsPage({
   setStatusTab,
   clientSearch,
   setClientSearch,
-  filteredClients,
+  filteredClients = [],
   onOpenStatusUpdate,
   onOpenDossier,
 }) {
   return (
-    <section className="admin-page-section">
-      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: 16, marginBottom: 24 }}>
+    <div className="admin-page-container">
+      {/* Glass Header Banner */}
+      <div className="admin-header-banner">
         <div>
-          <p className="dashboard-eyebrow">{selectedBranch}</p>
-          <h1>Branch Client Directory & Progress</h1>
+          <span className="admin-kicker">BRANCH DIRECTORY &amp; AUDIT</span>
+          <h2 className="admin-title">{selectedBranch} Client Register</h2>
+          <p className="admin-desc">
+            Unified directory for reviewing, verifying, and updating 5-point client milestones (20% each) across the branch.
+          </p>
         </div>
       </div>
 
-      {/* Filter Tabs & Search */}
-      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: 12, marginBottom: 20 }}>
-        <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
+      {/* Filter Tabs & Search Bar */}
+      <div className="admin-filter-bar">
+        <div className="admin-branch-tabs">
           {["All", ...ACTIVITY_STAGES.map((s) => s.name)].map((tab) => (
             <button
               key={tab}
               type="button"
-              className="table-action"
-              style={{
-                background: statusTab === tab ? "#4e7cff" : "#fff",
-                color: statusTab === tab ? "#fff" : "#1d2330",
-                border: statusTab === tab ? "1px solid #4e7cff" : "1px solid #e7e7f5",
-                minWidth: 100,
-              }}
+              className={`admin-branch-tab ${statusTab === tab ? "active" : ""}`}
               onClick={() => setStatusTab(tab)}
             >
               {tab}
@@ -41,24 +40,24 @@ export default function AdminClientsPage({
           ))}
         </div>
 
-        <div style={{ minWidth: 260 }}>
+        <div style={{ minWidth: 280 }}>
           <input
             type="text"
+            className="admin-form-input"
             placeholder="Search client, company, app ID..."
             value={clientSearch}
             onChange={(e) => setClientSearch(e.target.value)}
-            style={{ width: "100%", padding: "9px 14px", borderRadius: 8, border: "1px solid #dedfe1" }}
           />
         </div>
       </div>
 
-      {/* Clients Table */}
-      <div style={{ overflowX: "auto" }}>
-        <table className="clients-table" style={{ minWidth: 980 }}>
+      {/* Clients Table Wrap */}
+      <div className="admin-table-wrap" style={{ overflowX: "auto" }}>
+        <table className="admin-table" style={{ minWidth: 980 }}>
           <thead>
             <tr>
               <th>Application ID</th>
-              <th>Client & Company</th>
+              <th>Client &amp; Company</th>
               <th>Scheme / Value</th>
               <th>Sales Officer</th>
               <th>Activity Status (5 Points)</th>
@@ -73,10 +72,10 @@ export default function AdminClientsPage({
 
               return (
                 <tr key={client.id}>
-                  <td><strong>{client.appId}</strong></td>
+                  <td><code style={{ color: "#4e7cff", fontWeight: 700 }}>{client.appId}</code></td>
                   <td>
                     <strong>{client.name}</strong>
-                    <div style={{ fontSize: 12, color: "#7a748e" }}>{client.company}</div>
+                    <div style={{ fontSize: 12, color: "#64748b" }}>{client.company}</div>
                   </td>
                   <td>
                     <div>{client.scheme}</div>
@@ -86,15 +85,11 @@ export default function AdminClientsPage({
                   <td>
                     <div style={{ display: "flex", flexDirection: "column", gap: 4 }}>
                       <span
+                        className="admin-badge"
                         style={{
-                          display: "inline-flex",
-                          alignItems: "center",
-                          padding: "3px 9px",
-                          borderRadius: 999,
                           background: `${stageBadgeColors[client.applicationStatus || tracker.currentStage] || "#10b981"}18`,
                           color: stageBadgeColors[client.applicationStatus || tracker.currentStage] || "#10b981",
-                          fontWeight: 700,
-                          fontSize: 11.5,
+                          border: `1px solid ${stageBadgeColors[client.applicationStatus || tracker.currentStage] || "#10b981"}33`,
                           width: "fit-content",
                         }}
                       >
@@ -112,7 +107,7 @@ export default function AdminClientsPage({
                                 width: 8,
                                 height: 8,
                                 borderRadius: "50%",
-                                background: isDone ? "#10b981" : "#cbd5e1",
+                                background: isDone ? "#10b981" : "rgba(148, 163, 184, 0.4)",
                               }}
                             />
                           );
@@ -125,74 +120,36 @@ export default function AdminClientsPage({
                   </td>
                   <td style={{ minWidth: 130 }}>
                     <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-                      <div style={{ flex: 1, height: 8, background: "#e7e7f5", borderRadius: 999, overflow: "hidden" }}>
+                      <div style={{ flex: 1, height: 8, background: "rgba(154, 116, 233, 0.15)", borderRadius: 999, overflow: "hidden" }}>
                         <div
                           style={{
                             width: `${tracker.progressPercent}%`,
                             height: "100%",
-                            background: tracker.progressPercent === 100 ? "#10b981" : "linear-gradient(90deg, #10b981, #059669)",
+                            background: tracker.progressPercent === 100 ? "#10b981" : "linear-gradient(90deg, #4e7cff, #10b981)",
                             borderRadius: 999,
                           }}
                         />
                       </div>
-                      <strong style={{ fontSize: 12, color: tracker.progressPercent === 100 ? "#10b981" : "#1e293b" }}>
+                      <strong style={{ fontSize: 12, color: tracker.progressPercent === 100 ? "#10b981" : "inherit" }}>
                         {tracker.progressPercent}%
                       </strong>
                     </div>
                   </td>
-                  <td style={{ fontSize: 12, color: "#7a748e" }}>{client.lastUpdated}</td>
+                  <td style={{ fontSize: 12, color: "#64748b" }}>{client.lastUpdated}</td>
                   <td style={{ textAlign: "right" }}>
                     <div style={{ display: "inline-flex", gap: 6, alignItems: "center" }}>
                       <button
-                        className="primary-button"
+                        className="admin-btn-primary"
                         type="button"
-                        style={{
-                          display: "inline-flex",
-                          alignItems: "center",
-                          justifyContent: "center",
-                          height: 32,
-                          padding: "0 12px",
-                          fontSize: 12,
-                          fontWeight: 700,
-                          borderRadius: 8,
-                          margin: 0,
-                          boxSizing: "border-box",
-                        }}
+                        style={{ padding: "6px 12px", fontSize: 12 }}
                         onClick={() => onOpenStatusUpdate(client)}
                       >
                         Update Status
                       </button>
                       <button
-                        className="admin-dossier-btn"
+                        className="admin-btn-secondary"
                         type="button"
-                        style={{
-                          display: "inline-flex",
-                          alignItems: "center",
-                          justifyContent: "center",
-                          gap: 5,
-                          height: 32,
-                          padding: "0 12px",
-                          fontSize: 12,
-                          fontWeight: 700,
-                          borderRadius: 8,
-                          background: "#f0f4ff",
-                          color: "#3730a3",
-                          border: "1px solid #c7d2fe",
-                          cursor: "pointer",
-                          margin: 0,
-                          boxSizing: "border-box",
-                          transition: "all 0.2s cubic-bezier(0.4, 0, 0.2, 1)",
-                        }}
-                        onMouseEnter={(e) => {
-                          e.currentTarget.style.background = "#4338ca";
-                          e.currentTarget.style.color = "#ffffff";
-                          e.currentTarget.style.borderColor = "#4338ca";
-                        }}
-                        onMouseLeave={(e) => {
-                          e.currentTarget.style.background = "#f0f4ff";
-                          e.currentTarget.style.color = "#3730a3";
-                          e.currentTarget.style.borderColor = "#c7d2fe";
-                        }}
+                        style={{ padding: "6px 12px", fontSize: 12 }}
                         onClick={() => onOpenDossier(client)}
                       >
                         <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
@@ -210,7 +167,7 @@ export default function AdminClientsPage({
             })}
             {filteredClients.length === 0 && (
               <tr>
-                <td colSpan={8} style={{ textAlign: "center", padding: "36px 16px", color: "#7a748e" }}>
+                <td colSpan={8} style={{ textAlign: "center", padding: "36px 16px", color: "#64748b" }}>
                   No clients found for {selectedBranch} under {statusTab}.
                 </td>
               </tr>
@@ -218,6 +175,6 @@ export default function AdminClientsPage({
           </tbody>
         </table>
       </div>
-    </section>
+    </div>
   );
 }

@@ -1,5 +1,6 @@
 import React, { useState, useMemo } from "react";
 import { stageBadgeColors } from "./mockAdminData";
+import "./AdminDashboard.css";
 
 export default function AdminHistoryPage({
   selectedBranch,
@@ -39,45 +40,40 @@ export default function AdminHistoryPage({
   }, [branchClients, historySearch]);
 
   return (
-    <section className="admin-page-section">
-      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: 16, marginBottom: 20 }}>
+    <div className="admin-page-container">
+      {/* Glass Header Banner */}
+      <div className="admin-header-banner">
         <div>
-          <p className="dashboard-eyebrow">{selectedBranch}</p>
-          <h1 style={{ margin: 0 }}>Application Milestone Audit Trail</h1>
-          <p style={{ margin: "4px 0 0", color: "#7a748e", fontSize: 13 }}>
+          <span className="admin-kicker">COMPLIANCE &amp; LOGS</span>
+          <h2 className="admin-title">{selectedBranch} Milestone Audit Trail</h2>
+          <p className="admin-desc">
             Complete historical log of verification stages, updates, and admin notes across branch clients.
           </p>
         </div>
 
         {/* Quick Search */}
-        <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+        <div style={{ minWidth: 260 }}>
           <input
             type="text"
+            className="admin-form-input"
             placeholder="Search audit trail..."
             value={historySearch}
             onChange={(e) => setHistorySearch(e.target.value)}
-            style={{
-              padding: "7px 14px",
-              borderRadius: 8,
-              border: "1px solid #dcdfe6",
-              fontSize: 13,
-              width: 220,
-              outline: "none",
-            }}
           />
         </div>
       </div>
 
-      <div style={{ overflowX: "auto", background: "#fff", borderRadius: 16, border: "1px solid #e7e7f5" }}>
-        <table className="clients-table" style={{ minWidth: 960, margin: 0 }}>
+      {/* Table Wrap */}
+      <div className="admin-table-wrap" style={{ overflowX: "auto" }}>
+        <table className="admin-table" style={{ minWidth: 960 }}>
           <thead>
             <tr>
               <th>Date</th>
               <th>Application</th>
-              <th>Client & Company</th>
+              <th>Client &amp; Company</th>
               <th>Milestone Stage</th>
               <th>Updated By</th>
-              <th>Admin Notes & Remarks</th>
+              <th>Admin Notes &amp; Remarks</th>
               <th style={{ textAlign: "right" }}>Client Details</th>
             </tr>
           </thead>
@@ -85,63 +81,31 @@ export default function AdminHistoryPage({
             {historyItems.map((item) => (
               <tr key={item.rowKey}>
                 <td><strong>{item.date}</strong></td>
-                <td><code>{item.appId}</code></td>
+                <td><code style={{ color: "#4e7cff", fontWeight: 700 }}>{item.appId}</code></td>
                 <td>
                   <strong>{item.clientName}</strong>
-                  <div style={{ fontSize: 12, color: "#7a748e" }}>{item.company}</div>
+                  <div style={{ fontSize: 12, color: "#64748b" }}>{item.company}</div>
                 </td>
                 <td>
                   <span
+                    className="admin-badge"
                     style={{
-                      display: "inline-flex",
-                      alignItems: "center",
-                      padding: "4px 10px",
-                      borderRadius: 999,
                       background: `${stageBadgeColors[item.status] || "#10b981"}22`,
                       color: stageBadgeColors[item.status] || "#10b981",
-                      fontWeight: 700,
-                      fontSize: 12,
+                      border: `1px solid ${stageBadgeColors[item.status] || "#10b981"}33`,
                     }}
                   >
                     ● {item.status}
                   </span>
                 </td>
                 <td><strong>{item.updatedBy}</strong></td>
-                <td style={{ maxWidth: 320, color: "#475569", fontSize: 12.5 }}>{item.notes}</td>
+                <td style={{ maxWidth: 320, color: "#64748b", fontSize: 12.5 }}>{item.notes}</td>
                 <td style={{ textAlign: "right", whiteSpace: "nowrap" }}>
                   {onOpenDossier && (
                     <button
-                      className="admin-dossier-btn"
+                      className="admin-btn-secondary"
                       type="button"
-                      style={{
-                        display: "inline-flex",
-                        alignItems: "center",
-                        justifyContent: "center",
-                        gap: 5,
-                        height: 32,
-                        padding: "0 12px",
-                        fontSize: 12,
-                        fontWeight: 700,
-                        borderRadius: 8,
-                        background: "#f0f4ff",
-                        color: "#3730a3",
-                        border: "1px solid #c7d2fe",
-                        cursor: "pointer",
-                        margin: 0,
-                        boxSizing: "border-box",
-                        transition: "all 0.2s cubic-bezier(0.4, 0, 0.2, 1)",
-                        boxShadow: "0 1px 2px rgba(55, 48, 163, 0.06)",
-                      }}
-                      onMouseEnter={(e) => {
-                        e.currentTarget.style.background = "#4338ca";
-                        e.currentTarget.style.color = "#ffffff";
-                        e.currentTarget.style.borderColor = "#4338ca";
-                      }}
-                      onMouseLeave={(e) => {
-                        e.currentTarget.style.background = "#f0f4ff";
-                        e.currentTarget.style.color = "#3730a3";
-                        e.currentTarget.style.borderColor = "#c7d2fe";
-                      }}
+                      style={{ padding: "5px 10px", fontSize: 11.5 }}
                       onClick={() => onOpenDossier(item.client)}
                       title={`View full details & dossier for ${item.clientName}`}
                     >
@@ -159,7 +123,7 @@ export default function AdminHistoryPage({
             ))}
             {historyItems.length === 0 && (
               <tr>
-                <td colSpan={7} style={{ textAlign: "center", padding: "36px 16px", color: "#7a748e" }}>
+                <td colSpan={7} style={{ textAlign: "center", padding: "36px 16px", color: "#64748b" }}>
                   No audit history records found for {selectedBranch}.
                 </td>
               </tr>
@@ -167,6 +131,6 @@ export default function AdminHistoryPage({
           </tbody>
         </table>
       </div>
-    </section>
+    </div>
   );
 }

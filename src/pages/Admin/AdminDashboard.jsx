@@ -22,6 +22,7 @@ import AgreementPage from "../Agreement/AgreementPage";
 // Dedicated Modals
 import AdminStatusModal from "./AdminStatusModal";
 import AdminClientDossierModal from "./AdminClientDossierModal";
+import "./AdminDashboard.css";
 
 import {
   canCompleteStage,
@@ -335,15 +336,35 @@ export default function AdminDashboard({ onSignOut, userEmail }) {
         >
           <div className="top-actions">
             {/* Branch Selector Dropdown */}
-            <div style={{ display: "inline-flex", alignItems: "center", gap: 8, background: "#fff", padding: "4px 10px", borderRadius: 10, border: "1px solid #dedfe1" }}>
+            <div
+              style={{
+                display: "inline-flex",
+                alignItems: "center",
+                gap: 8,
+                background: dark ? "rgba(22, 30, 49, 0.85)" : "rgba(255, 255, 255, 0.85)",
+                backdropFilter: "blur(20px)",
+                padding: "6px 12px",
+                borderRadius: 12,
+                border: "1px solid rgba(154, 116, 233, 0.2)",
+                boxShadow: "0 4px 12px rgba(154, 116, 233, 0.06)",
+              }}
+            >
               <Icon name="branches" size={15} />
               <select
                 value={selectedBranch}
                 onChange={(e) => setSelectedBranch(e.target.value)}
-                style={{ border: "none", background: "transparent", font: "inherit", fontWeight: 700, color: "#1d2330", cursor: "pointer", outline: "none" }}
+                style={{
+                  border: "none",
+                  background: "transparent",
+                  font: "inherit",
+                  fontWeight: 700,
+                  color: dark ? "#ffffff" : "#1d2330",
+                  cursor: "pointer",
+                  outline: "none",
+                }}
               >
                 {initialBranches.map((b) => (
-                  <option key={b.id} value={b.name}>
+                  <option key={b.id} value={b.name} style={{ background: dark ? "#1e293b" : "#fff", color: dark ? "#fff" : "#000" }}>
                     {b.name}
                   </option>
                 ))}
@@ -413,12 +434,12 @@ export default function AdminDashboard({ onSignOut, userEmail }) {
             style={{
               padding: "14px 20px",
               marginBottom: 18,
-              borderRadius: 12,
+              borderRadius: 14,
               background: "linear-gradient(135deg, #10b981 0%, #059669 100%)",
               color: "#ffffff",
               fontWeight: 600,
               fontSize: "13.5px",
-              boxShadow: "0 4px 18px rgba(16, 185, 129, 0.35)",
+              boxShadow: "0 6px 20px rgba(16, 185, 129, 0.35)",
               display: "flex",
               alignItems: "center",
               justifyContent: "space-between",
@@ -445,7 +466,11 @@ export default function AdminDashboard({ onSignOut, userEmail }) {
                 selectedBranch={selectedBranch}
                 branchClients={branchClients}
                 metrics={metrics}
+                dark={dark}
                 onOpenClients={() => handleNavChange("Clients")}
+                onOpenPipeline={() => handleNavChange("Pipeline")}
+                onOpenAgreement={() => handleNavChange("Agreement")}
+                onOpenHistory={() => handleNavChange("History")}
                 onOpenStatusUpdate={handleOpenStatusUpdate}
                 onQuickStepToggle={handleQuickStepToggle}
                 onOpenDossier={setSelectedClientForDossier}
@@ -459,7 +484,11 @@ export default function AdminDashboard({ onSignOut, userEmail }) {
                 selectedBranch={selectedBranch}
                 branchClients={branchClients}
                 metrics={metrics}
+                dark={dark}
                 onOpenClients={() => handleNavChange("Clients")}
+                onOpenPipeline={() => handleNavChange("Pipeline")}
+                onOpenAgreement={() => handleNavChange("Agreement")}
+                onOpenHistory={() => handleNavChange("History")}
                 onOpenStatusUpdate={handleOpenStatusUpdate}
                 onQuickStepToggle={handleQuickStepToggle}
                 onOpenDossier={setSelectedClientForDossier}
@@ -473,7 +502,11 @@ export default function AdminDashboard({ onSignOut, userEmail }) {
                 selectedBranch={selectedBranch}
                 branchClients={branchClients}
                 metrics={metrics}
+                dark={dark}
                 onOpenClients={() => handleNavChange("Clients")}
+                onOpenPipeline={() => handleNavChange("Pipeline")}
+                onOpenAgreement={() => handleNavChange("Agreement")}
+                onOpenHistory={() => handleNavChange("History")}
                 onOpenStatusUpdate={handleOpenStatusUpdate}
                 onQuickStepToggle={handleQuickStepToggle}
                 onOpenDossier={setSelectedClientForDossier}
@@ -490,6 +523,7 @@ export default function AdminDashboard({ onSignOut, userEmail }) {
                 clientSearch={clientSearch}
                 setClientSearch={setClientSearch}
                 filteredClients={filteredClients}
+                dark={dark}
                 onOpenStatusUpdate={handleOpenStatusUpdate}
                 onOpenDossier={setSelectedClientForDossier}
               />
@@ -501,6 +535,7 @@ export default function AdminDashboard({ onSignOut, userEmail }) {
               <AdminPipelinePage
                 selectedBranch={selectedBranch}
                 branchClients={branchClients}
+                dark={dark}
                 onOpenStatusUpdate={handleOpenStatusUpdate}
               />
             }
@@ -522,6 +557,7 @@ export default function AdminDashboard({ onSignOut, userEmail }) {
               <AdminHistoryPage
                 selectedBranch={selectedBranch}
                 branchClients={branchClients}
+                dark={dark}
                 onOpenDossier={setSelectedClientForDossier}
               />
             }
@@ -533,6 +569,7 @@ export default function AdminDashboard({ onSignOut, userEmail }) {
                 selectedBranch={selectedBranch}
                 teamMembers={teamMembers}
                 branchClients={branchClients}
+                dark={dark}
                 onOpenDossier={setSelectedClientForDossier}
                 onOpenStatusUpdate={handleOpenStatusUpdate}
               />

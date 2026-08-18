@@ -6044,7 +6044,13 @@ form {
 .dashboard-dark .mkt-service-card,
 .dashboard-dark .mkt-filter-bar,
 .dashboard-dark .mkt-table-wrap,
-.dashboard-dark .modal-card.mkt-panel-card {
+.dashboard-dark .modal-card.mkt-panel-card,
+.dashboard-dark .admin-header-banner,
+.dashboard-dark .admin-stat-card,
+.dashboard-dark .admin-launchpad-card,
+.dashboard-dark .admin-panel-card,
+.dashboard-dark .admin-filter-bar,
+.dashboard-dark .admin-table-wrap {
   background: rgba(15, 21, 35, 0.75) !important;
   backdrop-filter: blur(28px) saturate(180%) !important;
   -webkit-backdrop-filter: blur(28px) saturate(180%) !important;
@@ -6054,7 +6060,8 @@ form {
 }
 
 .dashboard-dark .it-subcard,
-.dashboard-dark .mkt-subcard {
+.dashboard-dark .mkt-subcard,
+.dashboard-dark .admin-subcard {
   background: rgba(10, 15, 26, 0.65) !important;
   backdrop-filter: blur(16px) !important;
   -webkit-backdrop-filter: blur(16px) !important;
@@ -6068,11 +6075,19 @@ form {
 .dashboard-dark .it-dashboard textarea,
 .dashboard-dark .marketing-dashboard input,
 .dashboard-dark .marketing-dashboard select,
-.dashboard-dark .marketing-dashboard textarea {
-  background: rgba(10, 15, 26, 0.7) !important;
+.dashboard-dark .marketing-dashboard textarea,
+.dashboard-dark .admin-form-input,
+.dashboard-dark .admin-form-select,
+.dashboard-dark .admin-form-textarea,
+.dashboard-dark textarea,
+.dashboard-dark input[type="text"],
+.dashboard-dark input[type="email"],
+.dashboard-dark input[type="search"],
+.dashboard-dark select {
+  background: rgba(15, 23, 42, 0.8) !important;
   backdrop-filter: blur(16px) !important;
   -webkit-backdrop-filter: blur(16px) !important;
-  border: 1px solid rgba(255, 255, 255, 0.12) !important;
+  border: 1px solid rgba(255, 255, 255, 0.14) !important;
   color: #f8fafc !important;
 }
 
@@ -6081,9 +6096,13 @@ form {
 .dashboard-dark .it-dashboard textarea:focus,
 .dashboard-dark .marketing-dashboard input:focus,
 .dashboard-dark .marketing-dashboard select:focus,
-.dashboard-dark .marketing-dashboard textarea:focus {
-  border-color: #7aa2ff !important;
-  box-shadow: 0 0 0 3px rgba(122, 162, 255, 0.25) !important;
+.dashboard-dark .marketing-dashboard textarea:focus,
+.dashboard-dark .admin-form-input:focus,
+.dashboard-dark .admin-form-select:focus,
+.dashboard-dark .admin-form-textarea:focus,
+.dashboard-dark textarea:focus {
+  border-color: #60a5fa !important;
+  box-shadow: 0 0 0 3px rgba(96, 165, 250, 0.25) !important;
 }
 
 .dashboard-dark .it-dashboard input::placeholder,
@@ -6174,6 +6193,19 @@ form {
   border: 1px solid rgba(255, 255, 255, 0.1) !important;
   color: #e2e8f0 !important;
 }
+
+/* Hide Scrollbar Utility */
+.hide-scrollbar {
+  -ms-overflow-style: none !important;
+  scrollbar-width: none !important;
+}
+
+.hide-scrollbar::-webkit-scrollbar {
+  display: none !important;
+  width: 0 !important;
+  height: 0 !important;
+}
+
 
 .dashboard-dark .it-dashboard .it-btn-secondary:hover,
 .dashboard-dark .marketing-dashboard .mkt-btn-secondary:hover {

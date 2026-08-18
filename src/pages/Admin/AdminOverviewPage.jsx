@@ -1,118 +1,167 @@
 import React from "react";
+import KpiCard from "../../components/KpiCard";
+import Icon from "../../components/Icon";
 import ActivityStatusBar from "../../components/dashboard/ActivityStatusBar";
 import { ACTIVITY_STAGES, stageBadgeColors } from "./mockAdminData";
 import { getTrackerState } from "../../utils/schemeTracker";
+import "./AdminDashboard.css";
 
 export default function AdminOverviewPage({
   selectedBranch,
-  branchClients,
+  branchClients = [],
   metrics,
+  dark,
   onOpenClients,
+  onOpenPipeline,
+  onOpenAgreement,
+  onOpenHistory,
   onOpenStatusUpdate,
   onQuickStepToggle,
   onOpenDossier,
 }) {
+  const verifiedDocsCount = branchClients.reduce((acc, c) => {
+    return acc + (c.documents || []).filter((d) => d.status === "Verified").length;
+  }, 0);
+  const totalDocsCount = branchClients.reduce((acc, c) => {
+    return acc + (c.documents || []).length;
+  }, 0);
+
+  const kpiCards = [
+    {
+      label: "Branch Clients",
+      value: `${metrics.total}`,
+      trend: "100% Tracked",
+      description: `Under ${selectedBranch}`,
+      accent: "#4e7cff",
+      onClick: onOpenClients,
+    },
+    {
+      label: "In Active Pipeline",
+      value: `${metrics.inProgress}`,
+      trend: "20% - 80%",
+      description: "Milestone checkpoints active",
+      accent: "#f2aa38",
+      onClick: onOpenPipeline || onOpenClients,
+    },
+    {
+      label: "Manager Review Stage",
+      value: `${metrics.managerReview}`,
+      trend: "60% Milestone",
+      description: "Commercial clearance pending",
+      accent: "#26a69a",
+      onClick: onOpenClients,
+    },
+    {
+      label: "Fully Approved",
+      value: `${metrics.completed}`,
+      trend: "5/5 Points Done",
+      description: "Disbursed & live agreements",
+      accent: "#10b981",
+      onClick: onOpenClients,
+    },
+    {
+      label: "Document Audits",
+      value: `${verifiedDocsCount}/${totalDocsCount}`,
+      trend: "Verified KYC",
+      description: "Compliance documents checked",
+      accent: "#9a74e9",
+      onClick: onOpenClients,
+    },
+    {
+      label: "Branch S.L.A Health",
+      value: "99.8%",
+      trend: "Optimal",
+      description: "Milestone dispatch uptime",
+      accent: "#f2938f",
+      onClick: onOpenHistory,
+    },
+  ];
+
   return (
-    <section className="admin-page-section">
-      {/* Branch Header Banner */}
-      <div
-        style={{
-          background: "linear-gradient(135deg, #172135 0%, #20335e 100%)",
-          color: "#fff",
-          padding: "20px 24px",
-          borderRadius: 16,
-          marginBottom: 22,
-          display: "flex",
-          justifyContent: "space-between",
-          alignItems: "center",
-          flexWrap: "wrap",
-          gap: 16,
-        }}
-      >
-        <div>
-          <span style={{ fontSize: 11.5, textTransform: "uppercase", letterSpacing: 1, color: "#8c5ff8", fontWeight: 700 }}>
-            Active Branch Command
-          </span>
-          <h2 style={{ margin: "4px 0 2px", color: "#fff", fontSize: 22 }}>{selectedBranch}</h2>
-          <p style={{ margin: 0, color: "#a8b7dd", fontSize: 13 }}>
-            Admin workspace for reviewing, verifying, and updating 5-point client milestones (20% each) across the branch.
-          </p>
-        </div>
-        <div style={{ display: "flex", gap: 10 }}>
-          <button
-            type="button"
-            className="primary-button"
+    <section className="dashboard-layout" style={{ animation: "fadeIn 0.25s ease-out" }}>
+      {/* Main Column */}
+      <div className="dashboard-main">
+        {/* KPI Cards Grid */}
+        <section className="kpi-grid">
+          {kpiCards.map((card) => (
+            <KpiCard
+              key={card.label}
+              card={card}
+              onClick={card.onClick}
+              dark={dark}
+            />
+          ))}
+        </section>
+
+        {/* Quick Launchpad Action Cards */}
+        <section className="admin-launchpad-grid">
+          <div
+            className="admin-launchpad-card blue"
             onClick={onOpenClients}
-            style={{ background: "#4e7cff", borderColor: "#4e7cff" }}
           >
-            View All {branchClients.length} Clients
-          </button>
-        </div>
-      </div>
-
-      {/* KPI Cards Grid */}
-      <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(210px, 1fr))", gap: 16, marginBottom: 24 }}>
-        <div style={{ background: "#fff", padding: 20, borderRadius: 16, border: "1px solid #e7e7f5" }}>
-          <p className="eyebrow" style={{ margin: "0 0 6px", color: "#4e7cff" }}>Branch Clients</p>
-          <div style={{ display: "flex", alignItems: "baseline", gap: 10 }}>
-            <h2 style={{ margin: 0, fontSize: 28, fontWeight: 800 }}>{metrics.total}</h2>
-            <span style={{ fontSize: 12, color: "#10b981", fontWeight: 700 }}>100% Tracked</span>
-          </div>
-          <small style={{ color: "#7a748e", marginTop: 4, display: "block" }}>Under {selectedBranch}</small>
-        </div>
-
-        <div style={{ background: "#fff", padding: 20, borderRadius: 16, border: "1px solid #e7e7f5" }}>
-          <p className="eyebrow" style={{ margin: "0 0 6px", color: "#f2aa38" }}>In Active Pipeline</p>
-          <div style={{ display: "flex", alignItems: "baseline", gap: 10 }}>
-            <h2 style={{ margin: 0, fontSize: 28, fontWeight: 800 }}>{metrics.inProgress}</h2>
-            <span style={{ fontSize: 12, color: "#f2aa38", fontWeight: 700 }}>● 20% - 80% Progress</span>
-          </div>
-          <small style={{ color: "#7a748e", marginTop: 4, display: "block" }}>Milestone checkpoints in work</small>
-        </div>
-
-        <div style={{ background: "#fff", padding: 20, borderRadius: 16, border: "1px solid #e7e7f5" }}>
-          <p className="eyebrow" style={{ margin: "0 0 6px", color: "#26a69a" }}>Manager Review Stage</p>
-          <div style={{ display: "flex", alignItems: "baseline", gap: 10 }}>
-            <h2 style={{ margin: 0, fontSize: 28, fontWeight: 800 }}>{metrics.managerReview}</h2>
-            <span style={{ fontSize: 12, color: "#26a69a", fontWeight: 700 }}>60% Milestone</span>
-          </div>
-          <small style={{ color: "#7a748e", marginTop: 4, display: "block" }}>Commercial sign-off clearance</small>
-        </div>
-
-        <div style={{ background: "#fff", padding: 20, borderRadius: 16, border: "1px solid #e7e7f5" }}>
-          <p className="eyebrow" style={{ margin: "0 0 6px", color: "#10b981" }}>Fully Approved (100%)</p>
-          <div style={{ display: "flex", alignItems: "baseline", gap: 10 }}>
-            <h2 style={{ margin: 0, fontSize: 28, fontWeight: 800 }}>{metrics.completed}</h2>
-            <span style={{ fontSize: 12, color: "#10b981", fontWeight: 700 }}>5/5 Points Done</span>
-          </div>
-          <small style={{ color: "#7a748e", marginTop: 4, display: "block" }}>Disbursed & live agreements</small>
-        </div>
-      </div>
-
-      {/* Application Progress Grid & Quick Review Queue */}
-      <div style={{ display: "grid", gridTemplateColumns: "1.45fr 1fr", gap: 20 }}>
-        {/* Left: Active Applications Pipeline Table with 5-Point Stepper Cards */}
-        <div style={{ background: "#fff", padding: 22, borderRadius: 16, border: "1px solid #e7e7f5" }}>
-          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 16 }}>
-            <div>
-              <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-                <h3 style={{ margin: 0 }}>Client Application Progress Queue</h3>
-                <span style={{ fontSize: 11.5, fontWeight: 700, background: "rgba(99, 102, 241, 0.1)", color: "#4f46e5", padding: "2px 8px", borderRadius: 999 }}>
-                  Top 3 Recent
-                </span>
+            <div className="admin-launchpad-top">
+              <div className="admin-launchpad-icon">
+                <Icon name="clients" size={18} />
               </div>
-              <p style={{ margin: "4px 0 0", color: "#7a748e", fontSize: 13 }}>
-                Recently updated client milestones. Direct interactive status updates enabled.
-              </p>
+              <span className="admin-launchpad-action-link">Manage Clients →</span>
             </div>
-            <button type="button" className="table-action" onClick={onOpenClients}>
-              Manage All ({branchClients.length})
+            <h3 className="admin-launchpad-title">Branch Client Directory</h3>
+            <p className="admin-launchpad-desc">
+              Review and audit all {branchClients.length} registered clients under {selectedBranch}.
+            </p>
+          </div>
+
+          <div
+            className="admin-launchpad-card green"
+            onClick={onOpenPipeline || onOpenClients}
+          >
+            <div className="admin-launchpad-top">
+              <div className="admin-launchpad-icon">
+                <Icon name="overview" size={18} />
+              </div>
+              <span className="admin-launchpad-action-link">View Pipeline →</span>
+            </div>
+            <h3 className="admin-launchpad-title">Milestone Pipeline Board</h3>
+            <p className="admin-launchpad-desc">
+              Track 5-point progression stages across CRM Creation, Agreement, Reports, and Approvals.
+            </p>
+          </div>
+
+          <div
+            className="admin-launchpad-card purple"
+            onClick={onOpenAgreement || onOpenClients}
+          >
+            <div className="admin-launchpad-top">
+              <div className="admin-launchpad-icon">
+                <Icon name="agreement" size={18} />
+              </div>
+              <span className="admin-launchpad-action-link">Agreements →</span>
+            </div>
+            <h3 className="admin-launchpad-title">Legal Agreements</h3>
+            <p className="admin-launchpad-desc">
+              Generate, dispatch, and review legal agreements with automated milestone progression.
+            </p>
+          </div>
+        </section>
+
+        {/* Client Application Progress Queue */}
+        <section className="admin-panel-card" style={{ marginTop: 4 }}>
+          <div className="admin-panel-header">
+            <div>
+              <span className="admin-kicker">MILESTONE CHECKPOINT QUEUE</span>
+              <h3 className="admin-panel-header-title">Client Application Progress</h3>
+            </div>
+            <button
+              type="button"
+              className="admin-btn-secondary"
+              onClick={onOpenClients}
+            >
+              <span>Manage All ({branchClients.length}) →</span>
             </button>
           </div>
 
-          <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
+          <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
             {(() => {
-              // Strictly show only the 3 most recently updated or added cards
               const recentClients = [...branchClients]
                 .sort((a, b) => {
                   const timeA = new Date(a.lastUpdated || a.submissionDate || 0).getTime();
@@ -124,7 +173,7 @@ export default function AdminOverviewPage({
               if (recentClients.length === 0) {
                 return (
                   <div style={{ padding: "32px 16px", textAlign: "center", color: "#7a748e", fontSize: 13 }}>
-                    No client applications found in this branch.
+                    No client applications found in {selectedBranch}.
                   </div>
                 );
               }
@@ -135,35 +184,28 @@ export default function AdminOverviewPage({
                 return (
                   <div
                     key={client.id}
+                    className="admin-subcard"
                     style={{
-                      padding: 16,
-                      borderRadius: 16,
-                      background: "#fbfbfe",
-                      border: "1px solid #e7e7f5",
                       display: "flex",
                       flexDirection: "column",
-                      gap: 14,
+                      gap: 12,
                     }}
                   >
                     <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: 8 }}>
                       <div>
-                        <strong style={{ fontSize: 15 }}>{client.name}</strong> <span style={{ color: "#7a748e", fontSize: 12 }}>({client.company})</span>
-                        <div style={{ fontSize: 12, color: "#7a748e", marginTop: 2 }}>
-                          ID: <code>{client.appId}</code> • Scheme: <strong>{client.scheme}</strong> • Officer: <span>{client.assignedSalesPerson}</span>
+                        <strong style={{ fontSize: 15 }}>{client.name}</strong>{" "}
+                        <span style={{ color: "#64748b", fontSize: 12 }}>({client.company})</span>
+                        <div style={{ fontSize: 12, color: "#64748b", marginTop: 2 }}>
+                          ID: <code style={{ color: "#4e7cff", fontWeight: 700 }}>{client.appId}</code> • Scheme: <strong>{client.scheme}</strong> • Officer: <span>{client.assignedSalesPerson}</span>
                         </div>
                       </div>
 
-                      <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+                      <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
                         <span
+                          className="admin-badge"
                           style={{
-                            display: "inline-flex",
-                            alignItems: "center",
-                            padding: "4px 12px",
-                            borderRadius: 999,
                             background: `${stageBadgeColors[client.applicationStatus || tracker.currentStage] || "#4e7cff"}18`,
                             color: stageBadgeColors[client.applicationStatus || tracker.currentStage] || "#4e7cff",
-                            fontWeight: 750,
-                            fontSize: 12,
                             border: `1px solid ${stageBadgeColors[client.applicationStatus || tracker.currentStage] || "#4e7cff"}33`,
                           }}
                         >
@@ -172,19 +214,8 @@ export default function AdminOverviewPage({
 
                         <button
                           type="button"
-                          className="primary-button"
-                          style={{
-                            display: "inline-flex",
-                            alignItems: "center",
-                            justifyContent: "center",
-                            height: 32,
-                            padding: "0 12px",
-                            fontSize: 12,
-                            fontWeight: 700,
-                            borderRadius: 8,
-                            margin: 0,
-                            boxSizing: "border-box",
-                          }}
+                          className="admin-btn-primary"
+                          style={{ padding: "6px 12px", fontSize: 12 }}
                           onClick={() => onOpenStatusUpdate(client)}
                         >
                           Update Status
@@ -192,40 +223,8 @@ export default function AdminOverviewPage({
 
                         <button
                           type="button"
-                          className="admin-dossier-btn"
-                          style={{
-                            display: "inline-flex",
-                            alignItems: "center",
-                            justifyContent: "center",
-                            gap: 5,
-                            height: 32,
-                            padding: "0 12px",
-                            fontSize: 12,
-                            fontWeight: 700,
-                            borderRadius: 8,
-                            background: "#f0f4ff",
-                            color: "#3730a3",
-                            border: "1px solid #c7d2fe",
-                            cursor: "pointer",
-                            margin: 0,
-                            boxSizing: "border-box",
-                            transition: "all 0.2s cubic-bezier(0.4, 0, 0.2, 1)",
-                            boxShadow: "0 1px 2px rgba(55, 48, 163, 0.06)",
-                          }}
-                          onMouseEnter={(e) => {
-                            e.currentTarget.style.background = "#4338ca";
-                            e.currentTarget.style.color = "#ffffff";
-                            e.currentTarget.style.borderColor = "#4338ca";
-                            e.currentTarget.style.transform = "translateY(-1px)";
-                            e.currentTarget.style.boxShadow = "0 4px 12px rgba(67, 56, 202, 0.22)";
-                          }}
-                          onMouseLeave={(e) => {
-                            e.currentTarget.style.background = "#f0f4ff";
-                            e.currentTarget.style.color = "#3730a3";
-                            e.currentTarget.style.borderColor = "#c7d2fe";
-                            e.currentTarget.style.transform = "none";
-                            e.currentTarget.style.boxShadow = "0 1px 2px rgba(55, 48, 163, 0.06)";
-                          }}
+                          className="admin-btn-secondary"
+                          style={{ padding: "6px 12px", fontSize: 12 }}
                           onClick={() => onOpenDossier(client)}
                         >
                           <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
@@ -252,7 +251,7 @@ export default function AdminOverviewPage({
                       }
                     />
 
-                    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", fontSize: 12, color: "#7a748e", paddingTop: 4, borderTop: "1px dashed #e7e7f5" }}>
+                    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", fontSize: 12, color: "#64748b", paddingTop: 4, borderTop: "1px dashed rgba(154, 116, 233, 0.18)" }}>
                       <span>Last Milestone Audit: <strong>{client.lastUpdated}</strong></span>
                       <span>{tracker.completedStages.length} of {tracker.totalStages} points completed ({tracker.progressPercent}%)</span>
                     </div>
@@ -261,136 +260,205 @@ export default function AdminOverviewPage({
               });
             })()}
           </div>
-        </div>
+        </section>
+      </div>
 
-        {/* Right Column: Document Checklist & Milestone Distribution */}
-        <div style={{ display: "flex", flexDirection: "column", gap: 20 }}>
-          {/* Document Verification Checklist */}
-          <div style={{ background: "#fff", padding: 22, borderRadius: 16, border: "1px solid #e7e7f5" }}>
-            <h3 style={{ margin: "0 0 4px" }}>Document Verification Checklist</h3>
-            <p style={{ margin: "0 0 14px", color: "#7a748e", fontSize: 13 }}>
-              Audit KYC, PAN, GST, and trade licenses per client
-            </p>
-
-            <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
-              {branchClients.slice(0, 5).map((client) => {
-                const verifiedDocs = (client.documents || []).filter((d) => d.status === "Verified").length;
-                const totalDocs = (client.documents || []).length;
-                const isAllDone = totalDocs > 0 && verifiedDocs === totalDocs;
-
-                return (
-                  <div
-                    key={client.id}
-                    style={{
-                      padding: 12,
-                      borderRadius: 12,
-                      background: "#fbfbfe",
-                      border: "1px solid #e7e7f5",
-                      display: "flex",
-                      justifyContent: "space-between",
-                      alignItems: "center",
-                    }}
-                  >
-                    <div>
-                      <strong style={{ fontSize: 13.5 }}>{client.name}</strong>
-                      <div style={{ fontSize: 12, color: "#7a748e" }}>
-                        {verifiedDocs} of {totalDocs} Documents Verified
-                      </div>
-                    </div>
-
-                    <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-                      <span
-                        style={{
-                          fontSize: 11.5,
-                          fontWeight: 700,
-                          padding: "3px 8px",
-                          borderRadius: 6,
-                          background: isAllDone ? "rgba(16, 185, 129, 0.12)" : "rgba(242, 170, 56, 0.14)",
-                          color: isAllDone ? "#059669" : "#a16207",
-                        }}
-                      >
-                        {isAllDone ? "All Verified ✓" : "Audit Pending"}
-                      </span>
-                      <button
-                        type="button"
-                        className="table-action"
-                        style={{ padding: "4px 8px", fontSize: 11 }}
-                        onClick={() => onOpenStatusUpdate(client)}
-                      >
-                        Verify
-                      </button>
-                    </div>
-                  </div>
-                );
-              })}
+      {/* Right Column: REAL-TIME TELEMETRY & Verification Widgets */}
+      <aside className="owner-sidebar-widgets">
+        {/* Document Verification Checklist */}
+        <section className="admin-panel-card" style={{ display: "flex", flexDirection: "column" }}>
+          <div className="admin-panel-header" style={{ marginBottom: 14 }}>
+            <div>
+              <span className="admin-kicker">COMPLIANCE AUDIT</span>
+              <h3 className="admin-panel-header-title" style={{ fontSize: 16 }}>
+                Document Verification
+              </h3>
             </div>
+            <span
+              className="admin-badge"
+              style={{
+                background: "rgba(78, 124, 255, 0.12)",
+                color: "#4e7cff",
+              }}
+            >
+              KYC / Legal
+            </span>
           </div>
 
-          {/* Activity Stages Breakdown Widget */}
-          <div style={{ background: "#fff", padding: 22, borderRadius: 16, border: "1px solid #e7e7f5" }}>
-            <h3 style={{ margin: "0 0 14px" }}>5 Activity Stages Breakdown</h3>
-            <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
-              {ACTIVITY_STAGES.map((stage) => {
-                const count = branchClients.filter((c) => c.applicationStatus === stage.name).length;
-                return (
-                  <div
-                    key={stage.name}
-                    style={{
-                      display: "flex",
-                      alignItems: "center",
-                      justifyContent: "space-between",
-                      padding: "8px 12px",
-                      borderRadius: 8,
-                      background: "#fbfbfe",
-                      border: "1px solid #e7e7f5",
-                      fontSize: 13,
-                    }}
-                  >
-                    <span style={{ display: "flex", alignItems: "center", gap: 8 }}>
-                      <span
-                        style={{
-                          width: 18,
-                          height: 18,
-                          borderRadius: "50%",
-                          background: stage.badgeColor || "#10b981",
-                          color: "#fff",
-                          display: "grid",
-                          placeItems: "center",
-                          fontSize: 10,
-                          fontWeight: 800,
-                        }}
-                      >
-                        {stage.step}
-                      </span>
-                      <strong>{stage.name}</strong> ({stage.percent}%)
-                    </span>
-                    <span style={{ fontWeight: 800, color: "#1e293b", background: "#f1f5f9", padding: "2px 8px", borderRadius: 999 }}>
-                      {count} Clients
+          <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+            {branchClients.slice(0, 4).map((client) => {
+              const verifiedDocs = (client.documents || []).filter((d) => d.status === "Verified").length;
+              const totalDocs = (client.documents || []).length;
+              const isAllDone = totalDocs > 0 && verifiedDocs === totalDocs;
+
+              return (
+                <div
+                  key={client.id}
+                  className="admin-subcard"
+                  style={{
+                    display: "flex",
+                    justifyContent: "space-between",
+                    alignItems: "center",
+                    padding: "10px 12px",
+                  }}
+                >
+                  <div>
+                    <strong style={{ fontSize: 13, display: "block" }}>{client.name}</strong>
+                    <span style={{ fontSize: 11.5, color: "#64748b" }}>
+                      {verifiedDocs} of {totalDocs} Docs Verified
                     </span>
                   </div>
-                );
-              })}
+
+                  <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
+                    <span
+                      className="admin-badge"
+                      style={{
+                        fontSize: 10.5,
+                        padding: "2px 7px",
+                        background: isAllDone ? "rgba(16, 185, 129, 0.12)" : "rgba(245, 158, 11, 0.14)",
+                        color: isAllDone ? "#059669" : "#b45309",
+                      }}
+                    >
+                      {isAllDone ? "Verified ✓" : "Pending"}
+                    </span>
+                    <button
+                      type="button"
+                      className="admin-btn-secondary"
+                      style={{ padding: "3px 8px", fontSize: 11 }}
+                      onClick={() => onOpenStatusUpdate(client)}
+                    >
+                      Verify
+                    </button>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </section>
+
+        {/* Activity Stages Breakdown */}
+        <section className="admin-panel-card" style={{ display: "flex", flexDirection: "column" }}>
+          <div className="admin-panel-header" style={{ marginBottom: 14 }}>
+            <div>
+              <span className="admin-kicker">STAGE DISTRIBUTION</span>
+              <h3 className="admin-panel-header-title" style={{ fontSize: 16 }}>
+                5 Activity Stages
+              </h3>
             </div>
+            <span
+              className="admin-badge"
+              style={{
+                background: "rgba(154, 116, 233, 0.15)",
+                color: "#9a74e9",
+              }}
+            >
+              5 Points
+            </span>
           </div>
 
-          {/* Status Update Feed */}
-          <div style={{ background: "#fff", padding: 22, borderRadius: 16, border: "1px solid #e7e7f5" }}>
-            <h3 style={{ margin: "0 0 14px" }}>Recent Milestone History</h3>
-            <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
-              {branchClients.flatMap((c) => (c.history || []).map((h) => ({ ...h, clientName: c.name, appId: c.appId }))).slice(0, 5).map((entry, idx) => (
-                <div key={idx} style={{ padding: 10, background: "#fbfbfe", borderRadius: 8, border: "1px solid #e7e7f5", fontSize: 12 }}>
-                  <div style={{ display: "flex", justifyContent: "space-between", fontWeight: 700, marginBottom: 2 }}>
+          <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+            {ACTIVITY_STAGES.map((stage) => {
+              const count = branchClients.filter((c) => c.applicationStatus === stage.name).length;
+              return (
+                <div
+                  key={stage.name}
+                  className="admin-subcard"
+                  style={{
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "space-between",
+                    padding: "8px 12px",
+                    fontSize: 12.5,
+                  }}
+                >
+                  <span style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                    <span
+                      style={{
+                        width: 20,
+                        height: 20,
+                        borderRadius: "50%",
+                        background: stage.badgeColor || "#10b981",
+                        color: "#fff",
+                        display: "grid",
+                        placeItems: "center",
+                        fontSize: 10.5,
+                        fontWeight: 800,
+                      }}
+                    >
+                      {stage.step}
+                    </span>
+                    <strong>{stage.name}</strong> ({stage.percent}%)
+                  </span>
+                  <span
+                    className="admin-badge"
+                    style={{
+                      fontWeight: 800,
+                      background: "rgba(78, 124, 255, 0.1)",
+                      color: "#4e7cff",
+                    }}
+                  >
+                    {count} Clients
+                  </span>
+                </div>
+              );
+            })}
+          </div>
+        </section>
+
+        {/* Real-Time Milestone History / Stream Pulse */}
+        <section className="admin-panel-card" style={{ display: "flex", flexDirection: "column", flexGrow: 1 }}>
+          <div className="admin-panel-header" style={{ marginBottom: 14 }}>
+            <div>
+              <span className="admin-kicker">REAL-TIME AUDIT</span>
+              <h3 className="admin-panel-header-title" style={{ fontSize: 16 }}>
+                Milestone Stream Pulse
+              </h3>
+            </div>
+            <span
+              className="admin-badge"
+              style={{
+                background: "rgba(16, 185, 129, 0.15)",
+                color: "#10b981",
+                display: "inline-flex",
+                alignItems: "center",
+                gap: 5,
+              }}
+            >
+              ● Live
+            </span>
+          </div>
+
+          <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+            {branchClients
+              .flatMap((c) => (c.history || []).map((h) => ({ ...h, clientName: c.name, appId: c.appId })))
+              .slice(0, 4)
+              .map((entry, idx) => (
+                <div
+                  key={idx}
+                  className="admin-subcard"
+                  style={{
+                    padding: "10px 12px",
+                    fontSize: 12,
+                  }}
+                >
+                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", fontWeight: 700, marginBottom: 2 }}>
                     <span>{entry.clientName}</span>
-                    <span style={{ color: stageBadgeColors[entry.status] || "#10b981" }}>{entry.status}</span>
+                    <span style={{ color: stageBadgeColors[entry.status] || "#10b981", fontSize: 11 }}>
+                      {entry.status}
+                    </span>
                   </div>
-                  <p style={{ margin: "2px 0 0", color: "#6b6b77" }}>{entry.notes}</p>
-                  <small style={{ color: "#9a94ad" }}>{entry.date} by {entry.updatedBy}</small>
+                  <p style={{ margin: "2px 0 4px", color: "#64748b", fontSize: 11.5, lineHeight: 1.4 }}>
+                    {entry.notes}
+                  </p>
+                  <div style={{ fontSize: 10.5, color: "#94a3b8", display: "flex", justifyContent: "space-between" }}>
+                    <span>{entry.date}</span>
+                    <span>{entry.updatedBy}</span>
+                  </div>
                 </div>
               ))}
-            </div>
           </div>
-        </div>
-      </div>
+        </section>
+      </aside>
     </section>
   );
 }
