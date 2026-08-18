@@ -6,6 +6,7 @@ import MoreServicesPage from "./pages/MoreServicesPage";
 import EligibilityPage from "./pages/EligibilityPage";
 import DealsPage from "./pages/DealsPage";
 import InvoicesPage from "./pages/InvoicesPage";
+import { getTrackerState } from "./utils/schemeTracker";
 
 /* ── Icon Registry ── */
 const dashboardIcons = {
@@ -242,28 +243,31 @@ export default function Dashboard({ onSignOut }) {
   const [supportOpen, setSupportOpen] = React.useState(false);
   const [requestService, setRequestService] = React.useState("Certificate");
   const [requestNotes, setRequestNotes] = React.useState("");
-  const [requestSubmitted, setRequestSubmitted] = React.useState(false);
+  // Live Client Milestone Progress (syncable with Admin updates & scheme-driven)
+  const clientTracker = React.useMemo(() => {
+    let clientScheme = "PMEGP";
+    let rawSteps = ["Submission", "Doc Audit", "Manager Review"];
 
-  // Live Client Milestone Progress (syncable with Admin updates)
-  const clientCompletedSteps = React.useMemo(() => {
     try {
       const saved = localStorage.getItem("agni_branch_clients");
       if (saved) {
         const parsed = JSON.parse(saved);
         if (Array.isArray(parsed) && parsed.length > 0) {
           const found = parsed[0];
-          if (found && Array.isArray(found.completedSteps)) {
-            return found.completedSteps;
+          if (found) {
+            if (found.scheme) clientScheme = found.scheme;
+            if (Array.isArray(found.completedSteps)) rawSteps = found.completedSteps;
           }
         }
       }
     } catch (e) {
       console.warn("Error reading branch clients", e);
     }
-    return ["Submission", "Doc Audit", "Manager Review"];
+
+    return getTrackerState({ scheme: clientScheme, completedSteps: rawSteps });
   }, []);
 
-  const clientProgressPercent = Math.min(100, Math.max(0, clientCompletedSteps.length * 20));
+  const clientProgressPercent = clientTracker.progressPercent;
 
   const filteredSchemes = activeSchemesData.filter((scheme) =>
     scheme.name.toLowerCase().includes(submittedQuery.trim().toLowerCase()) ||
@@ -597,16 +601,11 @@ export default function Dashboard({ onSignOut }) {
 
                   <div style={{ marginTop: 12 }}>
                     <ActivityStatusBar
-                      completedSteps={clientCompletedSteps}
-                      progress={clientProgressPercent}
+                      scheme={clientTracker.schemeName}
+                      stages={clientTracker.stages}
+                      completedSteps={clientTracker.completedStages}
+                      progress={clientTracker.progressPercent}
                       interactive={false}
-                      stepDates={{
-                        Submission: "10 Aug",
-                        "Doc Audit": "12 Aug",
-                        "Manager Review": "14 Aug",
-                        Agreement: "Pending",
-                        "Final Approval": "Pending",
-                      }}
                     />
                   </div>
                 </section>

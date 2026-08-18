@@ -1,7 +1,9 @@
 import React from "react";
 import Icon from "../../../components/Icon";
+import ActivityStatusBar from "../../../components/dashboard/ActivityStatusBar";
 import EligibleSchemes from "../EligibleSchemes";
 import { mockEligibleSchemes } from "../mockEligibleSchemes";
+import { getTrackerState, getProcessTypeLabel } from "../../../utils/schemeTracker";
 
 export default function SalesClientDossier({
   selectedClient,
@@ -10,6 +12,10 @@ export default function SalesClientDossier({
   onSchemeSave,
 }) {
   if (!selectedClient) return null;
+
+  const tracker = getTrackerState(selectedClient);
+  const schemeName = selectedClient.scheme || tracker.schemeName;
+  const processLabel = tracker.processTypeLabel || getProcessTypeLabel(tracker.processType);
 
   return (
     <div className="client-details-dossier">
@@ -55,13 +61,19 @@ export default function SalesClientDossier({
                     : "prospect"
                 }`}
               >
-                ● {selectedClient.stage}
+                ● {selectedClient.stage || "Active"}
               </span>
               <span className="hero-pill">
                 Client ID: #{selectedClient.id}
               </span>
               <span className="hero-pill">
                 Owner: {selectedClient.owner || salesPersonName}
+              </span>
+              <span className="hero-pill" style={{ background: "rgba(140, 95, 248, 0.15)", color: "#8c5ff8", fontWeight: 700 }}>
+                Scheme: {schemeName}
+              </span>
+              <span className="hero-pill" style={{ background: "rgba(78, 124, 255, 0.15)", color: "#4e7cff", fontWeight: 700 }}>
+                Process: {processLabel}
               </span>
             </div>
           </div>
@@ -80,13 +92,39 @@ export default function SalesClientDossier({
         </div>
       </div>
 
+      {/* Activity Progress Stepper Section */}
+      <div className="dossier-finance-card" style={{ marginBottom: 20 }}>
+        <div className="dossier-card-title">
+          <div>
+            <span>Activity Milestone Tracker</span>
+            <small style={{ color: "#7a748e", display: "block", fontSize: 12, marginTop: 2 }}>
+              Scheme: <strong>{schemeName}</strong> ({processLabel} — {tracker.totalStages} Stages)
+            </small>
+          </div>
+          <span className="scheme-tag" style={{ fontSize: 13, padding: '6px 12px' }}>
+            <Icon name="document" size={14} />
+            Stage: {tracker.currentStage}
+          </span>
+        </div>
+
+        <div style={{ marginTop: 14 }}>
+          <ActivityStatusBar
+            scheme={schemeName}
+            stages={tracker.stages}
+            completedSteps={tracker.completedStages}
+            progress={tracker.progressPercent}
+            interactive={false}
+          />
+        </div>
+      </div>
+
       {/* Comprehensive Financial Breakdown */}
       <div className="dossier-finance-card">
         <div className="dossier-card-title">
           <span>Financial & Commercial Breakdown</span>
           <span className="scheme-tag" style={{ fontSize: 13, padding: '6px 12px' }}>
             <Icon name="document" size={14} />
-            {selectedClient.scheme || "Standard Scheme"}
+            {schemeName}
           </span>
         </div>
 

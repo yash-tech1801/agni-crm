@@ -16,6 +16,7 @@ import OwnerRevenuePage from "./OwnerRevenuePage";
 import OwnerInvoicePage from "./OwnerInvoicePage";
 import OwnerRequestsPage from "./OwnerRequestsPage";
 import OwnerReportsPage from "./OwnerReportsPage";
+import AgreementPage from "../Agreement/AgreementPage";
 
 // Dedicated Modals
 import OwnerClientInfoModal from "./OwnerClientInfoModal";
@@ -43,6 +44,8 @@ export default function OwnerDashboard({ onSignOut, userEmail }) {
     overview: "Dashboard",
     clients: "Clients",
     client: "Clients",
+    agreement: "Agreement",
+    agreements: "Agreement",
     revenue: "Revenue",
     revenues: "Revenue",
     reports: "Reports",
@@ -531,6 +534,16 @@ export default function OwnerDashboard({ onSignOut, userEmail }) {
                 clients={clients}
                 onOpenClientInfo={handleOpenClientInfo}
                 onDeleteClient={handleDeleteClient}
+              />
+            }
+          />
+          <Route
+            path="agreement"
+            element={
+              <AgreementPage
+                clients={clients}
+                showToast={showToast}
+                selectedBranch="Executive HQ"
               />
             }
           />

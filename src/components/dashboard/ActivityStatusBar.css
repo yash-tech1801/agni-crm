@@ -214,6 +214,35 @@
   border-color: #334155 !important;
 }
 
+/* Locked Step (Future steps locked until preceding steps complete) */
+.activity-point-item.is-locked .activity-point-node {
+  background: #f8fafc !important;
+  color: #94a3b8 !important;
+  border: 2px dashed #cbd5e1 !important;
+  font-weight: 700;
+  font-size: 14px;
+  box-shadow: none !important;
+}
+
+.activity-node-locked {
+  font-size: 15px;
+  opacity: 0.8;
+}
+
+.activity-status-points-container.is-interactive .activity-point-item.is-locked {
+  cursor: not-allowed !important;
+  opacity: 0.75;
+}
+
+.activity-status-points-container.is-interactive .activity-point-item.is-locked:hover {
+  transform: none !important;
+}
+
+.activity-point-status.status-locked {
+  color: #64748b !important;
+  background: #f1f5f9 !important;
+}
+
 /* Interactive Hover Toggle Indicator */
 .activity-node-toggle-indicator {
   position: absolute;

@@ -3,6 +3,7 @@ import { ACTIVITY_STAGES } from "../Admin/mockAdminData";
 export const navItems = [
   { icon: "dashboard", label: "Dashboard" },
   { icon: "clients", label: "Clients" },
+  { icon: "agreement", label: "Agreement" },
   { icon: "team", label: "Employees" },
   { icon: "revenue", label: "Revenue" },
   { icon: "invoice", label: "Invoice" },

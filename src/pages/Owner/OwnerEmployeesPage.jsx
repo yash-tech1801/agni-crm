@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import Icon from "../../components/Icon";
 import { employeeRoles, branchOptions, branchToRegionMap } from "./mockOwnerData";
-import { ACTIVITY_STAGES } from "../Admin/mockAdminData";
+import { getTrackerState } from "../../utils/schemeTracker";
 
 const PAGE_SIZE = 15;
 
@@ -570,74 +570,75 @@ export default function OwnerEmployeesPage({
                     </span>
                   </td>
                   <td>
-                    <div>
-                      <div
-                        style={{
-                          display: "flex",
-                          alignItems: "center",
-                          gap: 10,
-                          marginBottom: 4,
-                        }}
-                      >
-                        <div
-                          style={{
-                            flex: 1,
-                            height: 8,
-                            background: "#e2e8f0",
-                            borderRadius: 999,
-                            overflow: "hidden",
-                          }}
-                        >
+                    {(() => {
+                      const clientScheme = client.serviceName || client.scheme || client.serviceType || "PMEGP";
+                      const tracker = getTrackerState({ scheme: clientScheme, completedSteps: client.completedSteps });
+
+                      return (
+                        <div>
                           <div
                             style={{
-                              width: `${progress}%`,
-                              height: "100%",
-                              background:
-                                progress === 100
-                                  ? "#10b981"
-                                  : "linear-gradient(90deg, #10b981 0%, #059669 100%)",
-                              borderRadius: 999,
+                              display: "flex",
+                              alignItems: "center",
+                              gap: 10,
+                              marginBottom: 4,
                             }}
-                          />
-                        </div>
-                        <span
-                          style={{
-                            fontSize: 12,
-                            fontWeight: 700,
-                            color: progress === 100 ? "#10b981" : "#1e293b",
-                            minWidth: 38,
-                          }}
-                        >
-                          {progress}%
-                        </span>
-                      </div>
-                      <div style={{ display: "flex", gap: 4, alignItems: "center" }}>
-                        {ACTIVITY_STAGES.map((st) => {
-                          const isDone = (
-                            client.completedSteps ||
-                            ACTIVITY_STAGES.slice(
-                              0,
-                              Math.round(progress / 20)
-                            ).map((s) => s.name)
-                          ).includes(st.name);
-                          return (
-                            <span
-                              key={st.name}
-                              title={`${st.name} (${st.percent}%)`}
+                          >
+                            <div
                               style={{
-                                width: 6,
-                                height: 6,
-                                borderRadius: "50%",
-                                background: isDone ? "#10b981" : "#cbd5e1",
+                                flex: 1,
+                                height: 8,
+                                background: "#e2e8f0",
+                                borderRadius: 999,
+                                overflow: "hidden",
                               }}
-                            />
-                          );
-                        })}
-                        <span style={{ fontSize: 10, color: "#64748b", marginLeft: 2 }}>
-                          {Math.round(progress / 20)}/5 Points
-                        </span>
-                      </div>
-                    </div>
+                            >
+                              <div
+                                style={{
+                                  width: `${tracker.progressPercent}%`,
+                                  height: "100%",
+                                  background:
+                                    tracker.progressPercent === 100
+                                      ? "#10b981"
+                                      : "linear-gradient(90deg, #10b981 0%, #059669 100%)",
+                                  borderRadius: 999,
+                                }}
+                              />
+                            </div>
+                            <span
+                              style={{
+                                fontSize: 12,
+                                fontWeight: 700,
+                                color: tracker.progressPercent === 100 ? "#10b981" : "#1e293b",
+                                minWidth: 38,
+                              }}
+                            >
+                              {tracker.progressPercent}%
+                            </span>
+                          </div>
+                          <div style={{ display: "flex", gap: 4, alignItems: "center" }}>
+                            {tracker.stages.map((st) => {
+                              const isDone = tracker.completedStages.includes(st.name);
+                              return (
+                                <span
+                                  key={st.name}
+                                  title={`${st.name} (${st.percent}%)`}
+                                  style={{
+                                    width: 6,
+                                    height: 6,
+                                    borderRadius: "50%",
+                                    background: isDone ? "#10b981" : "#cbd5e1",
+                                  }}
+                                />
+                              );
+                            })}
+                            <span style={{ fontSize: 10, color: "#64748b", marginLeft: 2 }}>
+                              {tracker.completedStages.length}/{tracker.totalStages} Points
+                            </span>
+                          </div>
+                        </div>
+                      );
+                    })()}
                   </td>
                   <td style={{ textAlign: "right", whiteSpace: "nowrap" }}>
                     {onOpenClientInfo && (

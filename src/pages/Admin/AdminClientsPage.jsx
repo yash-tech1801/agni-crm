@@ -1,5 +1,5 @@
 import React from "react";
-import { ACTIVITY_STAGES, stageBadgeColors, formatCurrency } from "./mockAdminData";
+import { ACTIVITY_STAGES, stageBadgeColors, formatCurrency, getTrackerState } from "./mockAdminData";
 
 export default function AdminClientsPage({
   selectedBranch,
@@ -69,9 +69,7 @@ export default function AdminClientsPage({
           </thead>
           <tbody>
             {filteredClients.map((client) => {
-              const completed = client.completedSteps || (
-                client.progress ? ACTIVITY_STAGES.slice(0, Math.round(client.progress / 20)).map(s => s.name) : ["Submission"]
-              );
+              const tracker = getTrackerState(client);
 
               return (
                 <tr key={client.id}>
@@ -93,19 +91,19 @@ export default function AdminClientsPage({
                           alignItems: "center",
                           padding: "3px 9px",
                           borderRadius: 999,
-                          background: `${stageBadgeColors[client.applicationStatus] || "#10b981"}18`,
-                          color: stageBadgeColors[client.applicationStatus] || "#10b981",
+                          background: `${stageBadgeColors[client.applicationStatus || tracker.currentStage] || "#10b981"}18`,
+                          color: stageBadgeColors[client.applicationStatus || tracker.currentStage] || "#10b981",
                           fontWeight: 700,
                           fontSize: 11.5,
                           width: "fit-content",
                         }}
                       >
-                        ● {client.applicationStatus}
+                        ● {client.applicationStatus || tracker.currentStage}
                       </span>
-                      {/* 5 mini dots indicator */}
+                      {/* Dynamic scheme mini dots indicator */}
                       <div style={{ display: "flex", gap: 4, alignItems: "center" }}>
-                        {ACTIVITY_STAGES.map((st) => {
-                          const isDone = completed.includes(st.name);
+                        {tracker.stages.map((st) => {
+                          const isDone = tracker.completedStages.includes(st.name);
                           return (
                             <span
                               key={st.name}
@@ -120,7 +118,7 @@ export default function AdminClientsPage({
                           );
                         })}
                         <span style={{ fontSize: 10.5, color: "#64748b", marginLeft: 4 }}>
-                          {completed.length}/5 Points
+                          {tracker.completedStages.length}/{tracker.totalStages} Points
                         </span>
                       </div>
                     </div>
@@ -130,35 +128,80 @@ export default function AdminClientsPage({
                       <div style={{ flex: 1, height: 8, background: "#e7e7f5", borderRadius: 999, overflow: "hidden" }}>
                         <div
                           style={{
-                            width: `${client.progress}%`,
+                            width: `${tracker.progressPercent}%`,
                             height: "100%",
-                            background: client.progress === 100 ? "#10b981" : "linear-gradient(90deg, #10b981, #059669)",
+                            background: tracker.progressPercent === 100 ? "#10b981" : "linear-gradient(90deg, #10b981, #059669)",
                             borderRadius: 999,
                           }}
                         />
                       </div>
-                      <strong style={{ fontSize: 12, color: client.progress === 100 ? "#10b981" : "#1e293b" }}>
-                        {client.progress}%
+                      <strong style={{ fontSize: 12, color: tracker.progressPercent === 100 ? "#10b981" : "#1e293b" }}>
+                        {tracker.progressPercent}%
                       </strong>
                     </div>
                   </td>
                   <td style={{ fontSize: 12, color: "#7a748e" }}>{client.lastUpdated}</td>
                   <td style={{ textAlign: "right" }}>
-                    <div style={{ display: "inline-flex", gap: 6 }}>
+                    <div style={{ display: "inline-flex", gap: 6, alignItems: "center" }}>
                       <button
                         className="primary-button"
                         type="button"
-                        style={{ padding: "6px 12px", fontSize: 12 }}
+                        style={{
+                          display: "inline-flex",
+                          alignItems: "center",
+                          justifyContent: "center",
+                          height: 32,
+                          padding: "0 12px",
+                          fontSize: 12,
+                          fontWeight: 700,
+                          borderRadius: 8,
+                          margin: 0,
+                          boxSizing: "border-box",
+                        }}
                         onClick={() => onOpenStatusUpdate(client)}
                       >
                         Update Status
                       </button>
                       <button
-                        className="table-action"
+                        className="admin-dossier-btn"
                         type="button"
+                        style={{
+                          display: "inline-flex",
+                          alignItems: "center",
+                          justifyContent: "center",
+                          gap: 5,
+                          height: 32,
+                          padding: "0 12px",
+                          fontSize: 12,
+                          fontWeight: 700,
+                          borderRadius: 8,
+                          background: "#f0f4ff",
+                          color: "#3730a3",
+                          border: "1px solid #c7d2fe",
+                          cursor: "pointer",
+                          margin: 0,
+                          boxSizing: "border-box",
+                          transition: "all 0.2s cubic-bezier(0.4, 0, 0.2, 1)",
+                        }}
+                        onMouseEnter={(e) => {
+                          e.currentTarget.style.background = "#4338ca";
+                          e.currentTarget.style.color = "#ffffff";
+                          e.currentTarget.style.borderColor = "#4338ca";
+                        }}
+                        onMouseLeave={(e) => {
+                          e.currentTarget.style.background = "#f0f4ff";
+                          e.currentTarget.style.color = "#3730a3";
+                          e.currentTarget.style.borderColor = "#c7d2fe";
+                        }}
                         onClick={() => onOpenDossier(client)}
                       >
-                        Dossier
+                        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+                          <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+                          <polyline points="14 2 14 8 20 8" />
+                          <line x1="16" y1="13" x2="8" y2="13" />
+                          <line x1="16" y1="17" x2="8" y2="17" />
+                        </svg>
+                        <span>Dossier</span>
                       </button>
                     </div>
                   </td>

@@ -8,6 +8,7 @@ import {
   initialBranchClients,
   initialBranchTeam,
   ACTIVITY_STAGES,
+  getTrackerState,
 } from "./mockAdminData";
 
 // Modular Page Components
@@ -16,16 +17,24 @@ import AdminClientsPage from "./AdminClientsPage";
 import AdminPipelinePage from "./AdminPipelinePage";
 import AdminHistoryPage from "./AdminHistoryPage";
 import AdminTeamPage from "./AdminTeamPage";
+import AgreementPage from "../Agreement/AgreementPage";
 
 // Dedicated Modals
 import AdminStatusModal from "./AdminStatusModal";
 import AdminClientDossierModal from "./AdminClientDossierModal";
 
-// Navigation items without "Settings" as requested
+import {
+  canCompleteStage,
+  getTrackerStages,
+  normalizeCompletedStages,
+} from "../../utils/schemeTracker";
+
+// Navigation items
 const adminNavItems = [
   { icon: "dashboard", label: "Dashboard" },
   { icon: "clients", label: "Clients" },
   { icon: "overview", label: "Pipeline" },
+  { icon: "agreement", label: "Agreement" },
   { icon: "requests", label: "History" },
   { icon: "team", label: "Team" },
 ];
@@ -39,6 +48,8 @@ export default function AdminDashboard({ onSignOut, userEmail }) {
     overview: "Dashboard",
     clients: "Clients",
     pipeline: "Pipeline",
+    agreement: "Agreement",
+    agreements: "Agreement",
     history: "History",
     team: "Team",
   }), []);
@@ -151,15 +162,16 @@ export default function AdminDashboard({ onSignOut, userEmail }) {
 
   // Handle direct quick interactive point toggle on client card
   const handleQuickStepToggle = (client, stepName, nextCompletedSteps, newPercent) => {
-    const activeStageName = nextCompletedSteps.length > 0
-      ? nextCompletedSteps[nextCompletedSteps.length - 1]
-      : "Submission";
+    const tracker = getTrackerState({ scheme: client.scheme, completedSteps: nextCompletedSteps });
+    const activeStageName = tracker.completedStages.length > 0
+      ? tracker.completedStages[tracker.completedStages.length - 1]
+      : "CRM Creation";
     const nowStr = new Date().toISOString().replace("T", " ").substring(0, 16);
     const historyEntry = {
       date: nowStr.split(" ")[0],
       status: activeStageName,
       updatedBy: `${adminName} (Branch Admin)`,
-      notes: `Updated milestone to "${activeStageName}" (${newPercent}% completion - ${nextCompletedSteps.length}/5 points checked).`,
+      notes: `Updated milestone to "${activeStageName}" (${tracker.progressPercent}% completion - ${tracker.completedStages.length}/${tracker.totalStages} points checked).`,
     };
 
     setClients((prev) =>
@@ -167,9 +179,9 @@ export default function AdminDashboard({ onSignOut, userEmail }) {
         if (c.id === client.id) {
           return {
             ...c,
-            completedSteps: nextCompletedSteps,
+            completedSteps: tracker.completedStages,
             applicationStatus: activeStageName,
-            progress: newPercent,
+            progress: tracker.progressPercent,
             lastUpdated: nowStr,
             history: [historyEntry, ...(c.history || [])],
           };
@@ -178,21 +190,62 @@ export default function AdminDashboard({ onSignOut, userEmail }) {
       })
     );
 
-    showToast(`✓ Updated ${client.name} to "${activeStageName}" (${newPercent}% — ${nextCompletedSteps.length}/5 points completed)`);
+    showToast(`✓ Updated ${client.name} to "${activeStageName}" (${tracker.progressPercent}% — ${tracker.completedStages.length}/${tracker.totalStages} points completed)`);
+  };
+
+  // Advance client CRM activity tracker upon agreement creation/dispatch
+  const handleClientAgreementAdvance = (client, milestoneName, isComplete) => {
+    if (!client) return;
+    const stages = getTrackerStages(client.scheme);
+    const currentCompleted = client.completedSteps || ["CRM Creation"];
+    let nextCompleted = [...currentCompleted];
+
+    if (isComplete) {
+      if (!nextCompleted.includes("Agreement") && canCompleteStage("Agreement", stages, nextCompleted)) {
+        nextCompleted.push("Agreement");
+      }
+    }
+
+    const normalized = normalizeCompletedStages(nextCompleted, stages);
+    const tracker = getTrackerState({ scheme: client.scheme, completedSteps: normalized });
+    const nowStr = new Date().toISOString().replace("T", " ").substring(0, 16);
+
+    const historyEntry = {
+      date: nowStr.split(" ")[0],
+      status: isComplete ? "Agreement" : "CRM Creation",
+      updatedBy: `${adminName} (Branch Admin)`,
+      notes: isComplete
+        ? `Legal agreement executed and dispatched. Milestone "Agreement" completed (${tracker.progressPercent}%).`
+        : `Agreement draft initialized and prepared for ${client.name}.`,
+    };
+
+    setClients((prev) =>
+      prev.map((c) => {
+        if (c.id === client.id) {
+          return {
+            ...c,
+            completedSteps: tracker.completedStages,
+            applicationStatus: isComplete && tracker.completedStages.includes("Agreement") ? "Agreement" : c.applicationStatus,
+            progress: tracker.progressPercent,
+            lastUpdated: nowStr,
+            history: [historyEntry, ...(c.history || [])],
+          };
+        }
+        return c;
+      })
+    );
   };
 
   // Open Status Update Modal
   const handleOpenStatusUpdate = (client) => {
     setUpdatingClient(client);
-    const completed = client.completedSteps && Array.isArray(client.completedSteps)
-      ? client.completedSteps
-      : ACTIVITY_STAGES.slice(0, Math.round((client.progress || 20) / 20)).map((s) => s.name);
+    const tracker = getTrackerState(client);
 
     setStatusFormData({
-      status: client.applicationStatus || completed[completed.length - 1] || "Submission",
-      completedSteps: completed,
-      progress: completed.length * 20,
-      notes: "",
+      status: client.applicationStatus || tracker.currentStage,
+      completedSteps: tracker.completedStages,
+      progress: tracker.progressPercent,
+      notes: client.adminNotes || "",
       documentUpdates: (client.documents || []).reduce((acc, doc) => {
         acc[doc.name] = doc.status;
         return acc;
@@ -453,11 +506,23 @@ export default function AdminDashboard({ onSignOut, userEmail }) {
             }
           />
           <Route
+            path="agreement"
+            element={
+              <AgreementPage
+                clients={branchClients}
+                onClientTrackerAdvance={handleClientAgreementAdvance}
+                showToast={showToast}
+                selectedBranch={selectedBranch}
+              />
+            }
+          />
+          <Route
             path="history"
             element={
               <AdminHistoryPage
                 selectedBranch={selectedBranch}
                 branchClients={branchClients}
+                onOpenDossier={setSelectedClientForDossier}
               />
             }
           />
@@ -467,6 +532,9 @@ export default function AdminDashboard({ onSignOut, userEmail }) {
               <AdminTeamPage
                 selectedBranch={selectedBranch}
                 teamMembers={teamMembers}
+                branchClients={branchClients}
+                onOpenDossier={setSelectedClientForDossier}
+                onOpenStatusUpdate={handleOpenStatusUpdate}
               />
             }
           />

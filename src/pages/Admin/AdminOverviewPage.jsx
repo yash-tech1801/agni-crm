@@ -1,6 +1,7 @@
 import React from "react";
 import ActivityStatusBar from "../../components/dashboard/ActivityStatusBar";
 import { ACTIVITY_STAGES, stageBadgeColors } from "./mockAdminData";
+import { getTrackerState } from "../../utils/schemeTracker";
 
 export default function AdminOverviewPage({
   selectedBranch,
@@ -94,98 +95,171 @@ export default function AdminOverviewPage({
         <div style={{ background: "#fff", padding: 22, borderRadius: 16, border: "1px solid #e7e7f5" }}>
           <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 16 }}>
             <div>
-              <h3 style={{ margin: 0 }}>Client Application Progress Queue</h3>
+              <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                <h3 style={{ margin: 0 }}>Client Application Progress Queue</h3>
+                <span style={{ fontSize: 11.5, fontWeight: 700, background: "rgba(99, 102, 241, 0.1)", color: "#4f46e5", padding: "2px 8px", borderRadius: 999 }}>
+                  Top 3 Recent
+                </span>
+              </div>
               <p style={{ margin: "4px 0 0", color: "#7a748e", fontSize: 13 }}>
-                Interactive 5-point activity status (20% per point). Click any point to quickly update milestone.
+                Recently updated client milestones. Direct interactive status updates enabled.
               </p>
             </div>
             <button type="button" className="table-action" onClick={onOpenClients}>
-              Manage All
+              Manage All ({branchClients.length})
             </button>
           </div>
 
           <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
-            {branchClients.map((client) => {
-              const completed = client.completedSteps || (
-                client.progress ? ACTIVITY_STAGES.slice(0, Math.round(client.progress / 20)).map(s => s.name) : ["Submission"]
-              );
+            {(() => {
+              // Strictly show only the 3 most recently updated or added cards
+              const recentClients = [...branchClients]
+                .sort((a, b) => {
+                  const timeA = new Date(a.lastUpdated || a.submissionDate || 0).getTime();
+                  const timeB = new Date(b.lastUpdated || b.submissionDate || 0).getTime();
+                  return timeB - timeA;
+                })
+                .slice(0, 3);
 
-              return (
-                <div
-                  key={client.id}
-                  style={{
-                    padding: 16,
-                    borderRadius: 16,
-                    background: "#fbfbfe",
-                    border: "1px solid #e7e7f5",
-                    display: "flex",
-                    flexDirection: "column",
-                    gap: 14,
-                  }}
-                >
-                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: 8 }}>
-                    <div>
-                      <strong style={{ fontSize: 15 }}>{client.name}</strong> <span style={{ color: "#7a748e", fontSize: 12 }}>({client.company})</span>
-                      <div style={{ fontSize: 12, color: "#7a748e", marginTop: 2 }}>
-                        ID: <code>{client.appId}</code> • Scheme: <strong>{client.scheme}</strong> • Officer: <span>{client.assignedSalesPerson}</span>
+              if (recentClients.length === 0) {
+                return (
+                  <div style={{ padding: "32px 16px", textAlign: "center", color: "#7a748e", fontSize: 13 }}>
+                    No client applications found in this branch.
+                  </div>
+                );
+              }
+
+              return recentClients.map((client) => {
+                const tracker = getTrackerState(client);
+
+                return (
+                  <div
+                    key={client.id}
+                    style={{
+                      padding: 16,
+                      borderRadius: 16,
+                      background: "#fbfbfe",
+                      border: "1px solid #e7e7f5",
+                      display: "flex",
+                      flexDirection: "column",
+                      gap: 14,
+                    }}
+                  >
+                    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: 8 }}>
+                      <div>
+                        <strong style={{ fontSize: 15 }}>{client.name}</strong> <span style={{ color: "#7a748e", fontSize: 12 }}>({client.company})</span>
+                        <div style={{ fontSize: 12, color: "#7a748e", marginTop: 2 }}>
+                          ID: <code>{client.appId}</code> • Scheme: <strong>{client.scheme}</strong> • Officer: <span>{client.assignedSalesPerson}</span>
+                        </div>
+                      </div>
+
+                      <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+                        <span
+                          style={{
+                            display: "inline-flex",
+                            alignItems: "center",
+                            padding: "4px 12px",
+                            borderRadius: 999,
+                            background: `${stageBadgeColors[client.applicationStatus || tracker.currentStage] || "#4e7cff"}18`,
+                            color: stageBadgeColors[client.applicationStatus || tracker.currentStage] || "#4e7cff",
+                            fontWeight: 750,
+                            fontSize: 12,
+                            border: `1px solid ${stageBadgeColors[client.applicationStatus || tracker.currentStage] || "#4e7cff"}33`,
+                          }}
+                        >
+                          ● {client.applicationStatus || tracker.currentStage}
+                        </span>
+
+                        <button
+                          type="button"
+                          className="primary-button"
+                          style={{
+                            display: "inline-flex",
+                            alignItems: "center",
+                            justifyContent: "center",
+                            height: 32,
+                            padding: "0 12px",
+                            fontSize: 12,
+                            fontWeight: 700,
+                            borderRadius: 8,
+                            margin: 0,
+                            boxSizing: "border-box",
+                          }}
+                          onClick={() => onOpenStatusUpdate(client)}
+                        >
+                          Update Status
+                        </button>
+
+                        <button
+                          type="button"
+                          className="admin-dossier-btn"
+                          style={{
+                            display: "inline-flex",
+                            alignItems: "center",
+                            justifyContent: "center",
+                            gap: 5,
+                            height: 32,
+                            padding: "0 12px",
+                            fontSize: 12,
+                            fontWeight: 700,
+                            borderRadius: 8,
+                            background: "#f0f4ff",
+                            color: "#3730a3",
+                            border: "1px solid #c7d2fe",
+                            cursor: "pointer",
+                            margin: 0,
+                            boxSizing: "border-box",
+                            transition: "all 0.2s cubic-bezier(0.4, 0, 0.2, 1)",
+                            boxShadow: "0 1px 2px rgba(55, 48, 163, 0.06)",
+                          }}
+                          onMouseEnter={(e) => {
+                            e.currentTarget.style.background = "#4338ca";
+                            e.currentTarget.style.color = "#ffffff";
+                            e.currentTarget.style.borderColor = "#4338ca";
+                            e.currentTarget.style.transform = "translateY(-1px)";
+                            e.currentTarget.style.boxShadow = "0 4px 12px rgba(67, 56, 202, 0.22)";
+                          }}
+                          onMouseLeave={(e) => {
+                            e.currentTarget.style.background = "#f0f4ff";
+                            e.currentTarget.style.color = "#3730a3";
+                            e.currentTarget.style.borderColor = "#c7d2fe";
+                            e.currentTarget.style.transform = "none";
+                            e.currentTarget.style.boxShadow = "0 1px 2px rgba(55, 48, 163, 0.06)";
+                          }}
+                          onClick={() => onOpenDossier(client)}
+                        >
+                          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+                            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+                            <polyline points="14 2 14 8 20 8" />
+                            <line x1="16" y1="13" x2="8" y2="13" />
+                            <line x1="16" y1="17" x2="8" y2="17" />
+                          </svg>
+                          <span>Dossier</span>
+                        </button>
                       </div>
                     </div>
 
-                    <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-                      <span
-                        style={{
-                          display: "inline-flex",
-                          alignItems: "center",
-                          padding: "4px 12px",
-                          borderRadius: 999,
-                          background: `${stageBadgeColors[client.applicationStatus] || "#4e7cff"}18`,
-                          color: stageBadgeColors[client.applicationStatus] || "#4e7cff",
-                          fontWeight: 750,
-                          fontSize: 12,
-                          border: `1px solid ${stageBadgeColors[client.applicationStatus] || "#4e7cff"}33`,
-                        }}
-                      >
-                        ● {client.applicationStatus}
-                      </span>
+                    {/* Dynamic Scheme-Based Activity Stepper Bar */}
+                    <ActivityStatusBar
+                      scheme={client.scheme}
+                      stages={tracker.stages}
+                      completedSteps={tracker.completedStages}
+                      progress={tracker.progressPercent}
+                      interactive={true}
+                      size="normal"
+                      onStepToggle={(stepName, nextSteps, newPercent) =>
+                        onQuickStepToggle(client, stepName, nextSteps, newPercent)
+                      }
+                    />
 
-                      <button
-                        type="button"
-                        className="primary-button"
-                        style={{ padding: "6px 12px", fontSize: 12 }}
-                        onClick={() => onOpenStatusUpdate(client)}
-                      >
-                        Update Status
-                      </button>
-
-                      <button
-                        type="button"
-                        className="table-action"
-                        style={{ padding: "6px 12px", fontSize: 12 }}
-                        onClick={() => onOpenDossier(client)}
-                      >
-                        Dossier
-                      </button>
+                    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", fontSize: 12, color: "#7a748e", paddingTop: 4, borderTop: "1px dashed #e7e7f5" }}>
+                      <span>Last Milestone Audit: <strong>{client.lastUpdated}</strong></span>
+                      <span>{tracker.completedStages.length} of {tracker.totalStages} points completed ({tracker.progressPercent}%)</span>
                     </div>
                   </div>
-
-                  {/* 5-Points Stepper Bar */}
-                  <ActivityStatusBar
-                    completedSteps={completed}
-                    progress={client.progress}
-                    interactive={true}
-                    size="normal"
-                    onStepToggle={(stepName, nextSteps, newPercent) =>
-                      onQuickStepToggle(client, stepName, nextSteps, newPercent)
-                    }
-                  />
-
-                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", fontSize: 12, color: "#7a748e", paddingTop: 4, borderTop: "1px dashed #e7e7f5" }}>
-                    <span>Last Milestone Audit: <strong>{client.lastUpdated}</strong></span>
-                    <span>Direct one-click milestone toggle enabled</span>
-                  </div>
-                </div>
-              );
-            })}
+                );
+              });
+            })()}
           </div>
         </div>
 

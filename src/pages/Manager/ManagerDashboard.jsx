@@ -1,421 +1,98 @@
-import React from "react";
+import React, { useState, useMemo, useRef, useEffect } from "react";
+import { Routes, Route, Navigate, useLocation, useNavigate } from "react-router-dom";
 import DashboardSidebar from "../../components/dashboard/DashboardSidebar";
 import DashboardHeader from "../../components/dashboard/DashboardHeader";
 import Icon from "../../components/Icon";
-import KpiCard from "../../components/KpiCard";
-import RevenueSummaryCard from "../../components/RevenueSummaryCard";
-import { getDailyPayment, getWeeklyPayment, getMonthlyPayment, formatCurrency } from "../../utils/paymentHelpers";
-import PerformanceChart from "../../components/PerformanceChart";
-import SimpleModal from "../../components/SimpleModal";
-import TopPerformerLeaderboard from "../../components/TopPerformerLeaderboard";
-import EditForm from "../../components/EditForm";
-import ConfirmDialog from "../../components/ConfirmDialog";
-import ManagerRequests from "./ManagerRequests";
 
-const navItems = [
-  { icon: "dashboard", label: "Dashboard" },
-  { icon: "team", label: "Team" },
-  { icon: "clients", label: "Clients" },
-  { icon: "overview", label: "Requests" },
-  { icon: "revenue", label: "Revenue" },
-  { icon: "reports", label: "Reports" },
-];
+// Modular Page Components
+import ManagerOverviewPage from "./ManagerOverviewPage";
+import ManagerTeamPage from "./ManagerTeamPage";
+import ManagerClientsPage from "./ManagerClientsPage";
+import ManagerRequestsPage from "./ManagerRequestsPage";
+import ManagerRevenuePage from "./ManagerRevenuePage";
+import ManagerReportsPage from "./ManagerReportsPage";
 
-const kpiCards = [
-  {
-    label: "Team members",
-    value: "48",
-    trend: "+12%",
-    description: "Active this month",
-    accent: "#4e7cff",
-    linkTo: "Team",
-    slug: "managers",
-  },
-  {
-    label: "Open deals",
-    value: "32",
-    trend: "+9%",
-    description: "In progress",
-    accent: "#44bfb0",
-    linkTo: "Clients",
-    slug: "sales",
-  },
-  {
-    label: "Closed this month",
-    value: "18",
-    trend: "+21%",
-    description: "Won opportunities",
-    accent: "#9a74e9",
-    slug: "clients",
-  },
-];
-
-const teamPerformance = [
-  { name: "Mia Ross", role: "Senior Sales", score: "92%", detail: "Top conversion" },
-  { name: "Ariana Lee", role: "Branch Lead", score: "88%", detail: "Highest client growth" },
-  { name: "Eli Brooks", role: "Operations", score: "84%", detail: "Process efficiency" },
-  { name: "Noah Kim", role: "Support", score: "81%", detail: "Response quality" },
-  { name: "Priya Menon", role: "Assistant", score: "77%", detail: "Follow up speed" },
-];
-
-const salesTeam = [
-  {
-    id: 1,
-    name: "Mia Ross",
-    role: "Senior Sales",
-    branch: "East",
-    branchManager: "Ariana Lee",
-    email: "mia@agni.com",
-    phone: "+91 91234 10101",
-    region: "East Zone",
-    quota: "₹120k",
-    monthlySales: "₹96k",
-    joiningDate: "2024-02-15",
-  },
-  {
-    id: 2,
-    name: "Alex Vance",
-    role: "Sales Executive",
-    branch: "East",
-    branchManager: "Ariana Lee",
-    email: "alex@agni.com",
-    phone: "+91 91234 10102",
-    region: "East Zone",
-    quota: "₹100k",
-    monthlySales: "₹82k",
-    joiningDate: "2024-03-10",
-  },
-  {
-    id: 3,
-    name: "Kabir Sharma",
-    role: "Sales Specialist",
-    branch: "East",
-    branchManager: "Ariana Lee",
-    email: "kabir@agni.com",
-    phone: "+91 91234 10103",
-    region: "East Zone",
-    quota: "₹110k",
-    monthlySales: "₹74k",
-    joiningDate: "2024-04-01",
-  },
-  {
-    id: 4,
-    name: "Rohan Varma",
-    role: "Sales Executive",
-    branch: "South",
-    branchManager: "Priya Menon",
-    email: "rohan@agni.com",
-    phone: "+91 91234 20202",
-    region: "South Zone",
-    quota: "₹95k",
-    monthlySales: "₹78k",
-    joiningDate: "2024-05-11",
-  },
-  {
-    id: 5,
-    name: "Noah Kim",
-    role: "Sales Associate",
-    branch: "West",
-    branchManager: "Sara Kim",
-    email: "noah@agni.com",
-    phone: "+91 91234 10202",
-    region: "West Zone",
-    quota: "₹84k",
-    monthlySales: "₹63k",
-    joiningDate: "2024-03-18",
-  },
-  {
-    id: 6,
-    name: "Tara Singh",
-    role: "Sales Specialist",
-    branch: "North",
-    branchManager: "Eli Brooks",
-    email: "tara@agni.com",
-    phone: "+91 91234 30303",
-    region: "North Zone",
-    quota: "₹110k",
-    monthlySales: "₹88k",
-    joiningDate: "2024-01-22",
-  },
-];
-
-const managerClients = [
-  {
-    id: 1,
-    name: "Bright Retail",
-    company: "Bright Retail Pvt Ltd",
-    email: "hello@brightretail.com",
-    phone: "+91 98765 32100",
-    service: "CRM Implementation",
-    salesRep: "Mia Ross",
-    assignedSalesPersonId: 1,
-    branch: "East",
-    revenue: "₹68k",
-    startDate: "2024-03-02",
-  },
-  {
-    id: 2,
-    name: "Urban Foods",
-    company: "Urban Foods Ltd",
-    email: "sales@urbanfoods.com",
-    phone: "+91 91234 55678",
-    service: "Marketing Campaign",
-    salesRep: "Mia Ross",
-    assignedSalesPersonId: 1,
-    branch: "East",
-    revenue: "₹54k",
-    startDate: "2024-04-18",
-  },
-  {
-    id: 3,
-    name: "Nova Textiles",
-    company: "Nova Textiles Co",
-    email: "contact@novatextiles.com",
-    phone: "+91 99876 44556",
-    service: "IT Support",
-    salesRep: "Rohan Varma",
-    assignedSalesPersonId: 2,
-    branch: "South",
-    revenue: "₹46k",
-    startDate: "2024-05-09",
-  },
-];
-
-const activities = [
-  { title: "Weekly pipeline review", detail: "Scheduled for Thursday at 10am.", time: "Just now", tone: "#9a74e9" },
-  { title: "Client meeting prep", detail: "Finalize proposal deck for Kiran.", time: "1 hr ago", tone: "#4e7cff" },
-  { title: "Deal follow-up", detail: "Reminder to reconnect with RMD Corp.", time: "3 hrs ago", tone: "#44bfb0" },
-  { title: "Team coaching", detail: "Review conversion metrics with sales team.", time: "6 hrs ago", tone: "#f2aa38" },
-];
-
-const reportRoleOptions = [
-  { label: 'All roles', value: '' },
-  { label: 'Branch Manager', value: 'branch manager' },
-  { label: 'Manager', value: 'manager' },
-  { label: 'Senior Sales', value: 'Senior Sales' },
-  { label: 'Sales Executive', value: 'Sales Executive' },
-  { label: 'Sales Associate', value: 'Sales Associate' },
-  { label: 'Sales Specialist', value: 'Sales Specialist' },
-];
-
-const branchOptions = [
-  { label: 'All branches', value: '' },
-  { label: 'East', value: 'East' },
-  { label: 'South', value: 'South' },
-  { label: 'West', value: 'West' },
-  { label: 'North', value: 'North' },
-];
-
-function RevenueSparkline() {
-  return (
-    <svg viewBox="0 0 240 64" aria-hidden="true" className="sparkline-chart">
-      <path d="M12 48 C42 36 70 30 98 22 C126 14 154 18 182 12 C210 6 228 12 236 20" fill="none" stroke="rgba(255,255,255,0.9)" strokeWidth="3" strokeLinecap="round" />
-      <circle cx="12" cy="48" r="4" fill="#fff" />
-      <circle cx="98" cy="22" r="4" fill="#fff" />
-      <circle cx="236" cy="20" r="4" fill="#fff" />
-    </svg>
-  );
-}
-
-function RevenueTrendChart({ data }) {
-  const width = 320;
-  const height = 180;
-  const padding = 24;
-  const values = data.map((item) => item.value);
-  const maxValue = Math.max(...values);
-  const minValue = Math.min(...values);
-  const range = maxValue - minValue || 1;
-
-  const points = data.map((item, index) => {
-    const x = padding + (index * (width - padding * 2)) / Math.max(data.length - 1, 1);
-    const y = height - padding - ((item.value - minValue) / range) * (height - padding * 2);
-    return { x, y, label: item.label };
-  });
-
-  const linePath = points.map((point, index) => `${index === 0 ? 'M' : 'L'} ${point.x} ${point.y}`).join(' ');
-  const areaPath = `${linePath} L ${points[points.length - 1].x} ${height - padding} L ${points[0].x} ${height - padding} Z`;
-
-  return (
-    <svg viewBox={`0 0 ${width} ${height}`} className="dashboard-chart" aria-hidden="true">
-      <path d={areaPath} fill="rgba(154, 116, 233, 0.16)" />
-      <path d={linePath} fill="none" stroke="#9a74e9" strokeWidth="3" strokeLinecap="round" />
-      {points.map((point) => (
-        <g key={point.label}>
-          <circle cx={point.x} cy={point.y} r="4.5" fill="#fff" stroke="#9a74e9" strokeWidth="2" />
-          <text x={point.x} y={height - 6} textAnchor="middle" fill="#7d79a8" fontSize="11">
-            {point.label}
-          </text>
-        </g>
-      ))}
-    </svg>
-  );
-}
+// Mock & Initial Data
+import {
+  navItems,
+  salesTeam,
+  managerClients,
+} from "./mockManagerData";
 
 export default function ManagerDashboard({ onSignOut, userEmail }) {
-  const [activeNav, setActiveNav] = React.useState("Dashboard");
-  const [searchOpen, setSearchOpen] = React.useState(false);
-  const [notificationsOpen, setNotificationsOpen] = React.useState(false);
-  const [notificationsAutoScrollPaused, setNotificationsAutoScrollPaused] = React.useState(false);
-  const [dark, setDark] = React.useState(false);
-  const [query, setQuery] = React.useState("");
-  const [revenueRange, setRevenueRange] = React.useState("monthly");
-  const [revenueSalesPersonFilter, setRevenueSalesPersonFilter] = React.useState("all");
-  const [selectedTeamMember, setSelectedTeamMember] = React.useState(null);
-  const [selectedClient, setSelectedClient] = React.useState(null);
-  const [clients, setClients] = React.useState(managerClients);
-  const [selectedSalesPerson, setSelectedSalesPerson] = React.useState("all");
-  const [editClientValues, setEditClientValues] = React.useState(null);
-  const [deleteTargetClient, setDeleteTargetClient] = React.useState(null);
-  const notificationWrapRef = React.useRef(null);
-  const notificationsListRef = React.useRef(null);
-  const notificationsPauseTimer = React.useRef(null);
+  const navigate = useNavigate();
+  const location = useLocation();
 
-  const revenueSeries = {
-    daily: [
-      { label: 'Mon', value: 12000 },
-      { label: 'Tue', value: 16000 },
-      { label: 'Wed', value: 14500 },
-      { label: 'Thu', value: 19000 },
-      { label: 'Fri', value: 17000 },
-      { label: 'Sat', value: 21000 },
-    ],
-    weekly: [
-      { label: 'W1', value: 58000 },
-      { label: 'W2', value: 64000 },
-      { label: 'W3', value: 71000 },
-      { label: 'W4', value: 82000 },
-    ],
-    monthly: [
-      { label: 'Jan', value: 52000 },
-      { label: 'Feb', value: 61000 },
-      { label: 'Mar', value: 68000 },
-      { label: 'Apr', value: 74000 },
-      { label: 'May', value: 82000 },
-      { label: 'Jun', value: 96000 },
-    ],
-    yearly: [
-      { label: '2021', value: 340000 },
-      { label: '2022', value: 450000 },
-      { label: '2023', value: 560000 },
-      { label: '2024', value: 680000 },
-      { label: '2025', value: 810000 },
-    ],
-    allTime: [
-      { label: '2019', value: 210000 },
-      { label: '2020', value: 310000 },
-      { label: '2021', value: 450000 },
-      { label: '2022', value: 560000 },
-      { label: '2023', value: 680000 },
-      { label: '2024', value: 810000 },
-    ],
+  const urlToNavMap = useMemo(
+    () => ({
+      dashboard: "Dashboard",
+      overview: "Dashboard",
+      team: "Team",
+      employees: "Team",
+      clients: "Clients",
+      client: "Clients",
+      requests: "Requests",
+      request: "Requests",
+      revenue: "Revenue",
+      revenues: "Revenue",
+      reports: "Reports",
+      report: "Reports",
+      analytics: "Reports",
+    }),
+    []
+  );
+
+  const pathParts = location.pathname.split("/").filter(Boolean);
+  const currentSlug = pathParts[1] || "dashboard";
+  const activeNav = urlToNavMap[currentSlug.toLowerCase()] || "Dashboard";
+
+  const handleNavChange = (label) => {
+    const slug = label.toLowerCase();
+    navigate(`/manager/${slug}`);
   };
 
-  const selectedRevenueData = React.useMemo(() => {
-    const rawData = revenueSeries[revenueRange] || revenueSeries.monthly;
-    if (revenueSalesPersonFilter === "all") {
-      return rawData;
-    }
-    const selectedId = Number(revenueSalesPersonFilter);
-    const memberIndex = salesTeam.findIndex((m) => m.id === selectedId);
-    const factor = memberIndex >= 0 ? 0.35 + ((memberIndex % 3) * 0.12) : 0.4;
-    return rawData.map((item) => ({
-      ...item,
-      value: Math.round(item.value * factor),
-    }));
-  }, [revenueRange, revenueSalesPersonFilter]);
+  const [dark, setDark] = useState(false);
+  const [searchOpen, setSearchOpen] = useState(false);
+  const [notificationsOpen, setNotificationsOpen] = useState(false);
+  const [notificationsAutoScrollPaused, setNotificationsAutoScrollPaused] = useState(false);
+  const [query, setQuery] = useState("");
+  const [clients, setClients] = useState(managerClients);
 
-  const revenueTotal = selectedRevenueData.reduce((sum, point) => sum + point.value, 0);
-  const revenueReceived = Math.round(revenueTotal * 0.76);
-  const revenuePending = Math.round(revenueTotal * 0.24);
-  const revenueSummaryCards = [
-    {
-      label: 'Team Payment Received',
-      value: `₹${revenueReceived.toLocaleString()}`,
-      hint: 'Collected by team members',
-      accentClass: 'received',
-      icon: 'arrowUp',
-    },
-    {
-      label: 'Team Payment Pending',
-      value: `₹${revenuePending.toLocaleString()}`,
-      hint: 'Pending from team clients',
-      accentClass: 'pending',
-      icon: 'overview',
-    },
-    {
-      label: 'Total Team Payment',
-      value: `₹${revenueTotal.toLocaleString()}`,
-      hint: 'Overall team revenue range',
-      accentClass: 'total',
-      icon: 'revenue',
-    },
-  ];
+  const notificationWrapRef = useRef(null);
+  const notificationsListRef = useRef(null);
+  const notificationsPauseTimer = useRef(null);
 
-  const managerName = React.useMemo(() => {
+  const managerName = useMemo(() => {
     if (!userEmail) return "Manager";
     const raw = userEmail.split("@")[0];
     const parts = raw.split(/[^a-zA-Z0-9]+/).filter(Boolean);
-    return parts.map((part) => part.charAt(0).toUpperCase() + part.slice(1).toLowerCase()).join(" ");
+    return parts
+      .map((part) => part.charAt(0).toUpperCase() + part.slice(1).toLowerCase())
+      .join(" ");
   }, [userEmail]);
 
   const managedBranch = "East";
   const managedRegion = "East Zone";
-  const branchTeam = salesTeam.filter((member) => member.branch === managedBranch);
-  const branchTeamNames = branchTeam.map((member) => member.name);
-  const branchClients = clients.filter((client) => branchTeamNames.includes(client.salesRep));
+  const branchTeam = useMemo(
+    () => salesTeam.filter((member) => member.branch === managedBranch),
+    [managedBranch]
+  );
+  const branchTeamNames = useMemo(
+    () => branchTeam.map((member) => member.name),
+    [branchTeam]
+  );
+  const branchClients = useMemo(
+    () => clients.filter((client) => branchTeamNames.includes(client.salesRep)),
+    [clients, branchTeamNames]
+  );
 
-  const salesPeople = React.useMemo(
+  const salesPeople = useMemo(
     () => branchTeam.map((member) => ({ id: member.id, name: member.name })),
     [branchTeam]
   );
 
-  const filteredClients = React.useMemo(() => {
-    // Apply salesperson filtering first, then any other table-level filters if added.
-    if (selectedSalesPerson === "all") {
-      return branchClients;
-    }
-
-    const selectedId = Number(selectedSalesPerson);
-    return branchClients.filter((client) => client.assignedSalesPersonId === selectedId);
-  }, [branchClients, selectedSalesPerson]);
-
-  const currentManagerId = React.useMemo(() => 4, [userEmail]);
-
-  const paymentMetrics = React.useMemo(() => ({
-    daily: formatCurrency(getDailyPayment(currentManagerId)),
-    weekly: formatCurrency(getWeeklyPayment(currentManagerId)),
-    monthly: formatCurrency(getMonthlyPayment(currentManagerId)),
-  }), [currentManagerId]);
-
-  const dashboardKpiCards = React.useMemo(() => [
-    ...kpiCards,
-    {
-      label: "Daily Payment",
-      value: paymentMetrics.daily,
-      trend: "Today",
-      description: "Today's collection",
-      accent: "#f2938f",
-      icon: "calendarToday",
-    },
-    {
-      label: "Weekly Payment",
-      value: paymentMetrics.weekly,
-      trend: "This week",
-      description: "Sales team total",
-      accent: "#6f94f8",
-      icon: "calendarWeek",
-    },
-    {
-      label: "Monthly Payment",
-      value: paymentMetrics.monthly,
-      trend: "This month",
-      description: "Manager collection",
-      accent: "#56c37d",
-      icon: "wallet",
-    },
-  ], [paymentMetrics]);
-
-  React.useEffect(() => {
+  // Close notifications on outside click
+  useEffect(() => {
     function handleOutsideClick(event) {
       if (
         notificationsOpen &&
@@ -430,7 +107,8 @@ export default function ManagerDashboard({ onSignOut, userEmail }) {
     return () => document.removeEventListener("mousedown", handleOutsideClick);
   }, [notificationsOpen]);
 
-  React.useEffect(() => {
+  // Notifications auto-scroll
+  useEffect(() => {
     if (!notificationsOpen) return undefined;
     const list = notificationsListRef.current;
     if (!list) return undefined;
@@ -451,7 +129,7 @@ export default function ManagerDashboard({ onSignOut, userEmail }) {
     return () => window.clearInterval(intervalId);
   }, [notificationsOpen, notificationsAutoScrollPaused]);
 
-  React.useEffect(() => {
+  useEffect(() => {
     return () => {
       if (notificationsPauseTimer.current) {
         window.clearTimeout(notificationsPauseTimer.current);
@@ -471,92 +149,12 @@ export default function ManagerDashboard({ onSignOut, userEmail }) {
     }, 3000);
   }
 
-  function openMemberInfo(member) {
-    setSelectedTeamMember(member);
-  }
-
-  function closeMemberInfo() {
-    setSelectedTeamMember(null);
-  }
-
-  const [showLeaderboard, setShowLeaderboard] = React.useState(false);
-  const [selectedPerformanceEmployee, setSelectedPerformanceEmployee] = React.useState(null);
-
-  function openClientInfo(client) {
-    setSelectedClient(client);
-    setEditClientValues(null);
-  }
-
-  function closeClientInfo() {
-    setSelectedClient(null);
-    setEditClientValues(null);
-  }
-
-  function openDeleteConfirm(client) {
-    setDeleteTargetClient(client);
-  }
-
-  function closeDeleteConfirm() {
-    setDeleteTargetClient(null);
-  }
-
-  function handleDeleteClient(clientId) {
-    setClients((prev) => prev.filter((client) => client.id !== clientId));
-    if (selectedClient?.id === clientId) {
-      setSelectedClient(null);
-      setEditClientValues(null);
-    }
-  }
-
-  function confirmDeleteClient() {
-    if (!deleteTargetClient) return;
-    handleDeleteClient(deleteTargetClient.id);
-    closeDeleteConfirm();
-  }
-
-  function startClientEdit() {
-    setEditClientValues(selectedClient);
-  }
-
-  function handleEditClientChange(event) {
-    const { name, value } = event.target;
-    setEditClientValues((prev) => ({ ...prev, [name]: value }));
-  }
-
-  function saveClientEdit() {
-    setClients((prev) => prev.map((client) => (client.id === editClientValues.id ? editClientValues : client)));
-    setSelectedClient(editClientValues);
-    setEditClientValues(null);
-  }
-
-  function cancelClientEdit() {
-    setEditClientValues(null);
-  }
-
-  function openPerformance(employee) {
-    const series = generateYearlySeries(employee);
-    setSelectedPerformanceEmployee({ ...employee, series });
-  }
-
-  function closePerformance() {
-    setSelectedPerformanceEmployee(null);
-  }
-
-  function generateYearlySeries(employee) {
-    const base = 50000 + employee.id * 2000;
-    return Array.from({ length: 12 }, (_, index) => {
-      const seasonal = 0.72 + index * 0.02;
-      const seed = ((employee.id * 7 + index * 3) % 11) * 0.01;
-      return Math.round(base * (seasonal + seed));
-    });
-  }
-
   return (
     <main className={`owner-dashboard ${dark ? "dashboard-dark" : ""}`}>
       <DashboardSidebar
         navItems={navItems}
         activeNav={activeNav}
-        onNavChange={setActiveNav}
+        onNavChange={handleNavChange}
         dark={dark}
         onToggleDark={() => setDark((value) => !value)}
         onSignOut={onSignOut}
@@ -639,552 +237,117 @@ export default function ManagerDashboard({ onSignOut, userEmail }) {
           </div>
         </DashboardHeader>
 
-        {activeNav === "Dashboard" ? (
-          <section className="dashboard-layout">
-            <div className="dashboard-main">
-              <section className="kpi-grid">
-                {dashboardKpiCards.map((card) => (
-                  <KpiCard
-                    key={card.label}
-                    card={card}
-                    onAction={(c) => c.linkTo && setActiveNav(c.linkTo)}
-                    dark={dark}
-                  />
-                ))}
-              </section>
-
-              <section className="revenue-panel">
-                <div className="revenue-summary">
-                  <p className="eyebrow">Performance overview</p>
-                  <h2>₹184.6k</h2>
-                  <p className="revenue-copy">Pipeline value across active opportunities this month.</p>
-                  <div className="revenue-breakdown">
-                    <div>
-                      <span>Won revenue</span>
-                      <strong>₹84.2k</strong>
-                    </div>
-                    <div>
-                      <span>Pending</span>
-                      <strong>₹52.3k</strong>
-                    </div>
-                    <div>
-                      <span>Forecast</span>
-                      <strong>+18.9%</strong>
-                    </div>
-                  </div>
-                </div>
-                <div className="revenue-chart-panel">
-                  <div className="revenue-chip">
-                    <Icon name="arrowUp" size={14} />
-                    <span>Pipeline trend</span>
-                  </div>
-                  <RevenueSparkline />
-                </div>
-              </section>
-            </div>
-
-            <aside className="owner-sidebar-widgets">
-              <section className="activity-panel">
-                <div className="panel-header">
-                  <div>
-                    <p className="eyebrow">Activity</p>
-                    <h2>What’s happening</h2>
-                  </div>
-                </div>
-                <div className="activity-list">
-                  {activities.map((activity) => (
-                    <div className="activity-row" key={activity.title}>
-                      <span className="activity-mark" style={{ background: activity.tone }} />
-                      <div>
-                        <strong>{activity.title}</strong>
-                        <small>{activity.detail}</small>
-                      </div>
-                      <time>{activity.time}</time>
-                    </div>
-                  ))}
-                </div>
-              </section>
-            </aside>
-          </section>
-        ) : activeNav === "Team" ? (
-          <section>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16, flexWrap: 'wrap', gap: 12 }}>
-              <div>
-                <p className="eyebrow">Sales team</p>
-                <h2>{managedRegion} team</h2>
-                <p style={{ margin: 0, color: '#6b6b77', fontSize: 13 }}>Only sales members from the branch you manage are shown here.</p>
-              </div>
-              <div style={{ color: '#7a748e', fontSize: 13 }}>{branchTeam.length} members</div>
-            </div>
-
-            <table className="clients-table">
-              <thead>
-                <tr>
-                  <th>Name</th>
-                  <th>Role</th>
-                  <th>Email</th>
-                  <th>Phone</th>
-                  <th>Joined</th>
-                  <th></th>
-                </tr>
-              </thead>
-              <tbody>
-                {branchTeam.map((member) => (
-                  <tr key={member.id}>
-                    <td>{member.name}</td>
-                    <td>{member.role}</td>
-                    <td>{member.email}</td>
-                    <td>{member.phone}</td>
-                    <td>{member.joiningDate}</td>
-                    <td style={{ textAlign: 'right' }}>
-                      <button className="table-action" type="button" onClick={() => openMemberInfo(member)}>
-                        Info
-                      </button>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-
-            {selectedTeamMember && (
-              <SimpleModal onClose={closeMemberInfo}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 12 }}>
-                  <div>
-                    <h3 style={{ margin: 0 }}>Employee — {selectedTeamMember.name}</h3>
-                    <div style={{ color: '#7a748e', fontSize: 13 }}>{selectedTeamMember.role}</div>
-                  </div>
-                </div>
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12, marginTop: 16, padding: '12px 0' }}>
-                  <div style={{ background: '#fbfbfe', padding: 12, borderRadius: 8 }}>
-                    <div style={{ color: '#6b6b77', fontSize: 12 }}>Name</div>
-                    <div style={{ marginTop: 6, fontWeight: 600 }}>{selectedTeamMember.name}</div>
-                  </div>
-                  <div style={{ background: '#fbfbfe', padding: 12, borderRadius: 8 }}>
-                    <div style={{ color: '#6b6b77', fontSize: 12 }}>Role</div>
-                    <div style={{ marginTop: 6, fontWeight: 600 }}>{selectedTeamMember.role}</div>
-                  </div>
-                  <div style={{ background: '#fbfbfe', padding: 12, borderRadius: 8 }}>
-                    <div style={{ color: '#6b6b77', fontSize: 12 }}>Branch</div>
-                    <div style={{ marginTop: 6, fontWeight: 600 }}>{selectedTeamMember.branch}</div>
-                  </div>
-                  <div style={{ background: '#fbfbfe', padding: 12, borderRadius: 8 }}>
-                    <div style={{ color: '#6b6b77', fontSize: 12 }}>Branch manager</div>
-                    <div style={{ marginTop: 6, fontWeight: 600 }}>{selectedTeamMember.branchManager || managerName}</div>
-                  </div>
-                  <div style={{ background: '#fbfbfe', padding: 12, borderRadius: 8 }}>
-                    <div style={{ color: '#6b6b77', fontSize: 12 }}>Region</div>
-                    <div style={{ marginTop: 6, fontWeight: 600 }}>{selectedTeamMember.region}</div>
-                  </div>
-                  <div style={{ background: '#fbfbfe', padding: 12, borderRadius: 8 }}>
-                    <div style={{ color: '#6b6b77', fontSize: 12 }}>Email</div>
-                    <div style={{ marginTop: 6, fontWeight: 600 }}>{selectedTeamMember.email}</div>
-                  </div>
-                  <div style={{ background: '#fbfbfe', padding: 12, borderRadius: 8 }}>
-                    <div style={{ color: '#6b6b77', fontSize: 12 }}>Phone</div>
-                    <div style={{ marginTop: 6, fontWeight: 600 }}>{selectedTeamMember.phone}</div>
-                  </div>
-                  <div style={{ background: '#fbfbfe', padding: 12, borderRadius: 8 }}>
-                    <div style={{ color: '#6b6b77', fontSize: 12 }}>Quota</div>
-                    <div style={{ marginTop: 6, fontWeight: 600 }}>{selectedTeamMember.quota}</div>
-                  </div>
-                  <div style={{ background: '#fbfbfe', padding: 12, borderRadius: 8 }}>
-                    <div style={{ color: '#6b6b77', fontSize: 12 }}>Monthly sales</div>
-                    <div style={{ marginTop: 6, fontWeight: 600 }}>{selectedTeamMember.monthlySales}</div>
-                  </div>
-                  <div style={{ background: '#fbfbfe', padding: 12, borderRadius: 8, gridColumn: '1 / -1' }}>
-                    <div style={{ color: '#6b6b77', fontSize: 12 }}>Joined</div>
-                    <div style={{ marginTop: 6, fontWeight: 600 }}>{selectedTeamMember.joiningDate}</div>
-                  </div>
-                </div>
-              </SimpleModal>
-            )}
-          </section>
-        ) : activeNav === "Clients" ? (
-          <section>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16, flexWrap: 'wrap', gap: 12 }}>
-              <div>
-                <p className="eyebrow">Branch clients</p>
-                <h2>Clients under your sales team</h2>
-                <p style={{ margin: 0, color: '#6b6b77', fontSize: 13 }}>Showing only clients managed by sales members in your branch.</p>
-              </div>
-              <div style={{ display: 'flex', alignItems: 'center', gap: 12, flexWrap: 'wrap' }}>
-                <div style={{ color: '#7a748e', fontSize: 13 }}>{filteredClients.length} clients</div>
-                <label className="field-label" style={{ minWidth: 220, margin: 0 }}>
-                  <span>Sales Person</span>
-                  <select
-                    value={selectedSalesPerson}
-                    onChange={(event) => setSelectedSalesPerson(event.target.value)}
-                  >
-                    <option value="all">All Sales Persons</option>
-                    {salesPeople.map((person) => (
-                      <option key={person.id} value={person.id}>
-                        {person.name}
-                      </option>
-                    ))}
-                  </select>
-                </label>
-              </div>
-            </div>
-
-            <table className="clients-table">
-              <thead>
-                <tr>
-                  <th>Client</th>
-                  <th>Company</th>
-                  <th>Assigned rep</th>
-                  <th>Email</th>
-                  <th>Phone</th>
-                  <th>Start</th>
-                  <th></th>
-                </tr>
-              </thead>
-              <tbody>
-                {filteredClients.map((client) => (
-                  <tr key={client.id}>
-                    <td>{client.name}</td>
-                    <td>{client.company}</td>
-                    <td>{client.salesRep}</td>
-                    <td>{client.email}</td>
-                    <td>{client.phone}</td>
-                    <td>{client.startDate}</td>
-                    <td style={{ textAlign: 'right' }}>
-                      <button className="table-action" type="button" onClick={() => openClientInfo(client)}>
-                        Info
-                      </button>
-                      <button className="table-action danger" type="button" onClick={() => openDeleteConfirm(client)}>
-                        Delete
-                      </button>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-
-            {selectedClient && (
-              <SimpleModal onClose={closeClientInfo}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 12 }}>
-                  <div>
-                    <h3 style={{ margin: 0 }}>Client — {selectedClient.name}</h3>
-                    <div style={{ color: '#7a748e', fontSize: 13 }}>{selectedClient.company}</div>
-                  </div>
-                </div>
-
-                {editClientValues ? (
-                  <div style={{ display: 'grid', gap: 16, marginTop: 16 }}>
-                    <EditForm values={editClientValues} onChange={handleEditClientChange} />
-                    <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 10 }}>
-                      <button className="table-action" type="button" onClick={cancelClientEdit}>
-                        Cancel
-                      </button>
-                      <button className="table-action" type="button" onClick={saveClientEdit}>
-                        Save
-                      </button>
-                    </div>
-                  </div>
-                ) : (
-                  <>
-                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12, marginTop: 16, padding: '12px 0' }}>
-                      <div style={{ background: '#fbfbfe', padding: 12, borderRadius: 8 }}>
-                        <div style={{ color: '#6b6b77', fontSize: 12 }}>Client</div>
-                        <div style={{ marginTop: 6, fontWeight: 600 }}>{selectedClient.name}</div>
-                      </div>
-                      <div style={{ background: '#fbfbfe', padding: 12, borderRadius: 8 }}>
-                        <div style={{ color: '#6b6b77', fontSize: 12 }}>Company</div>
-                        <div style={{ marginTop: 6, fontWeight: 600 }}>{selectedClient.company}</div>
-                      </div>
-                      <div style={{ background: '#fbfbfe', padding: 12, borderRadius: 8 }}>
-                        <div style={{ color: '#6b6b77', fontSize: 12 }}>Assigned rep</div>
-                        <div style={{ marginTop: 6, fontWeight: 600 }}>{selectedClient.salesRep}</div>
-                      </div>
-                      <div style={{ background: '#fbfbfe', padding: 12, borderRadius: 8 }}>
-                        <div style={{ color: '#6b6b77', fontSize: 12 }}>Email</div>
-                        <div style={{ marginTop: 6, fontWeight: 600 }}>{selectedClient.email}</div>
-                      </div>
-                      <div style={{ background: '#fbfbfe', padding: 12, borderRadius: 8 }}>
-                        <div style={{ color: '#6b6b77', fontSize: 12 }}>Phone</div>
-                        <div style={{ marginTop: 6, fontWeight: 600 }}>{selectedClient.phone}</div>
-                      </div>
-                      <div style={{ background: '#fbfbfe', padding: 12, borderRadius: 8 }}>
-                        <div style={{ color: '#6b6b77', fontSize: 12 }}>Service</div>
-                        <div style={{ marginTop: 6, fontWeight: 600 }}>{selectedClient.service}</div>
-                      </div>
-                      <div style={{ background: '#fbfbfe', padding: 12, borderRadius: 8 }}>
-                        <div style={{ color: '#6b6b77', fontSize: 12 }}>Start date</div>
-                        <div style={{ marginTop: 6, fontWeight: 600 }}>{selectedClient.startDate}</div>
-                      </div>
-                      <div style={{ background: '#fbfbfe', padding: 12, borderRadius: 8 }}>
-                        <div style={{ color: '#6b6b77', fontSize: 12 }}>Revenue</div>
-                        <div style={{ marginTop: 6, fontWeight: 600 }}>{selectedClient.revenue}</div>
-                      </div>
-                    </div>
-                    <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: 16 }}>
-                      <button className="table-action" type="button" onClick={startClientEdit}>
-                        Edit
-                      </button>
-                    </div>
-                  </>
-                )}
-              </SimpleModal>
-            )}
-
-            {deleteTargetClient && (
-              <SimpleModal onClose={closeDeleteConfirm} showCloseButton={false}>
-                <ConfirmDialog
-                  message={`Delete ${deleteTargetClient.name} from clients?`}
-                  onConfirm={confirmDeleteClient}
-                  onCancel={closeDeleteConfirm}
-                />
-              </SimpleModal>
-            )}
-          </section>
-        ) : activeNav === "Requests" ? (
-          <section>
-            <ManagerRequests branchTeamNames={branchTeamNames} managedRegion={managedRegion} branchTeam={branchTeam} />
-          </section>
-        ) : activeNav === "Revenue" ? (
-          <section>
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12, marginBottom: 16, flexWrap: 'wrap' }}>
-              <div>
-                <h2 style={{ margin: 0 }}>Team Revenue Analytics</h2>
-                <div style={{ color: '#7a748e', fontSize: 13, marginTop: 4 }}>
-                  Revenue performance for your sales team in {managedRegion} ({managedBranch} Branch)
-                </div>
-              </div>
-              <div style={{ display: 'flex', alignItems: 'center', gap: 12, flexWrap: 'wrap' }}>
-                <div>
-                  <label style={{ fontSize: 13, color: '#6b6b77', marginRight: 8 }}>Team Member</label>
-                  <select value={revenueSalesPersonFilter} onChange={(e) => setRevenueSalesPersonFilter(e.target.value)}>
-                    <option value="all">All Team Members</option>
-                    {branchTeam.map((member) => (
-                      <option key={member.id} value={member.id}>{member.name}</option>
-                    ))}
-                  </select>
-                </div>
-                <div>
-                  <label style={{ fontSize: 13, color: '#6b6b77', marginRight: 8 }}>Time range</label>
-                  <select value={revenueRange} onChange={(event) => setRevenueRange(event.target.value)}>
-                    <option value="daily">Daily</option>
-                    <option value="weekly">Weekly</option>
-                    <option value="monthly">Monthly</option>
-                    <option value="yearly">Yearly</option>
-                    <option value="allTime">All time</option>
-                  </select>
-                </div>
-              </div>
-            </div>
-
-            <div className="revenue-panel" style={{ display: 'grid', gridTemplateColumns: '1.2fr 0.8fr', gap: 16, alignItems: 'stretch' }}>
-              <div className="revenue-summary" style={{ minHeight: 220 }}>
-                <p className="eyebrow">
-                  {revenueSalesPersonFilter === "all" ? "Team Revenue Overview" : `${branchTeam.find((m) => String(m.id) === String(revenueSalesPersonFilter))?.name || "Member"}'s Revenue`}
-                </p>
-                <h2>₹{revenueTotal.toLocaleString()}</h2>
-                <p className="revenue-copy">
-                  {revenueSalesPersonFilter === "all" ? `Combined revenue of ${branchTeam.length} sales team members.` : `Revenue generated by selected team member.`}
-                </p>
-                <div className="revenue-breakdown">
-                  <div>
-                    <span>Average</span>
-                    <strong>₹{Math.round(revenueTotal / selectedRevenueData.length).toLocaleString()}</strong>
-                  </div>
-                  <div>
-                    <span>Peak</span>
-                    <strong>₹{Math.max(...selectedRevenueData.map((item) => item.value)).toLocaleString()}</strong>
-                  </div>
-                  <div>
-                    <span>Team Members</span>
-                    <strong>{revenueSalesPersonFilter === "all" ? branchTeam.length : 1}</strong>
-                  </div>
-                </div>
-              </div>
-              <div className="revenue-chart-panel" style={{ minHeight: 220 }}>
-                <div className="revenue-chip">
-                  <Icon name="arrowUp" size={14} />
-                  <span>Team Trend</span>
-                </div>
-                <RevenueTrendChart data={selectedRevenueData} />
-              </div>
-            </div>
-
-            <div className="revenue-summary-grid">
-              {revenueSummaryCards.map((card) => (
-                <RevenueSummaryCard key={card.label} card={card} />
-              ))}
-            </div>
-
-            <div style={{ marginTop: 24 }}>
-              <h3 style={{ margin: '0 0 12px 0' }}>Team Member Revenue Breakdown</h3>
-              <table className="clients-table">
-                <thead>
-                  <tr>
-                    <th>Sales Person</th>
-                    <th>Role</th>
-                    <th>Region</th>
-                    <th>Monthly Quota</th>
-                    <th>Revenue Generated</th>
-                    <th>Achievement</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {branchTeam
-                    .filter((member) => revenueSalesPersonFilter === "all" || String(member.id) === String(revenueSalesPersonFilter))
-                    .map((member) => {
-                      const salesVal = parseInt(member.monthlySales.replace(/[^0-9]/g, '')) * 1000;
-                      const quotaVal = parseInt(member.quota.replace(/[^0-9]/g, '')) * 1000;
-                      const pct = Math.round((salesVal / quotaVal) * 100);
-                      return (
-                        <tr key={member.id}>
-                          <td style={{ fontWeight: 600 }}>{member.name}</td>
-                          <td>{member.role}</td>
-                          <td>{member.region}</td>
-                          <td>{member.quota}</td>
-                          <td style={{ color: '#44bfb0', fontWeight: 600 }}>{member.monthlySales}</td>
-                          <td>
-                            <span className="table-action" style={{ background: '#eef3ff', color: '#4e7cff', border: '1px solid #c7d7fe' }}>
-                              {pct}% Achieved
-                            </span>
-                          </td>
-                        </tr>
-                      );
-                    })}
-                </tbody>
-              </table>
-            </div>
-          </section>
-        ) : activeNav === "Reports" ? (
-          <section>
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12, marginBottom: 12, flexWrap: 'wrap' }}>
-              <div>
-                <h2 style={{ margin: 0 }}>Employee reports</h2>
-                <div style={{ color: '#7a748e', fontSize: 13, marginTop: 4 }}>Last month vs this month performance</div>
-              </div>
-            </div>
-
-            <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: 16 }}>
-              <button type="button" className="table-action" onClick={() => setShowLeaderboard((show) => !show)}>
-                {showLeaderboard ? 'Hide leaderboard' : 'Leaderboard'}
-              </button>
-            </div>
-
-            {showLeaderboard ? (
-              <div style={{ marginBottom: 18 }}>
-                <TopPerformerLeaderboard performers={branchTeam} />
-              </div>
-            ) : (
-              <>
-                <table className="clients-table">
-                  <thead>
-                    <tr>
-                      <th>Name</th>
-                      <th>Branch</th>
-                      <th>Role</th>
-                      <th>Last month</th>
-                      <th>This month</th>
-                      <th></th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {branchTeam.map((employee) => {
-                      const series = generateYearlySeries(employee);
-                      const lastMonth = series[10];
-                      const thisMonth = series[11];
-                      return (
-                        <tr key={employee.id}>
-                          <td>{employee.name}</td>
-                          <td>{employee.branch}</td>
-                          <td>{employee.role}</td>
-                          <td>₹{lastMonth.toLocaleString()}</td>
-                          <td>₹{thisMonth.toLocaleString()}</td>
-                          <td style={{ textAlign: 'right' }}>
-                            <button className="table-action" type="button" onClick={() => openPerformance(employee)}>
-                              View chart
-                            </button>
-                          </td>
-                        </tr>
-                      );
-                    })}
-                  </tbody>
-                </table>
-              </>
-            )}
-
-            {selectedPerformanceEmployee && (
-              <SimpleModal onClose={closePerformance}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                  <h3 style={{ margin: 0 }}>Performance — {selectedPerformanceEmployee.name}</h3>
-                </div>
-                <PerformanceChart series={selectedPerformanceEmployee.series} label={`Employee: ${selectedPerformanceEmployee.name}`} />
-              </SimpleModal>
-            )}
-          </section>
-        ) : (
-          <section className="dashboard-layout">
-            <div className="dashboard-main">
-              <section className="kpi-grid">
-                {dashboardKpiCards.map((card) => (
-                  <KpiCard
-                    key={card.label}
-                    card={card}
-                    onAction={(c) => c.linkTo && setActiveNav(c.linkTo)}
-                    dark={dark}
-                  />
-                ))}
-              </section>
-
-              <section className="revenue-panel">
-                <div className="revenue-summary">
-                  <p className="eyebrow">Performance overview</p>
-                  <h2>₹184.6k</h2>
-                  <p className="revenue-copy">Pipeline value across active opportunities this month.</p>
-                  <div className="revenue-breakdown">
-                    <div>
-                      <span>Won revenue</span>
-                      <strong>₹84.2k</strong>
-                    </div>
-                    <div>
-                      <span>Pending</span>
-                      <strong>₹52.3k</strong>
-                    </div>
-                    <div>
-                      <span>Forecast</span>
-                      <strong>+18.9%</strong>
-                    </div>
-                  </div>
-                </div>
-                <div className="revenue-chart-panel">
-                  <div className="revenue-chip">
-                    <Icon name="arrowUp" size={14} />
-                    <span>Pipeline trend</span>
-                  </div>
-                  <RevenueSparkline />
-                </div>
-              </section>
-            </div>
-
-            <aside className="owner-sidebar-widgets">
-              <section className="activity-panel">
-                <div className="panel-header">
-                  <div>
-                    <p className="eyebrow">Activity</p>
-                    <h2>What’s happening</h2>
-                  </div>
-                </div>
-                <div className="activity-list">
-                  {activities.map((activity) => (
-                    <div className="activity-row" key={activity.title}>
-                      <span className="activity-mark" style={{ background: activity.tone }} />
-                      <div>
-                        <strong>{activity.title}</strong>
-                        <small>{activity.detail}</small>
-                      </div>
-                      <time>{activity.time}</time>
-                    </div>
-                  ))}
-                </div>
-              </section>
-            </aside>
-          </section>
-        )}
+        {/* Nested Routes for Manager Dashboard */}
+        <Routes>
+          <Route
+            index
+            element={<ManagerOverviewPage dark={dark} onNavigate={handleNavChange} />}
+          />
+          <Route
+            path="dashboard"
+            element={<ManagerOverviewPage dark={dark} onNavigate={handleNavChange} />}
+          />
+          <Route
+            path="overview"
+            element={<ManagerOverviewPage dark={dark} onNavigate={handleNavChange} />}
+          />
+          <Route
+            path="team"
+            element={
+              <ManagerTeamPage
+                branchTeam={branchTeam}
+                managedRegion={managedRegion}
+                managerName={managerName}
+              />
+            }
+          />
+          <Route
+            path="employees"
+            element={
+              <ManagerTeamPage
+                branchTeam={branchTeam}
+                managedRegion={managedRegion}
+                managerName={managerName}
+              />
+            }
+          />
+          <Route
+            path="clients"
+            element={
+              <ManagerClientsPage
+                clients={branchClients}
+                setClients={setClients}
+                salesPeople={salesPeople}
+              />
+            }
+          />
+          <Route
+            path="client"
+            element={
+              <ManagerClientsPage
+                clients={branchClients}
+                setClients={setClients}
+                salesPeople={salesPeople}
+              />
+            }
+          />
+          <Route
+            path="requests"
+            element={
+              <ManagerRequestsPage
+                branchTeamNames={branchTeamNames}
+                managedRegion={managedRegion}
+                branchTeam={branchTeam}
+              />
+            }
+          />
+          <Route
+            path="request"
+            element={
+              <ManagerRequestsPage
+                branchTeamNames={branchTeamNames}
+                managedRegion={managedRegion}
+                branchTeam={branchTeam}
+              />
+            }
+          />
+          <Route
+            path="revenue"
+            element={
+              <ManagerRevenuePage
+                branchTeam={branchTeam}
+                managedRegion={managedRegion}
+                managedBranch={managedBranch}
+              />
+            }
+          />
+          <Route
+            path="revenues"
+            element={
+              <ManagerRevenuePage
+                branchTeam={branchTeam}
+                managedRegion={managedRegion}
+                managedBranch={managedBranch}
+              />
+            }
+          />
+          <Route
+            path="reports"
+            element={<ManagerReportsPage branchTeam={branchTeam} />}
+          />
+          <Route
+            path="report"
+            element={<ManagerReportsPage branchTeam={branchTeam} />}
+          />
+          <Route
+            path="analytics"
+            element={<ManagerReportsPage branchTeam={branchTeam} />}
+          />
+          <Route
+            path="*"
+            element={<Navigate to="/manager/dashboard" replace />}
+          />
+        </Routes>
       </section>
     </main>
   );

@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { services } from "./mockOwnerData";
-import { ACTIVITY_STAGES } from "../Admin/mockAdminData";
+import { getTrackerState } from "../../utils/schemeTracker";
 
 const PAGE_SIZE = 15;
 
@@ -87,14 +87,11 @@ export default function OwnerClientsPage({
             </tr>
           ) : (
             clientsPageItems.map((client) => {
-              const completed =
-                client.completedSteps ||
-                (client.progressPercent
-                  ? ACTIVITY_STAGES.slice(
-                      0,
-                      Math.round(client.progressPercent / 20)
-                    ).map((s) => s.name)
-                  : ["Submission", "Doc Audit", "Manager Review"]);
+              const clientScheme = client.serviceName || client.scheme || client.serviceType || "PMEGP";
+              const tracker = getTrackerState({
+                scheme: clientScheme,
+                completedSteps: client.completedSteps,
+              });
 
               return (
                 <tr key={client.id}>
@@ -137,16 +134,12 @@ export default function OwnerClientsPage({
                           width: "fit-content",
                         }}
                       >
-                        ●{" "}
-                        {client.applicationStatus ||
-                          (completed.length > 0
-                            ? completed[completed.length - 1]
-                            : "Submission")}
+                        ● {client.applicationStatus || tracker.currentStage}
                       </span>
-                      {/* 5 mini dots */}
+                      {/* Dynamic scheme dots */}
                       <div style={{ display: "flex", gap: 4, alignItems: "center" }}>
-                        {ACTIVITY_STAGES.map((st) => {
-                          const isDone = completed.includes(st.name);
+                        {tracker.stages.map((st) => {
+                          const isDone = tracker.completedStages.includes(st.name);
                           return (
                             <span
                               key={st.name}
@@ -162,24 +155,18 @@ export default function OwnerClientsPage({
                             />
                           );
                         })}
-                        <span
-                          style={{
-                            fontSize: 10.5,
-                            color: "#64748b",
-                            marginLeft: 4,
-                          }}
-                        >
-                          {completed.length}/5 Points
+                        <span style={{ fontSize: 10.5, color: "#64748b", marginLeft: 4 }}>
+                          {tracker.completedStages.length}/{tracker.totalStages} Points
                         </span>
                       </div>
                     </div>
                   </td>
-                  <td style={{ minWidth: 130 }}>
+                  <td style={{ minWidth: 120 }}>
                     <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
                       <div
                         style={{
                           flex: 1,
-                          height: 8,
+                          height: 7,
                           background: "#e2e8f0",
                           borderRadius: 999,
                           overflow: "hidden",
@@ -187,27 +174,25 @@ export default function OwnerClientsPage({
                       >
                         <div
                           style={{
-                            width: `${client.progressPercent || 60}%`,
+                            width: `${tracker.progressPercent}%`,
                             height: "100%",
                             background:
-                              (client.progressPercent || 60) === 100
+                              tracker.progressPercent === 100
                                 ? "#10b981"
-                                : "linear-gradient(90deg, #10b981 0%, #059669 100%)",
+                                : "linear-gradient(90deg, #6366f1 0%, #10b981 100%)",
                             borderRadius: 999,
                           }}
                         />
                       </div>
-                      <strong
+                      <span
                         style={{
                           fontSize: 12,
-                          color:
-                            (client.progressPercent || 60) === 100
-                              ? "#10b981"
-                              : "#1e293b",
+                          fontWeight: 700,
+                          color: tracker.progressPercent === 100 ? "#10b981" : "#1e293b",
                         }}
                       >
-                        {client.progressPercent || 60}%
-                      </strong>
+                        {tracker.progressPercent}%
+                      </span>
                     </div>
                   </td>
                   <td style={{ textAlign: "right", whiteSpace: "nowrap" }}>

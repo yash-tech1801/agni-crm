@@ -3,6 +3,7 @@ import KpiCard from "../../components/KpiCard";
 import Icon from "../../components/Icon";
 import { revenueKpiCards, workforceKpiCards, activities } from "./mockOwnerData";
 import { ACTIVITY_STAGES } from "../Admin/mockAdminData";
+import { getTrackerState } from "../../utils/schemeTracker";
 
 function RevenueSparkline() {
   return (
@@ -119,29 +120,30 @@ export default function OwnerOverviewPage({
       </div>
 
       <aside className="owner-sidebar-widgets">
-        {/* 5-Point Activity Status Milestone Widget */}
+        {/* Dynamic Activity Status Milestone Widget */}
         <section className="activity-panel" style={{ marginBottom: 18 }}>
           <div className="panel-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
             <div>
               <p className="eyebrow">Milestone pipeline</p>
-              <h2>5-Point Activity Status</h2>
+              <h2>Activity Status Breakdown</h2>
             </div>
             <span style={{ fontSize: 11, fontWeight: 700, padding: '3px 8px', borderRadius: 999, background: 'rgba(16, 185, 129, 0.12)', color: '#059669' }}>
-              20% / Step
+              Scheme-Driven
             </span>
           </div>
           <div style={{ display: 'flex', flexDirection: 'column', gap: 8, marginTop: 12 }}>
             {ACTIVITY_STAGES.map((st) => {
               const clientsInStage = clients.filter(c => {
-                const steps = c.completedSteps || (c.progressPercent ? ACTIVITY_STAGES.slice(0, Math.round(c.progressPercent / 20)).map(s => s.name) : ["Submission"]);
-                return steps.includes(st.name);
+                const clientScheme = c.serviceName || c.scheme || c.serviceType || "PMEGP";
+                const tracker = getTrackerState({ scheme: clientScheme, completedSteps: c.completedSteps });
+                return tracker.completedStages.includes(st.name);
               }).length;
               const percentOfClients = Math.round((clientsInStage / Math.max(1, clients.length)) * 100);
 
               return (
                 <div key={st.name} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '8px 10px', borderRadius: 8, background: '#f8fafc', border: '1px solid #f1f5f9' }}>
                   <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                    <span style={{ width: 8, height: 8, borderRadius: '50%', background: '#10b981' }} />
+                    <span style={{ width: 8, height: 8, borderRadius: '50%', background: st.badgeColor || '#10b981' }} />
                     <span style={{ fontSize: 12.5, fontWeight: 600, color: '#1e293b' }}>{st.name}</span>
                     <span style={{ fontSize: 11, color: '#64748b' }}>({st.percent}%)</span>
                   </div>

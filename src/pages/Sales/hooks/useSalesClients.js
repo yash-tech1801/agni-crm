@@ -6,6 +6,7 @@ import {
   initialNewClientState,
   salesLeads,
 } from "../mockSalesData";
+import { getTrackerState } from "../../../utils/schemeTracker";
 
 export function useSalesClients(salesPersonName, onClientAdded) {
   const [clients, setClients] = useState(initialSalesClients);
@@ -105,6 +106,8 @@ export function useSalesClients(salesPersonName, onClientAdded) {
       },
     ];
 
+    const tracker = getTrackerState(newClient.scheme, ["CRM Creation"]);
+
     const newlyCreatedClient = {
       id: nextId,
       name: newClient.name,
@@ -124,6 +127,10 @@ export function useSalesClients(salesPersonName, onClientAdded) {
       paymentPending: newClient.paymentPending,
       notes: newClient.notes || "Client profile registered by salesperson.",
       documentDetails,
+      completedSteps: ["CRM Creation"],
+      progress: tracker.progressPercent,
+      applicationStatus: "CRM Creation",
+      processType: tracker.processType,
     };
 
     setClients((prev) => [newlyCreatedClient, ...prev]);

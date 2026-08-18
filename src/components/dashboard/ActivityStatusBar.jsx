@@ -1,23 +1,21 @@
 import React from "react";
 import Icon from "../Icon";
-import { ACTIVITY_STAGES } from "../../pages/Admin/mockAdminData";
+import {
+  getTrackerStages,
+  getTrackerState,
+  canCompleteStage,
+  normalizeCompletedStages,
+  getProcessTypeForScheme,
+  getProcessTypeLabel,
+} from "../../utils/schemeTracker.js";
 import "./ActivityStatusBar.css";
 
 /**
- * ActivityStatusBar: 5-Point Client Activity Status Stepper
- * Each checked point represents 20% progress (1=20%, 2=40%, 3=60%, 4=80%, 5=100%).
- *
- * @param {Object} props
- * @param {Array<string>} [props.completedSteps] - Array of completed stage names
- * @param {number} [props.progress] - Progress percentage (0 - 100)
- * @param {Function} [props.onStepToggle] - Callback (stepName, newCompletedSteps, newPercent)
- * @param {boolean} [props.interactive] - If true, points can be clicked to toggle completion
- * @param {boolean} [props.showTrack] - If true, renders a filled progress track bar
- * @param {string} [props.size] - "compact" | "normal" | "large"
- * @param {Object} [props.stepDates] - Optional map of { [stepName]: "10 Aug" }
- * @param {string} [props.className] - Custom container class
+ * ActivityStatusBar: Scheme-Based Dynamic Activity Milestone Tracker
+ * Strictly enforces sequential workflow.
  */
 export default function ActivityStatusBar({
+  scheme,
   completedSteps,
   progress,
   onStepToggle,
@@ -27,43 +25,49 @@ export default function ActivityStatusBar({
   stepDates = {},
   className = "",
 }) {
-  // Determine checked steps array
+  const stages = React.useMemo(() => getTrackerStages(scheme), [scheme]);
+  const totalStages = stages.length;
+
   const currentCompleted = React.useMemo(() => {
+    let rawSteps = [];
     if (Array.isArray(completedSteps)) {
-      return completedSteps;
+      rawSteps = completedSteps;
+    } else if (typeof progress === "number" && totalStages > 0) {
+      const count = Math.round((progress / 100) * totalStages);
+      rawSteps = stages.slice(0, count).map((s) => s.name);
     }
-    if (typeof progress === "number") {
-      const count = Math.round(progress / 20);
-      return ACTIVITY_STAGES.slice(0, count).map((s) => s.name);
-    }
-    return [];
-  }, [completedSteps, progress]);
+    return normalizeCompletedStages(rawSteps, stages);
+  }, [completedSteps, progress, stages, totalStages]);
 
-  // Calculate percentage: exactly 20% per completed point
-  const calculatedPercent = Math.min(100, Math.max(0, currentCompleted.length * 20));
+  const trackerState = React.useMemo(() => {
+    return getTrackerState({ scheme, completedSteps: currentCompleted });
+  }, [scheme, currentCompleted]);
 
-  // Find the first uncompleted step (active next step)
-  const firstUncompletedIndex = ACTIVITY_STAGES.findIndex(
-    (s) => !currentCompleted.includes(s.name)
-  );
+  const calculatedPercent = trackerState.progressPercent;
+  const processType = getProcessTypeForScheme(scheme);
+  const processLabel = getProcessTypeLabel(processType);
 
   const handlePointClick = (stage, idx) => {
     if (!interactive || !onStepToggle) return;
 
     let nextCompleted;
     if (currentCompleted.includes(stage.name)) {
-      // If clicking already completed, uncheck this and subsequent steps
+      // If unchecking, remove this and all subsequent steps to maintain sequentiality
       nextCompleted = currentCompleted.filter((name) => {
-        const stageIdx = ACTIVITY_STAGES.findIndex((s) => s.name === name);
+        const stageIdx = stages.findIndex((s) => s.name === name);
         return stageIdx < idx;
       });
     } else {
-      // If clicking uncompleted, check all steps up to and including this one
-      nextCompleted = ACTIVITY_STAGES.slice(0, idx + 1).map((s) => s.name);
+      // If completing, check if allowed sequentially
+      if (!canCompleteStage(stage.name, stages, currentCompleted)) {
+        return;
+      }
+      nextCompleted = stages.slice(0, idx + 1).map((s) => s.name);
     }
 
-    const newPercent = nextCompleted.length * 20;
-    onStepToggle(stage.name, nextCompleted, newPercent);
+    const normalized = normalizeCompletedStages(nextCompleted, stages);
+    const updatedTracker = getTrackerState({ scheme, completedSteps: normalized });
+    onStepToggle(stage.name, updatedTracker.completedStages, updatedTracker.progressPercent);
   };
 
   return (
@@ -71,9 +75,11 @@ export default function ActivityStatusBar({
       {showTrack && (
         <div className="activity-status-header-bar">
           <div className="activity-status-header-left">
-            <span className="activity-status-kicker">ACTIVITY MILESTONE TRACKER</span>
+            <span className="activity-status-kicker">
+              ACTIVITY MILESTONE TRACKER ({processLabel})
+            </span>
             <span className="activity-status-count-badge">
-              <strong>{currentCompleted.length}</strong> of 5 Points Completed
+              <strong>{currentCompleted.length}</strong> of {totalStages} Points Completed
             </span>
           </div>
           <div className="activity-status-header-right">
@@ -92,36 +98,38 @@ export default function ActivityStatusBar({
         </div>
       )}
 
-      {/* 5-Points Stepper Container */}
+      {/* Stepper Container */}
       <div className={`activity-status-points-container ${interactive ? "is-interactive" : ""}`}>
-        {ACTIVITY_STAGES.map((stage, idx) => {
+        {stages.map((stage, idx) => {
           const isDone = currentCompleted.includes(stage.name);
-          const isActive = !isDone && idx === firstUncompletedIndex;
-          const isPending = !isDone && !isActive;
-          const dateStr = stepDates[stage.name] || (isDone ? "Completed" : "Pending");
+          const isCurrentActive = stage.name === trackerState.currentStage;
+          const isLocked = !isDone && !isCurrentActive;
+          const isClickable = interactive && (isDone || canCompleteStage(stage.name, stages, currentCompleted));
+
+          const dateStr = stepDates[stage.name] || (isDone ? "Completed" : isCurrentActive ? "In Progress" : "Locked");
 
           return (
             <div
               key={stage.name}
               className={`activity-point-item ${
-                isDone ? "is-done" : isActive ? "is-active" : "is-pending"
-              }`}
+                isDone
+                  ? "is-done"
+                  : isCurrentActive
+                  ? "is-active"
+                  : "is-pending is-locked"
+              } ${isClickable ? "is-clickable" : "not-clickable"}`}
               onClick={() => handlePointClick(stage, idx)}
               title={
                 interactive
                   ? isDone
                     ? `Click to mark pending from ${stage.name}`
-                    : `Click to complete up to ${stage.name} (${(idx + 1) * 20}%)`
+                    : isClickable
+                    ? `Click to complete ${stage.name}`
+                    : `Locked: Complete prior steps first`
                   : undefined
               }
-              role={interactive ? "button" : undefined}
-              tabIndex={interactive ? 0 : undefined}
-              onKeyDown={(e) => {
-                if (interactive && (e.key === "Enter" || e.key === " ")) {
-                  e.preventDefault();
-                  handlePointClick(stage, idx);
-                }
-              }}
+              role={interactive && isClickable ? "button" : undefined}
+              tabIndex={interactive && isClickable ? 0 : undefined}
             >
               {/* Circle Node */}
               <div className="activity-point-node">
@@ -129,10 +137,12 @@ export default function ActivityStatusBar({
                   <div className="activity-node-check">
                     <Icon name="check" size={size === "compact" ? 14 : 20} />
                   </div>
-                ) : (
+                ) : isCurrentActive ? (
                   <div className="activity-node-number">{idx + 1}</div>
+                ) : (
+                  <div className="activity-node-locked">🔒</div>
                 )}
-                {interactive && (
+                {interactive && isClickable && (
                   <span className="activity-node-toggle-indicator" title="Toggle point">
                     {isDone ? "✕" : "✓"}
                   </span>
@@ -144,12 +154,18 @@ export default function ActivityStatusBar({
                 <span className="activity-point-name">{stage.name}</span>
                 <span
                   className={`activity-point-status ${
-                    isDone ? "status-done" : isActive ? "status-active" : "status-pending"
+                    isDone
+                      ? "status-done"
+                      : isCurrentActive
+                      ? "status-active"
+                      : "status-pending status-locked"
                   }`}
                 >
-                  {isDone ? "Completed" : dateStr}
+                  {dateStr}
                 </span>
-                <span className="activity-point-pct-tag">{(idx + 1) * 20}%</span>
+                <span className="activity-point-pct-tag">
+                  {Math.round(((idx + 1) / totalStages) * 100)}%
+                </span>
               </div>
             </div>
           );
