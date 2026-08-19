@@ -13,6 +13,7 @@ import BranchManagerReportsPage from "./BranchManagerReportsPage";
 import BranchManagerAdminPage from "./BranchManagerAdminPage";
 import BranchManagerITPage from "./BranchManagerITPage";
 import BranchManagerMarketingPage from "./BranchManagerMarketingPage";
+import "./branchmanagerdashboard.css";
 
 // Mock & Initial Data
 import {

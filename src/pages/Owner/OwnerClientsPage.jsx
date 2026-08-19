@@ -1,20 +1,51 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useMemo } from "react";
+import Icon from "../../components/Icon";
 import { services } from "./mockOwnerData";
 import { getTrackerState } from "../../utils/schemeTracker";
 
-const PAGE_SIZE = 15;
+const PAGE_SIZE = 12;
 
 export default function OwnerClientsPage({
   clients = [],
   onOpenClientInfo,
   onDeleteClient,
 }) {
+  const [searchTerm, setSearchTerm] = useState("");
   const [serviceFilter, setServiceFilter] = useState("");
+  const [statusFilter, setStatusFilter] = useState("");
   const [clientsPage, setClientsPage] = useState(1);
 
-  const filteredClients = clients.filter(
-    (c) => !serviceFilter || c.serviceType === serviceFilter
-  );
+  // Compute KPI metrics
+  const totalClients = clients.length;
+  const fullyPaidCount = clients.filter(
+    (c) => (c.paymentReceived || 0) >= (c.totalPayment || 0) && (c.totalPayment || 0) > 0
+  ).length;
+  const activePipelineCount = clients.filter(
+    (c) => (c.paymentReceived || 0) < (c.totalPayment || 0)
+  ).length;
+  const totalPortfolioValue = clients.reduce((sum, c) => sum + (c.totalPayment || 0), 0);
+
+  // Filter clients
+  const filteredClients = useMemo(() => {
+    return clients.filter((c) => {
+      const searchLower = searchTerm.toLowerCase().trim();
+      const nameMatch = (c.name || "").toLowerCase().includes(searchLower);
+      const companyMatch = (c.company || "").toLowerCase().includes(searchLower);
+      const emailMatch = (c.email || "").toLowerCase().includes(searchLower);
+      const phoneMatch = (c.phone || "").toLowerCase().includes(searchLower);
+      const schemeMatch = (c.serviceName || c.scheme || c.serviceType || "").toLowerCase().includes(searchLower);
+
+      const searchOk = !searchLower || nameMatch || companyMatch || emailMatch || phoneMatch || schemeMatch;
+      const serviceOk = !serviceFilter || c.serviceType === serviceFilter || c.serviceName === serviceFilter;
+      
+      const isPaid = (c.paymentReceived || 0) >= (c.totalPayment || 0) && (c.totalPayment || 0) > 0;
+      let statusOk = true;
+      if (statusFilter === "Paid") statusOk = isPaid;
+      if (statusFilter === "Pending") statusOk = !isPaid;
+
+      return searchOk && serviceOk && statusOk;
+    });
+  }, [clients, searchTerm, serviceFilter, statusFilter]);
 
   const clientsTotalPages = Math.max(1, Math.ceil(filteredClients.length / PAGE_SIZE));
   const clientsPageItems = filteredClients.slice(
@@ -22,227 +53,342 @@ export default function OwnerClientsPage({
     clientsPage * PAGE_SIZE
   );
 
-  useEffect(() => {
+  const handleResetFilters = () => {
+    setSearchTerm("");
+    setServiceFilter("");
+    setStatusFilter("");
     setClientsPage(1);
-  }, [serviceFilter]);
+  };
 
   return (
-    <section style={{ animation: "fadeIn 0.25s ease-out" }}>
-      <div
-        style={{
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "space-between",
-          gap: 12,
-          marginBottom: 16,
-          flexWrap: "wrap",
-        }}
-      >
-        <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-          <label style={{ fontSize: 13, color: "#6b6b77", marginRight: 4, fontWeight: 500 }}>
-            Filter by service:
-          </label>
-          <select
-            value={serviceFilter}
-            onChange={(e) => setServiceFilter(e.target.value)}
-            style={{
-              padding: "6px 12px",
-              borderRadius: 8,
-              border: "1px solid #cbd5e1",
-              fontSize: 13,
-              background: "#ffffff",
-            }}
-          >
-            <option value="">All services</option>
-            {services.map((s) => (
-              <option key={s.name} value={s.name}>
-                {s.name}
-              </option>
-            ))}
-          </select>
-        </div>
-        <div style={{ color: "#7a748e", fontSize: 13, fontWeight: 600 }}>
-          {filteredClients.length} clients
+    <section className="owner-page-view">
+      {/* Header Banner */}
+      <div className="owner-header-banner">
+        <div className="owner-header-info">
+          <p className="owner-header-eyebrow">Enterprise Client Portfolios</p>
+          <h1 className="owner-header-title">Corporate Client Directory</h1>
+          <p className="owner-header-subtitle">
+            Comprehensive directory of enterprise client accounts, multi-point scheme pipelines, commercial agreements, and milestone tracking.
+          </p>
         </div>
       </div>
 
-      <table className="clients-table">
-        <thead>
-          <tr>
-            <th>Client Name</th>
-            <th>Company</th>
-            <th>Contact Info</th>
-            <th>Service</th>
-            <th>Activity Status (5 Points)</th>
-            <th>Progress (%)</th>
-            <th style={{ textAlign: "right" }}>Actions</th>
-          </tr>
-        </thead>
-        <tbody>
-          {clientsPageItems.length === 0 ? (
-            <tr>
-              <td colSpan={7} style={{ textAlign: "center", padding: 36, color: "#64748b" }}>
-                No clients found matching the selected filter.
-              </td>
-            </tr>
-          ) : (
-            clientsPageItems.map((client) => {
-              const clientScheme = client.serviceName || client.scheme || client.serviceType || "PMEGP";
-              const tracker = getTrackerState({
-                scheme: clientScheme,
-                completedSteps: client.completedSteps,
-              });
+      {/* KPI Ribbon */}
+      <div className="owner-kpi-ribbon">
+        <div className="owner-kpi-tile blue">
+          <div className="owner-kpi-tile-top">
+            <span className="owner-kpi-tile-label">Total Accounts</span>
+            <div className="owner-kpi-tile-icon blue">
+              <Icon name="clients" size={16} />
+            </div>
+          </div>
+          <div>
+            <strong className="owner-kpi-tile-value">{totalClients}</strong>
+            <span className="owner-kpi-tile-sub">Active Corporate Portfolios</span>
+          </div>
+        </div>
 
-              return (
-                <tr key={client.id}>
-                  <td>
-                    <strong style={{ color: "#1e293b" }}>{client.name}</strong>
-                  </td>
-                  <td style={{ color: "#64748b" }}>{client.company}</td>
-                  <td>
-                    <div style={{ fontSize: 13 }}>{client.email}</div>
-                    <div style={{ fontSize: 12, color: "#7a748e" }}>
-                      {client.phone}
-                    </div>
-                  </td>
-                  <td>
-                    <span
-                      style={{
-                        padding: "3px 8px",
-                        borderRadius: 6,
-                        background: "#f1f5f9",
-                        fontSize: 12,
-                        fontWeight: 600,
-                        color: "#475569",
-                      }}
-                    >
-                      {client.serviceName || client.serviceType}
-                    </span>
-                  </td>
-                  <td>
-                    <div style={{ display: "flex", flexDirection: "column", gap: 4 }}>
-                      <span
-                        style={{
-                          display: "inline-flex",
-                          alignItems: "center",
-                          padding: "2px 8px",
-                          borderRadius: 999,
-                          background: "rgba(16, 185, 129, 0.12)",
-                          color: "#059669",
-                          fontWeight: 700,
-                          fontSize: 11.5,
-                          width: "fit-content",
-                        }}
-                      >
-                        ● {client.applicationStatus || tracker.currentStage}
-                      </span>
-                      {/* Dynamic scheme dots */}
-                      <div style={{ display: "flex", gap: 4, alignItems: "center" }}>
-                        {tracker.stages.map((st) => {
-                          const isDone = tracker.completedStages.includes(st.name);
-                          return (
-                            <span
-                              key={st.name}
-                              title={`${st.name} (${st.percent}%) - ${
-                                isDone ? "Completed" : "Pending"
-                              }`}
-                              style={{
-                                width: 8,
-                                height: 8,
-                                borderRadius: "50%",
-                                background: isDone ? "#10b981" : "#cbd5e1",
-                              }}
-                            />
-                          );
-                        })}
-                        <span style={{ fontSize: 10.5, color: "#64748b", marginLeft: 4 }}>
-                          {tracker.completedStages.length}/{tracker.totalStages} Points
-                        </span>
-                      </div>
-                    </div>
-                  </td>
-                  <td style={{ minWidth: 120 }}>
-                    <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-                      <div
-                        style={{
-                          flex: 1,
-                          height: 7,
-                          background: "#e2e8f0",
-                          borderRadius: 999,
-                          overflow: "hidden",
-                        }}
-                      >
-                        <div
-                          style={{
-                            width: `${tracker.progressPercent}%`,
-                            height: "100%",
-                            background:
-                              tracker.progressPercent === 100
-                                ? "#10b981"
-                                : "linear-gradient(90deg, #6366f1 0%, #10b981 100%)",
-                            borderRadius: 999,
-                          }}
-                        />
-                      </div>
-                      <span
-                        style={{
-                          fontSize: 12,
-                          fontWeight: 700,
-                          color: tracker.progressPercent === 100 ? "#10b981" : "#1e293b",
-                        }}
-                      >
-                        {tracker.progressPercent}%
-                      </span>
-                    </div>
-                  </td>
-                  <td style={{ textAlign: "right", whiteSpace: "nowrap" }}>
-                    <button
-                      className="table-action"
-                      onClick={() => onOpenClientInfo(client)}
-                    >
-                      Info &amp; Tracker
-                    </button>
-                    <button
-                      className="table-action danger"
-                      onClick={() => onDeleteClient(client)}
-                    >
-                      Delete
-                    </button>
+        <div className="owner-kpi-tile green">
+          <div className="owner-kpi-tile-top">
+            <span className="owner-kpi-tile-label">Fully Settled</span>
+            <div className="owner-kpi-tile-icon green">
+              <Icon name="checkCircle" size={16} />
+            </div>
+          </div>
+          <div>
+            <strong className="owner-kpi-tile-value" style={{ color: "#10b981" }}>
+              {fullyPaidCount}
+            </strong>
+            <span className="owner-kpi-tile-sub">100% Commercial Realization</span>
+          </div>
+        </div>
+
+        <div className="owner-kpi-tile amber">
+          <div className="owner-kpi-tile-top">
+            <span className="owner-kpi-tile-label">Pipeline Active</span>
+            <div className="owner-kpi-tile-icon amber">
+              <Icon name="overview" size={16} />
+            </div>
+          </div>
+          <div>
+            <strong className="owner-kpi-tile-value" style={{ color: "#f59e0b" }}>
+              {activePipelineCount}
+            </strong>
+            <span className="owner-kpi-tile-sub">In Execution Pipeline</span>
+          </div>
+        </div>
+
+        <div className="owner-kpi-tile purple">
+          <div className="owner-kpi-tile-top">
+            <span className="owner-kpi-tile-label">Portfolio Value</span>
+            <div className="owner-kpi-tile-icon purple">
+              <Icon name="revenue" size={16} />
+            </div>
+          </div>
+          <div>
+            <strong className="owner-kpi-tile-value">₹{totalPortfolioValue.toLocaleString()}</strong>
+            <span className="owner-kpi-tile-sub">Total Contracted Mandates</span>
+          </div>
+        </div>
+      </div>
+
+      {/* Toolbar Filter Card */}
+      <div className="analytics-card owner-toolbar-card">
+        <div className="owner-toolbar-filters">
+          <div className="owner-search-box">
+            <span className="owner-search-icon">
+              <Icon name="search" size={14} />
+            </span>
+            <input
+              type="text"
+              placeholder="Search by client, company, email, phone, scheme..."
+              value={searchTerm}
+              onChange={(e) => {
+                setSearchTerm(e.target.value);
+                setClientsPage(1);
+              }}
+            />
+          </div>
+
+          <label className="field-label" style={{ margin: 0 }}>
+            <span>Service Scheme:</span>
+            <select
+              className="owner-filter-select"
+              value={serviceFilter}
+              onChange={(e) => {
+                setServiceFilter(e.target.value);
+                setClientsPage(1);
+              }}
+            >
+              <option value="">All Services</option>
+              {services.map((s) => (
+                <option key={s.name} value={s.name}>
+                  {s.name}
+                </option>
+              ))}
+            </select>
+          </label>
+
+          <label className="field-label" style={{ margin: 0 }}>
+            <span>Payment Status:</span>
+            <select
+              className="owner-filter-select"
+              value={statusFilter}
+              onChange={(e) => {
+                setStatusFilter(e.target.value);
+                setClientsPage(1);
+              }}
+            >
+              <option value="">All Payment States</option>
+              <option value="Paid">Fully Paid</option>
+              <option value="Pending">Payment Pending</option>
+            </select>
+          </label>
+
+          {(searchTerm || serviceFilter || statusFilter) && (
+            <button
+              type="button"
+              className="owner-btn-secondary"
+              onClick={handleResetFilters}
+            >
+              Reset Filters
+            </button>
+          )}
+        </div>
+
+        <div className="owner-count-badge">
+          <span>Showing</span>
+          <strong>{filteredClients.length}</strong>
+          <span>of {clients.length} clients</span>
+        </div>
+      </div>
+
+      {/* Clients Table Card */}
+      <div className="analytics-card owner-table-card">
+        <div className="owner-table-scroll">
+          <table className="owner-table">
+            <thead>
+              <tr>
+                <th>Client &amp; Company</th>
+                <th>Contact Information</th>
+                <th>Service Scheme</th>
+                <th>Activity Status (5 Points)</th>
+                <th>Milestone Progress</th>
+                <th>Payment State</th>
+                <th style={{ textAlign: "right" }}>Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              {clientsPageItems.length === 0 ? (
+                <tr>
+                  <td colSpan={7} className="owner-empty-state">
+                    No clients found matching the selected filter criteria.
                   </td>
                 </tr>
-              );
-            })
-          )}
-        </tbody>
-      </table>
+              ) : (
+                clientsPageItems.map((client) => {
+                  const clientScheme = client.serviceName || client.scheme || client.serviceType || "PMEGP";
+                  const tracker = getTrackerState({
+                    scheme: clientScheme,
+                    completedSteps: client.completedSteps,
+                  });
 
+                  const initials = client.name
+                    ? client.name
+                        .split(" ")
+                        .map((n) => n[0])
+                        .join("")
+                        .slice(0, 2)
+                        .toUpperCase()
+                    : "CL";
+
+                  const remaining = Math.max(0, (client.totalPayment || 0) - (client.paymentReceived || 0));
+                  const isPaid = (client.totalPayment || 0) > 0 && remaining === 0;
+
+                  return (
+                    <tr key={client.id}>
+                      <td>
+                        <div className="owner-member-avatar-cell">
+                          <div className="owner-member-avatar">{initials}</div>
+                          <div className="owner-member-details">
+                            <strong className="owner-member-name">{client.name}</strong>
+                            <span className="owner-member-branch">
+                              {client.company || "Individual Account"}
+                            </span>
+                          </div>
+                        </div>
+                      </td>
+                      <td>
+                        <div>
+                          <div>{client.email}</div>
+                          <div className="owner-phone-text">{client.phone}</div>
+                        </div>
+                      </td>
+                      <td>
+                        <span className="owner-service-pill">
+                          {client.serviceName || client.serviceType || "PMEGP"}
+                        </span>
+                      </td>
+                      <td>
+                        <div style={{ display: "flex", flexDirection: "column", gap: 4 }}>
+                          <span className="owner-status-pill completed">
+                            ● {client.applicationStatus || tracker.currentStage}
+                          </span>
+                          <div className="owner-scheme-dots">
+                            {tracker.stages.map((st) => {
+                              const isDone = tracker.completedStages.includes(st.name);
+                              return (
+                                <span
+                                  key={st.name}
+                                  className="owner-scheme-dot"
+                                  title={`${st.name} (${st.percent}%) - ${
+                                    isDone ? "Completed" : "Pending"
+                                  }`}
+                                  style={{
+                                    background: isDone ? "#10b981" : "rgba(99, 102, 241, 0.2)",
+                                  }}
+                                />
+                              );
+                            })}
+                            <span style={{ fontSize: 11, color: "#64748b", marginLeft: 4 }}>
+                              {tracker.completedStages.length}/{tracker.totalStages} Points
+                            </span>
+                          </div>
+                        </div>
+                      </td>
+                      <td style={{ minWidth: 140 }}>
+                        <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                          <div className="owner-progress-bar-wrap">
+                            <div
+                              className="owner-progress-bar-fill"
+                              style={{
+                                width: `${tracker.progressPercent}%`,
+                                background:
+                                  tracker.progressPercent === 100
+                                    ? "#10b981"
+                                    : "linear-gradient(90deg, #6366f1 0%, #10b981 100%)",
+                              }}
+                            />
+                          </div>
+                          <span
+                            className="owner-progress-percent"
+                            style={{
+                              color: tracker.progressPercent === 100 ? "#10b981" : "inherit",
+                            }}
+                          >
+                            {tracker.progressPercent}%
+                          </span>
+                        </div>
+                      </td>
+                      <td>
+                        {isPaid ? (
+                          <span className="owner-status-pill completed">
+                            ✓ Fully Paid
+                          </span>
+                        ) : remaining > 0 ? (
+                          <span className="owner-status-pill pending">
+                            Due ₹{remaining.toLocaleString()}
+                          </span>
+                        ) : (
+                          <span className="owner-date-text">Pending</span>
+                        )}
+                      </td>
+                      <td style={{ textAlign: "right", whiteSpace: "nowrap" }}>
+                        <div className="owner-actions-cell">
+                          <button
+                            className="owner-view-btn"
+                            type="button"
+                            onClick={() => onOpenClientInfo(client)}
+                          >
+                            Info &amp; Tracker
+                          </button>
+                          <button
+                            className="owner-btn-danger"
+                            type="button"
+                            onClick={() => onDeleteClient(client)}
+                          >
+                            Delete
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  );
+                })
+              )}
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      {/* Pagination */}
       <div
-        className="table-pagination"
         style={{
           display: "flex",
           justifyContent: "space-between",
           alignItems: "center",
           marginTop: 14,
+          flexWrap: "wrap",
+          gap: 10,
         }}
       >
-        <div style={{ color: "#6b6b77", fontSize: 13 }}>
+        <div style={{ color: "#64748b", fontSize: 13 }}>
           Showing {filteredClients.length === 0 ? 0 : (clientsPage - 1) * PAGE_SIZE + 1} -{" "}
           {Math.min(clientsPage * PAGE_SIZE, filteredClients.length)} of{" "}
           {filteredClients.length}
         </div>
-        <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
+        <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
           <button
-            className="table-action"
+            className="owner-btn-secondary"
             disabled={clientsPage <= 1}
             onClick={() => setClientsPage((p) => Math.max(1, p - 1))}
           >
             Prev
           </button>
-          <span style={{ margin: "0 8px", fontSize: 13 }}>
+          <span style={{ margin: "0 6px", fontSize: 13, fontWeight: 600 }}>
             Page {clientsPage} / {clientsTotalPages}
           </span>
           <button
-            className="table-action"
+            className="owner-btn-secondary"
             disabled={clientsPage >= clientsTotalPages}
             onClick={() => setClientsPage((p) => Math.min(clientsTotalPages, p + 1))}
           >

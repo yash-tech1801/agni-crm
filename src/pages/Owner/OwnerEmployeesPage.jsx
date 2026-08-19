@@ -1,9 +1,9 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useMemo } from "react";
 import Icon from "../../components/Icon";
 import { employeeRoles, branchOptions, branchToRegionMap } from "./mockOwnerData";
 import { getTrackerState } from "../../utils/schemeTracker";
 
-const PAGE_SIZE = 15;
+const PAGE_SIZE = 12;
 
 export default function OwnerEmployeesPage({
   employeesList = [],
@@ -15,6 +15,7 @@ export default function OwnerEmployeesPage({
   onDeleteEmployee,
   onOpenClientInfo,
 }) {
+  const [searchTerm, setSearchTerm] = useState("");
   const [selectedBranch, setSelectedBranch] = useState("");
   const [employeesPage, setEmployeesPage] = useState(1);
   const [managerTeamView, setManagerTeamView] = useState(null);
@@ -83,14 +84,35 @@ export default function OwnerEmployeesPage({
     });
   }
 
-  const filteredEmployees = employeesList.filter((employee) => {
-    const roleOk =
-      selectedRole === "All roles" ||
-      !selectedRole ||
-      (employee.role || "").toLowerCase() === (selectedRole || "").toLowerCase();
-    const branchOk = !selectedBranch || (employee.branch || "") === selectedBranch;
-    return roleOk && branchOk;
-  });
+  // Compute KPI metrics
+  const totalEmployees = employeesList.length;
+  const branchManagersCount = employeesList.filter(
+    (e) => (e.role || "").toLowerCase() === "branch manager"
+  ).length;
+  const managersCount = employeesList.filter(
+    (e) => (e.role || "").toLowerCase() === "manager"
+  ).length;
+  const uniqueBranchesCount = Array.from(new Set(employeesList.map((e) => e.branch))).length;
+
+  const filteredEmployees = useMemo(() => {
+    return employeesList.filter((employee) => {
+      const sLower = searchTerm.toLowerCase().trim();
+      const nameMatch = (employee.name || "").toLowerCase().includes(sLower);
+      const emailMatch = (employee.email || "").toLowerCase().includes(sLower);
+      const phoneMatch = (employee.phone || "").toLowerCase().includes(sLower);
+      const branchMatch = (employee.branch || "").toLowerCase().includes(sLower);
+      const roleMatch = (employee.role || "").toLowerCase().includes(sLower);
+
+      const searchOk = !sLower || nameMatch || emailMatch || phoneMatch || branchMatch || roleMatch;
+      const roleOk =
+        selectedRole === "All roles" ||
+        !selectedRole ||
+        (employee.role || "").toLowerCase() === (selectedRole || "").toLowerCase();
+      const branchOk = !selectedBranch || (employee.branch || "") === selectedBranch;
+
+      return searchOk && roleOk && branchOk;
+    });
+  }, [employeesList, searchTerm, selectedRole, selectedBranch]);
 
   const employeesTotalPages = Math.max(1, Math.ceil(filteredEmployees.length / PAGE_SIZE));
   const employeesPageItems = filteredEmployees.slice(
@@ -100,7 +122,14 @@ export default function OwnerEmployeesPage({
 
   useEffect(() => {
     setEmployeesPage(1);
-  }, [selectedRole, selectedBranch]);
+  }, [selectedRole, selectedBranch, searchTerm]);
+
+  const handleResetFilters = () => {
+    setSearchTerm("");
+    if (setSelectedRole) setSelectedRole("All roles");
+    setSelectedBranch("");
+    setEmployeesPage(1);
+  };
 
   // VIEW 1: Team under Manager
   if (managerTeamView) {
@@ -108,242 +137,170 @@ export default function OwnerEmployeesPage({
     const uniqueRoles = Array.from(new Set(team.map((t) => t.role)));
 
     return (
-      <section style={{ animation: "fadeIn 0.25s ease-out" }}>
+      <section className="owner-page-view">
         {/* Header Bar */}
-        <div
-          style={{
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "space-between",
-            gap: 16,
-            marginBottom: 20,
-            flexWrap: "wrap",
-          }}
-        >
-          <div>
-            <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
-              <button
-                type="button"
-                className="table-action"
-                onClick={() => setManagerTeamView(null)}
-                style={{
-                  padding: "7px 14px",
-                  borderRadius: 8,
-                  display: "flex",
-                  alignItems: "center",
-                  gap: 6,
-                  fontWeight: 600,
-                }}
-              >
-                ← Back to Employees
-              </button>
-              <div>
-                <h2 style={{ margin: 0, fontSize: 22, fontWeight: 700, letterSpacing: "-0.02em" }}>
-                  Team Under — {managerTeamView.name}
-                </h2>
-                <div style={{ color: "#7a748e", fontSize: 13, marginTop: 2 }}>
-                  Designation: {(managerTeamView.role || "").toUpperCase()} | Branch:{" "}
-                  {managerTeamView.branch} | Email: {managerTeamView.email}
-                </div>
-              </div>
+        <div className="owner-header-banner">
+          <div style={{ display: "flex", alignItems: "center", gap: 14 }}>
+            <button
+              type="button"
+              className="owner-btn-secondary"
+              onClick={() => setManagerTeamView(null)}
+            >
+              ← Back to All Employees
+            </button>
+            <div className="owner-header-info">
+              <p className="owner-header-eyebrow">Managerial Team Drilldown</p>
+              <h1 className="owner-header-title">Team Under — {managerTeamView.name}</h1>
+              <p className="owner-header-subtitle">
+                Role: {(managerTeamView.role || "").toUpperCase()} • Branch: {managerTeamView.branch} • Contact: {managerTeamView.email}
+              </p>
             </div>
           </div>
         </div>
 
         {/* Summary Cards */}
-        <div
-          style={{
-            display: "grid",
-            gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))",
-            gap: 16,
-            marginBottom: 22,
-          }}
-        >
-          <div
-            style={{
-              background: "#ffffff",
-              padding: "18px 22px",
-              borderRadius: 14,
-              border: "1px solid #eef0f5",
-              display: "flex",
-              alignItems: "center",
-              gap: 16,
-            }}
-          >
-            <div
-              style={{
-                background: "rgba(78, 124, 255, 0.12)",
-                color: "#4e7cff",
-                padding: 14,
-                borderRadius: 12,
-                display: "flex",
-              }}
-            >
-              <Icon name="team" size={24} />
+        <div className="owner-kpi-ribbon">
+          <div className="owner-kpi-tile blue">
+            <div className="owner-kpi-tile-top">
+              <span className="owner-kpi-tile-label">Team Size</span>
+              <div className="owner-kpi-tile-icon blue">
+                <Icon name="team" size={16} />
+              </div>
             </div>
             <div>
-              <div style={{ fontSize: 22, fontWeight: 700, color: "#1e1b2e" }}>
-                {team.length}
-              </div>
-              <div style={{ fontSize: 12, color: "#7a748e", marginTop: 2, fontWeight: 500 }}>
-                Team Members
-              </div>
+              <strong className="owner-kpi-tile-value">{team.length}</strong>
+              <span className="owner-kpi-tile-sub">Subordinate Team Members</span>
             </div>
           </div>
 
-          <div
-            style={{
-              background: "#ffffff",
-              padding: "18px 22px",
-              borderRadius: 14,
-              border: "1px solid #eef0f5",
-              display: "flex",
-              alignItems: "center",
-              gap: 16,
-            }}
-          >
-            <div
-              style={{
-                background: "rgba(99, 102, 241, 0.12)",
-                color: "#6366f1",
-                padding: 14,
-                borderRadius: 12,
-                display: "flex",
-              }}
-            >
-              <Icon name="roles" size={24} />
+          <div className="owner-kpi-tile purple">
+            <div className="owner-kpi-tile-top">
+              <span className="owner-kpi-tile-label">Role Profiles</span>
+              <div className="owner-kpi-tile-icon purple">
+                <Icon name="roles" size={16} />
+              </div>
             </div>
             <div>
-              <div style={{ fontSize: 22, fontWeight: 700, color: "#1e1b2e" }}>
-                {uniqueRoles.length}
-              </div>
-              <div style={{ fontSize: 12, color: "#7a748e", marginTop: 2, fontWeight: 500 }}>
-                Role Types
-              </div>
+              <strong className="owner-kpi-tile-value">{uniqueRoles.length}</strong>
+              <span className="owner-kpi-tile-sub">Distinct Functional Roles</span>
             </div>
           </div>
 
-          <div
-            style={{
-              background: "#ffffff",
-              padding: "18px 22px",
-              borderRadius: 14,
-              border: "1px solid #eef0f5",
-              display: "flex",
-              alignItems: "center",
-              gap: 16,
-            }}
-          >
-            <div
-              style={{
-                background: "rgba(68, 191, 176, 0.12)",
-                color: "#2b9385",
-                padding: 14,
-                borderRadius: 12,
-                display: "flex",
-              }}
-            >
-              <Icon name="branches" size={24} />
+          <div className="owner-kpi-tile green">
+            <div className="owner-kpi-tile-top">
+              <span className="owner-kpi-tile-label">Branch Jurisdiction</span>
+              <div className="owner-kpi-tile-icon green">
+                <Icon name="branches" size={16} />
+              </div>
             </div>
             <div>
-              <div style={{ fontSize: 22, fontWeight: 700, color: "#2b9385" }}>
+              <strong className="owner-kpi-tile-value" style={{ color: "#10b981" }}>
                 {managerTeamView.branch}
-              </div>
-              <div style={{ fontSize: 12, color: "#7a748e", marginTop: 2, fontWeight: 500 }}>
-                Branch Scope
-              </div>
+              </strong>
+              <span className="owner-kpi-tile-sub">Assigned Territory</span>
             </div>
           </div>
         </div>
 
         {/* Team Members Table */}
-        <table className="clients-table">
-          <thead>
-            <tr>
-              <th>Name</th>
-              <th>Branch</th>
-              <th>Email</th>
-              <th>Phone</th>
-              <th>Role</th>
-              <th style={{ textAlign: "right" }}>Actions</th>
-            </tr>
-          </thead>
-          <tbody>
-            {team.length === 0 ? (
-              <tr>
-                <td colSpan={6} style={{ textAlign: "center", padding: 36, color: "#64748b" }}>
-                  No team members under this manager.
-                </td>
-              </tr>
-            ) : (
-              team.map((member) => (
-                <tr key={member.id}>
-                  <td>
-                    <strong style={{ color: "#1e293b" }}>{member.name}</strong>
-                  </td>
-                  <td>{member.branch}</td>
-                  <td>{member.email}</td>
-                  <td>{member.phone}</td>
-                  <td>{member.role}</td>
-                  <td style={{ textAlign: "right", whiteSpace: "nowrap" }}>
-                    <div
-                      style={{
-                        display: "inline-flex",
-                        alignItems: "center",
-                        justifyContent: "flex-end",
-                        gap: 6,
-                      }}
-                    >
-                      {["branch manager", "manager"].includes(
-                        (member.role || "").toLowerCase()
-                      )}
-                      {["sales", "it", "admin", "market"].includes(
-                        (member.role || "").toLowerCase()
-                      ) && (
-                        <button
-                          className="table-action"
-                          style={{
-                            background: "rgba(99, 102, 241, 0.12)",
-                            color: "#4f46e5",
-                            fontWeight: 600,
-                            whiteSpace: "nowrap",
-                          }}
-                          onClick={() => {
-                            setManagerTeamView(null);
-                            setSalesClientsView(member);
-                          }}
-                        >
-                          Clients under
-                        </button>
-                      )}
-                      <button
-                        className="table-action"
-                        style={{ whiteSpace: "nowrap" }}
-                        onClick={() => onOpenEmployeeInfo(member)}
-                      >
-                        Info
-                      </button>
-                      <button
-                        className="table-action"
-                        style={{ whiteSpace: "nowrap" }}
-                        onClick={() => onOpenEditEmployee(member)}
-                      >
-                        Edit
-                      </button>
-                      <button
-                        className="table-action danger"
-                        style={{ whiteSpace: "nowrap" }}
-                        onClick={() => onDeleteEmployee(member)}
-                      >
-                        Delete
-                      </button>
-                    </div>
-                  </td>
+        <div className="analytics-card owner-table-card">
+          <div className="owner-table-scroll">
+            <table className="owner-table">
+              <thead>
+                <tr>
+                  <th>Team Member</th>
+                  <th>Branch Location</th>
+                  <th>Contact Details</th>
+                  <th>Designation</th>
+                  <th style={{ textAlign: "right" }}>Actions</th>
                 </tr>
-              ))
-            )}
-          </tbody>
-        </table>
+              </thead>
+              <tbody>
+                {team.length === 0 ? (
+                  <tr>
+                    <td colSpan={5} className="owner-empty-state">
+                      No direct team members currently assigned under this manager.
+                    </td>
+                  </tr>
+                ) : (
+                  team.map((member) => {
+                    const initials = member.name
+                      ? member.name
+                          .split(" ")
+                          .map((n) => n[0])
+                          .join("")
+                          .slice(0, 2)
+                          .toUpperCase()
+                      : "TM";
+
+                    return (
+                      <tr key={member.id}>
+                        <td>
+                          <div className="owner-member-avatar-cell">
+                            <div className="owner-member-avatar">{initials}</div>
+                            <div className="owner-member-details">
+                              <strong className="owner-member-name">{member.name}</strong>
+                              <span className="owner-member-branch">{member.branch} Branch</span>
+                            </div>
+                          </div>
+                        </td>
+                        <td>
+                          <span className="owner-rep-pill">{member.branch}</span>
+                        </td>
+                        <td>
+                          <div>
+                            <div>{member.email}</div>
+                            <div className="owner-phone-text">{member.phone}</div>
+                          </div>
+                        </td>
+                        <td>
+                          <span className="owner-role-tag">{member.role}</span>
+                        </td>
+                        <td style={{ textAlign: "right", whiteSpace: "nowrap" }}>
+                          <div className="owner-actions-cell">
+                            {["sales", "it", "admin", "market"].includes(
+                              (member.role || "").toLowerCase()
+                            ) && (
+                              <button
+                                className="owner-btn-primary"
+                                style={{ padding: "6px 12px", fontSize: 12 }}
+                                onClick={() => {
+                                  setManagerTeamView(null);
+                                  setSalesClientsView(member);
+                                }}
+                              >
+                                Clients under
+                              </button>
+                            )}
+                            <button
+                              className="owner-view-btn"
+                              onClick={() => onOpenEmployeeInfo(member)}
+                            >
+                              Info
+                            </button>
+                            <button
+                              className="owner-btn-secondary"
+                              style={{ padding: "6px 12px", fontSize: 12 }}
+                              onClick={() => onOpenEditEmployee(member)}
+                            >
+                              Edit
+                            </button>
+                            <button
+                              className="owner-btn-danger"
+                              onClick={() => onDeleteEmployee(member)}
+                            >
+                              Delete
+                            </button>
+                          </div>
+                        </td>
+                      </tr>
+                    );
+                  })
+                )}
+              </tbody>
+            </table>
+          </div>
+        </div>
       </section>
     );
   }
@@ -363,503 +320,484 @@ export default function OwnerEmployeesPage({
     );
 
     return (
-      <section style={{ animation: "fadeIn 0.25s ease-out" }}>
+      <section className="owner-page-view">
         {/* Header Bar */}
-        <div
-          style={{
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "space-between",
-            gap: 16,
-            marginBottom: 20,
-            flexWrap: "wrap",
-          }}
-        >
-          <div>
-            <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
-              <button
-                type="button"
-                className="table-action"
-                onClick={() => setSalesClientsView(null)}
-                style={{
-                  padding: "7px 14px",
-                  borderRadius: 8,
-                  display: "flex",
-                  alignItems: "center",
-                  gap: 6,
-                  fontWeight: 600,
-                }}
-              >
-                ← Back to Employees
-              </button>
-              <div>
-                <h2 style={{ margin: 0, fontSize: 22, fontWeight: 700, letterSpacing: "-0.02em" }}>
-                  Clients Under — {salesClientsView.name}
-                </h2>
-                <div style={{ color: "#7a748e", fontSize: 13, marginTop: 2 }}>
-                  Designation: {(salesClientsView.role || "").toUpperCase()} | Branch:{" "}
-                  {salesClientsView.branch} | Email: {salesClientsView.email}
-                </div>
-              </div>
+        <div className="owner-header-banner">
+          <div style={{ display: "flex", alignItems: "center", gap: 14 }}>
+            <button
+              type="button"
+              className="owner-btn-secondary"
+              onClick={() => setSalesClientsView(null)}
+            >
+              ← Back to All Employees
+            </button>
+            <div className="owner-header-info">
+              <p className="owner-header-eyebrow">Client Portfolio Assignment</p>
+              <h1 className="owner-header-title">Clients Under — {salesClientsView.name}</h1>
+              <p className="owner-header-subtitle">
+                Role: {(salesClientsView.role || "").toUpperCase()} • Branch: {salesClientsView.branch} • Contact: {salesClientsView.email}
+              </p>
             </div>
           </div>
         </div>
 
         {/* Summary Cards */}
-        <div
-          style={{
-            display: "grid",
-            gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))",
-            gap: 16,
-            marginBottom: 22,
-          }}
-        >
-          <div
-            style={{
-              background: "#ffffff",
-              padding: "18px 22px",
-              borderRadius: 14,
-              border: "1px solid #eef0f5",
-              display: "flex",
-              alignItems: "center",
-              gap: 16,
-            }}
-          >
-            <div
-              style={{
-                background: "rgba(78, 124, 255, 0.12)",
-                color: "#4e7cff",
-                padding: 14,
-                borderRadius: 12,
-                display: "flex",
-              }}
-            >
-              <Icon name="clients" size={24} />
+        <div className="owner-kpi-ribbon">
+          <div className="owner-kpi-tile blue">
+            <div className="owner-kpi-tile-top">
+              <span className="owner-kpi-tile-label">Clients Managed</span>
+              <div className="owner-kpi-tile-icon blue">
+                <Icon name="clients" size={16} />
+              </div>
             </div>
             <div>
-              <div style={{ fontSize: 22, fontWeight: 700, color: "#1e1b2e" }}>
-                {managedClients.length}
-              </div>
-              <div style={{ fontSize: 12, color: "#7a748e", marginTop: 2, fontWeight: 500 }}>
-                Clients Managed
-              </div>
+              <strong className="owner-kpi-tile-value">{managedClients.length}</strong>
+              <span className="owner-kpi-tile-sub">Active Accounts</span>
             </div>
           </div>
 
-          <div
-            style={{
-              background: "#ffffff",
-              padding: "18px 22px",
-              borderRadius: 14,
-              border: "1px solid #eef0f5",
-              display: "flex",
-              alignItems: "center",
-              gap: 16,
-            }}
-          >
-            <div
-              style={{
-                background: "rgba(99, 102, 241, 0.12)",
-                color: "#6366f1",
-                padding: 14,
-                borderRadius: 12,
-                display: "flex",
-              }}
-            >
-              <Icon name="revenue" size={24} />
+          <div className="owner-kpi-tile purple">
+            <div className="owner-kpi-tile-top">
+              <span className="owner-kpi-tile-label">Total Portfolio Value</span>
+              <div className="owner-kpi-tile-icon purple">
+                <Icon name="revenue" size={16} />
+              </div>
             </div>
             <div>
-              <div style={{ fontSize: 22, fontWeight: 700, color: "#1e1b2e" }}>
-                ₹{totalVal.toLocaleString()}
-              </div>
-              <div style={{ fontSize: 12, color: "#7a748e", marginTop: 2, fontWeight: 500 }}>
-                Total Billed Value
-              </div>
+              <strong className="owner-kpi-tile-value">₹{totalVal.toLocaleString()}</strong>
+              <span className="owner-kpi-tile-sub">Contracted Value</span>
             </div>
           </div>
 
-          <div
-            style={{
-              background: "#ffffff",
-              padding: "18px 22px",
-              borderRadius: 14,
-              border: "1px solid #eef0f5",
-              display: "flex",
-              alignItems: "center",
-              gap: 16,
-            }}
-          >
-            <div
-              style={{
-                background: "rgba(68, 191, 176, 0.12)",
-                color: "#2b9385",
-                padding: 14,
-                borderRadius: 12,
-                display: "flex",
-              }}
-            >
-              <Icon name="overview" size={24} />
+          <div className="owner-kpi-tile green">
+            <div className="owner-kpi-tile-top">
+              <span className="owner-kpi-tile-label">Average Completion</span>
+              <div className="owner-kpi-tile-icon green">
+                <Icon name="overview" size={16} />
+              </div>
             </div>
             <div>
-              <div style={{ fontSize: 22, fontWeight: 700, color: "#2b9385" }}>
+              <strong className="owner-kpi-tile-value" style={{ color: "#10b981" }}>
                 {avgProgress}%
-              </div>
-              <div style={{ fontSize: 12, color: "#7a748e", marginTop: 2, fontWeight: 500 }}>
-                Avg Progress Completion
-              </div>
+              </strong>
+              <span className="owner-kpi-tile-sub">Pipeline Milestone Rate</span>
             </div>
           </div>
         </div>
 
         {/* Managed Clients Table */}
-        <table className="clients-table">
-          <thead>
-            <tr>
-              <th>Client Name</th>
-              <th>Company</th>
-              <th>Service Line</th>
-              <th>Total Billed</th>
-              <th>Payment Received</th>
-              <th style={{ width: 190 }}>Progress Percent</th>
-              <th style={{ textAlign: "right" }}>Actions</th>
-            </tr>
-          </thead>
-          <tbody>
-            {managedClients.map((client) => {
-              const progress =
-                client.progressPercent ||
-                (client.paymentReceived >= client.totalPayment ? 100 : 70);
-              const remaining = Math.max(
-                0,
-                (client.totalPayment || 0) - (client.paymentReceived || 0)
-              );
+        <div className="analytics-card owner-table-card">
+          <div className="owner-table-scroll">
+            <table className="owner-table">
+              <thead>
+                <tr>
+                  <th>Client &amp; Company</th>
+                  <th>Service Line</th>
+                  <th>Total Billed</th>
+                  <th>Payment Received</th>
+                  <th>Milestone Progress</th>
+                  <th style={{ textAlign: "right" }}>Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                {managedClients.length === 0 ? (
+                  <tr>
+                    <td colSpan={6} className="owner-empty-state">
+                      No clients currently assigned under this employee.
+                    </td>
+                  </tr>
+                ) : (
+                  managedClients.map((client) => {
+                    const clientScheme = client.serviceName || client.scheme || client.serviceType || "PMEGP";
+                    const tracker = getTrackerState({ scheme: clientScheme, completedSteps: client.completedSteps });
 
-              return (
-                <tr key={client.id}>
-                  <td>
-                    <strong style={{ color: "#1e293b" }}>{client.name}</strong>
-                  </td>
-                  <td style={{ color: "#64748b" }}>{client.company}</td>
-                  <td>
-                    <span
-                      style={{
-                        padding: "3px 9px",
-                        borderRadius: 6,
-                        background: "#f1f5f9",
-                        fontSize: 12,
-                        fontWeight: 500,
-                        color: "#475569",
-                      }}
-                    >
-                      {client.serviceType} ({client.serviceName || "Standard"})
-                    </span>
-                  </td>
-                  <td>
-                    <strong style={{ color: "#0f172a" }}>
-                      ₹{(client.totalPayment || 0).toLocaleString()}
-                    </strong>
-                  </td>
-                  <td>
-                    <span
-                      style={{
-                        color: remaining === 0 ? "#16a34a" : "#d97706",
-                        fontWeight: 600,
-                      }}
-                    >
-                      ₹{(client.paymentReceived || 0).toLocaleString()}
-                    </span>
-                  </td>
-                  <td>
-                    {(() => {
-                      const clientScheme = client.serviceName || client.scheme || client.serviceType || "PMEGP";
-                      const tracker = getTrackerState({ scheme: clientScheme, completedSteps: client.completedSteps });
+                    const initials = client.name
+                      ? client.name
+                          .split(" ")
+                          .map((n) => n[0])
+                          .join("")
+                          .slice(0, 2)
+                          .toUpperCase()
+                      : "CL";
 
-                      return (
-                        <div>
-                          <div
-                            style={{
-                              display: "flex",
-                              alignItems: "center",
-                              gap: 10,
-                              marginBottom: 4,
-                            }}
-                          >
-                            <div
-                              style={{
-                                flex: 1,
-                                height: 8,
-                                background: "#e2e8f0",
-                                borderRadius: 999,
-                                overflow: "hidden",
-                              }}
-                            >
+                    return (
+                      <tr key={client.id}>
+                        <td>
+                          <div className="owner-member-avatar-cell">
+                            <div className="owner-member-avatar">{initials}</div>
+                            <div className="owner-member-details">
+                              <strong className="owner-member-name">{client.name}</strong>
+                              <span className="owner-member-branch">{client.company || "Enterprise Account"}</span>
+                            </div>
+                          </div>
+                        </td>
+                        <td>
+                          <span className="owner-service-pill">
+                            {client.serviceType} ({client.serviceName || "Standard"})
+                          </span>
+                        </td>
+                        <td>
+                          <strong className="owner-revenue-text">
+                            ₹{(client.totalPayment || 0).toLocaleString()}
+                          </strong>
+                        </td>
+                        <td>
+                          <span style={{ color: "#10b981", fontWeight: 700 }}>
+                            ₹{(client.paymentReceived || 0).toLocaleString()}
+                          </span>
+                        </td>
+                        <td style={{ minWidth: 150 }}>
+                          <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                            <div className="owner-progress-bar-wrap">
                               <div
+                                className="owner-progress-bar-fill"
                                 style={{
                                   width: `${tracker.progressPercent}%`,
-                                  height: "100%",
                                   background:
                                     tracker.progressPercent === 100
                                       ? "#10b981"
-                                      : "linear-gradient(90deg, #10b981 0%, #059669 100%)",
-                                  borderRadius: 999,
+                                      : "linear-gradient(90deg, #6366f1 0%, #10b981 100%)",
                                 }}
                               />
                             </div>
                             <span
-                              style={{
-                                fontSize: 12,
-                                fontWeight: 700,
-                                color: tracker.progressPercent === 100 ? "#10b981" : "#1e293b",
-                                minWidth: 38,
-                              }}
+                              className="owner-progress-percent"
+                              style={{ color: tracker.progressPercent === 100 ? "#10b981" : "inherit" }}
                             >
                               {tracker.progressPercent}%
                             </span>
                           </div>
-                          <div style={{ display: "flex", gap: 4, alignItems: "center" }}>
+                          <div className="owner-scheme-dots">
                             {tracker.stages.map((st) => {
                               const isDone = tracker.completedStages.includes(st.name);
                               return (
                                 <span
                                   key={st.name}
+                                  className="owner-scheme-dot"
                                   title={`${st.name} (${st.percent}%)`}
-                                  style={{
-                                    width: 6,
-                                    height: 6,
-                                    borderRadius: "50%",
-                                    background: isDone ? "#10b981" : "#cbd5e1",
-                                  }}
+                                  style={{ background: isDone ? "#10b981" : "rgba(99, 102, 241, 0.2)" }}
                                 />
                               );
                             })}
-                            <span style={{ fontSize: 10, color: "#64748b", marginLeft: 2 }}>
-                              {tracker.completedStages.length}/{tracker.totalStages} Points
+                            <span style={{ fontSize: 10.5, color: "#64748b", marginLeft: 4 }}>
+                              {tracker.completedStages.length}/{tracker.totalStages} Stages
                             </span>
                           </div>
-                        </div>
-                      );
-                    })()}
-                  </td>
-                  <td style={{ textAlign: "right", whiteSpace: "nowrap" }}>
-                    {onOpenClientInfo && (
-                      <button
-                        className="table-action"
-                        style={{ whiteSpace: "nowrap" }}
-                        onClick={() => onOpenClientInfo(client)}
-                      >
-                        Info &amp; Tracker
-                      </button>
-                    )}
-                  </td>
-                </tr>
-              );
-            })}
-          </tbody>
-        </table>
+                        </td>
+                        <td style={{ textAlign: "right", whiteSpace: "nowrap" }}>
+                          <div className="owner-actions-cell">
+                            {onOpenClientInfo && (
+                              <button
+                                className="owner-view-btn"
+                                onClick={() => onOpenClientInfo(client)}
+                              >
+                                Info &amp; Tracker
+                              </button>
+                            )}
+                          </div>
+                        </td>
+                      </tr>
+                    );
+                  })
+                )}
+              </tbody>
+            </table>
+          </div>
+        </div>
       </section>
     );
   }
 
   // MAIN VIEW: Employees Directory
   return (
-    <section style={{ animation: "fadeIn 0.25s ease-out" }}>
-      <div
-        style={{
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "space-between",
-          gap: 12,
-          marginBottom: 16,
-          flexWrap: "wrap",
-        }}
-      >
-        <div style={{ display: "flex", alignItems: "center", gap: 10, flexWrap: "wrap" }}>
-          <label style={{ fontSize: 13, color: "#6b6b77", marginRight: 4, fontWeight: 500 }}>
-            Filter by role:
-          </label>
-          <select
-            value={selectedRole}
-            onChange={(event) => {
-              if (setSelectedRole) setSelectedRole(event.target.value);
-              setEmployeesPage(1);
-            }}
-            style={{ padding: "6px 12px", borderRadius: 8, border: "1px solid #cbd5e1", fontSize: 13 }}
-          >
-            {employeeRoles.map((role) => (
-              <option key={role} value={role}>
-                {role}
-              </option>
-            ))}
-          </select>
-
-          <label style={{ fontSize: 13, color: "#6b6b77", margin: "0 4px 0 8px", fontWeight: 500 }}>
-            Branch:
-          </label>
-          <select
-            value={selectedBranch}
-            onChange={(event) => {
-              setSelectedBranch(event.target.value);
-              setEmployeesPage(1);
-            }}
-            style={{ padding: "6px 12px", borderRadius: 8, border: "1px solid #cbd5e1", fontSize: 13 }}
-          >
-            {branchOptions.map((opt) => (
-              <option key={opt.value} value={opt.value}>
-                {opt.label}
-              </option>
-            ))}
-          </select>
-        </div>
-        <div style={{ color: "#7a748e", fontSize: 13, fontWeight: 600 }}>
-          {filteredEmployees.length} employees
+    <section className="owner-page-view">
+      {/* Header Banner */}
+      <div className="owner-header-banner">
+        <div className="owner-header-info">
+          <p className="owner-header-eyebrow">Workforce Governance</p>
+          <h1 className="owner-header-title">Enterprise Employee Directory</h1>
+          <p className="owner-header-subtitle">
+            Manage corporate organization hierarchy, branch deployments, reporting chains, and cross-functional team allocations.
+          </p>
         </div>
       </div>
 
-      <table className="clients-table">
-        <thead>
-          <tr>
-            <th>Name</th>
-            <th>Branch</th>
-            <th>Email</th>
-            <th>Phone</th>
-            <th>Role</th>
-            <th style={{ textAlign: "right" }}>Actions</th>
-          </tr>
-        </thead>
-        <tbody>
-          {employeesPageItems.length === 0 ? (
-            <tr>
-              <td colSpan={6} style={{ textAlign: "center", padding: 36, color: "#64748b" }}>
-                No employees found matching the filters.
-              </td>
-            </tr>
-          ) : (
-            employeesPageItems.map((employee) => (
-              <tr key={employee.id}>
-                <td>
-                  <strong style={{ color: "#1e293b" }}>{employee.name}</strong>
-                </td>
-                <td>{employee.branch}</td>
-                <td>{employee.email}</td>
-                <td>{employee.phone}</td>
-                <td>
-                  <span
-                    style={{
-                      padding: "3px 8px",
-                      borderRadius: 6,
-                      background: "#f1f5f9",
-                      fontSize: 12,
-                      fontWeight: 600,
-                      color: "#475569",
-                      textTransform: "capitalize",
-                    }}
-                  >
-                    {employee.role}
-                  </span>
-                </td>
-                <td style={{ textAlign: "right", whiteSpace: "nowrap" }}>
-                  <div
-                    style={{
-                      display: "inline-flex",
-                      alignItems: "center",
-                      justifyContent: "flex-end",
-                      gap: 6,
-                    }}
-                  >
-                    {["branch manager", "manager"].includes(
-                      (employee.role || "").toLowerCase()
-                    ) && (
-                      <button
-                        className="table-action"
-                        style={{
-                          background: "rgba(16, 185, 129, 0.12)",
-                          color: "#059669",
-                          fontWeight: 600,
-                          whiteSpace: "nowrap",
-                        }}
-                        onClick={() => {
-                          setSalesClientsView(null);
-                          setManagerTeamView(employee);
-                        }}
-                      >
-                        Team under
-                      </button>
-                    )}
-                    {["sales", "it", "admin", "market"].includes(
-                      (employee.role || "").toLowerCase()
-                    ) && (
-                      <button
-                        className="table-action"
-                        style={{
-                          background: "rgba(99, 102, 241, 0.12)",
-                          color: "#4f46e5",
-                          fontWeight: 600,
-                          whiteSpace: "nowrap",
-                        }}
-                        onClick={() => {
-                          setManagerTeamView(null);
-                          setSalesClientsView(employee);
-                        }}
-                      >
-                        Clients under
-                      </button>
-                    )}
-                    <button
-                      className="table-action"
-                      style={{ whiteSpace: "nowrap" }}
-                      onClick={() => onOpenEmployeeInfo(employee)}
-                    >
-                      Info
-                    </button>
-                    <button
-                      className="table-action"
-                      style={{ whiteSpace: "nowrap" }}
-                      onClick={() => onOpenEditEmployee(employee)}
-                    >
-                      Edit
-                    </button>
-                    <button
-                      className="table-action danger"
-                      style={{ whiteSpace: "nowrap" }}
-                      onClick={() => onDeleteEmployee(employee)}
-                    >
-                      Delete
-                    </button>
-                  </div>
-                </td>
-              </tr>
-            ))
-          )}
-        </tbody>
-      </table>
+      {/* KPI Ribbon */}
+      <div className="owner-kpi-ribbon">
+        <div className="owner-kpi-tile blue">
+          <div className="owner-kpi-tile-top">
+            <span className="owner-kpi-tile-label">Total Workforce</span>
+            <div className="owner-kpi-tile-icon blue">
+              <Icon name="team" size={16} />
+            </div>
+          </div>
+          <div>
+            <strong className="owner-kpi-tile-value">{totalEmployees}</strong>
+            <span className="owner-kpi-tile-sub">Active Enterprise Staff</span>
+          </div>
+        </div>
 
+        <div className="owner-kpi-tile green">
+          <div className="owner-kpi-tile-top">
+            <span className="owner-kpi-tile-label">Branch Managers</span>
+            <div className="owner-kpi-tile-icon green">
+              <Icon name="roles" size={16} />
+            </div>
+          </div>
+          <div>
+            <strong className="owner-kpi-tile-value" style={{ color: "#10b981" }}>
+              {branchManagersCount}
+            </strong>
+            <span className="owner-kpi-tile-sub">Territory Heads</span>
+          </div>
+        </div>
+
+        <div className="owner-kpi-tile amber">
+          <div className="owner-kpi-tile-top">
+            <span className="owner-kpi-tile-label">Regional Managers</span>
+            <div className="owner-kpi-tile-icon amber">
+              <Icon name="team" size={16} />
+            </div>
+          </div>
+          <div>
+            <strong className="owner-kpi-tile-value" style={{ color: "#f59e0b" }}>
+              {managersCount}
+            </strong>
+            <span className="owner-kpi-tile-sub">Sales Operations Leads</span>
+          </div>
+        </div>
+
+        <div className="owner-kpi-tile purple">
+          <div className="owner-kpi-tile-top">
+            <span className="owner-kpi-tile-label">Operating Branches</span>
+            <div className="owner-kpi-tile-icon purple">
+              <Icon name="branches" size={16} />
+            </div>
+          </div>
+          <div>
+            <strong className="owner-kpi-tile-value">{uniqueBranchesCount}</strong>
+            <span className="owner-kpi-tile-sub">Across All Regions</span>
+          </div>
+        </div>
+      </div>
+
+      {/* Toolbar Filter Card */}
+      <div className="analytics-card owner-toolbar-card">
+        <div className="owner-toolbar-filters">
+          <div className="owner-search-box">
+            <span className="owner-search-icon">
+              <Icon name="search" size={14} />
+            </span>
+            <input
+              type="text"
+              placeholder="Search by employee name, branch, email, phone, role..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+            />
+          </div>
+
+          <label className="field-label" style={{ margin: 0 }}>
+            <span>Filter by Role:</span>
+            <select
+              className="owner-filter-select"
+              value={selectedRole}
+              onChange={(event) => {
+                if (setSelectedRole) setSelectedRole(event.target.value);
+                setEmployeesPage(1);
+              }}
+            >
+              {employeeRoles.map((role) => (
+                <option key={role} value={role}>
+                  {role}
+                </option>
+              ))}
+            </select>
+          </label>
+
+          <label className="field-label" style={{ margin: 0 }}>
+            <span>Branch:</span>
+            <select
+              className="owner-filter-select"
+              value={selectedBranch}
+              onChange={(event) => {
+                setSelectedBranch(event.target.value);
+                setEmployeesPage(1);
+              }}
+            >
+              {branchOptions.map((opt) => (
+                <option key={opt.value} value={opt.value}>
+                  {opt.label}
+                </option>
+              ))}
+            </select>
+          </label>
+
+          {(searchTerm || (selectedRole && selectedRole !== "All roles") || selectedBranch) && (
+            <button
+              type="button"
+              className="owner-btn-secondary"
+              onClick={handleResetFilters}
+            >
+              Reset Filters
+            </button>
+          )}
+        </div>
+
+        <div className="owner-count-badge">
+          <span>Showing</span>
+          <strong>{filteredEmployees.length}</strong>
+          <span>of {employeesList.length} employees</span>
+        </div>
+      </div>
+
+      {/* Employees Table Card */}
+      <div className="analytics-card owner-table-card">
+        <div className="owner-table-scroll">
+          <table className="owner-table">
+            <thead>
+              <tr>
+                <th>Employee &amp; Branch</th>
+                <th>Contact Information</th>
+                <th>Designation Role</th>
+                <th>Reporting Hierarchy</th>
+                <th style={{ textAlign: "right" }}>Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              {employeesPageItems.length === 0 ? (
+                <tr>
+                  <td colSpan={5} className="owner-empty-state">
+                    No employees found matching the selected filter criteria.
+                  </td>
+                </tr>
+              ) : (
+                employeesPageItems.map((employee) => {
+                  const initials = employee.name
+                    ? employee.name
+                        .split(" ")
+                        .map((n) => n[0])
+                        .join("")
+                        .slice(0, 2)
+                        .toUpperCase()
+                    : "EM";
+
+                  return (
+                    <tr key={employee.id}>
+                      <td>
+                        <div className="owner-member-avatar-cell">
+                          <div className="owner-member-avatar">{initials}</div>
+                          <div className="owner-member-details">
+                            <strong className="owner-member-name">{employee.name}</strong>
+                            <span className="owner-member-branch">{employee.branch} Branch</span>
+                          </div>
+                        </div>
+                      </td>
+                      <td>
+                        <div>
+                          <div>{employee.email}</div>
+                          <div className="owner-phone-text">{employee.phone}</div>
+                        </div>
+                      </td>
+                      <td>
+                        <span className="owner-role-tag">
+                          {employee.role}
+                        </span>
+                      </td>
+                      <td>
+                        <span className="owner-rep-pill">
+                          <Icon name="user" size={12} />
+                          {employee.reportingManager || employee.branchManager || "Branch Executive"}
+                        </span>
+                      </td>
+                      <td style={{ textAlign: "right", whiteSpace: "nowrap" }}>
+                        <div className="owner-actions-cell">
+                          {["branch manager", "manager"].includes(
+                            (employee.role || "").toLowerCase()
+                          ) && (
+                            <button
+                              className="owner-btn-primary"
+                              style={{ padding: "6px 12px", fontSize: 12, background: "linear-gradient(135deg, #10b981 0%, #059669 100%)" }}
+                              onClick={() => {
+                                setSalesClientsView(null);
+                                setManagerTeamView(employee);
+                              }}
+                            >
+                              Team under
+                            </button>
+                          )}
+                          {["sales", "it", "admin", "market"].includes(
+                            (employee.role || "").toLowerCase()
+                          ) && (
+                            <button
+                              className="owner-btn-primary"
+                              style={{ padding: "6px 12px", fontSize: 12 }}
+                              onClick={() => {
+                                setManagerTeamView(null);
+                                setSalesClientsView(employee);
+                              }}
+                            >
+                              Clients under
+                            </button>
+                          )}
+                          <button
+                            className="owner-view-btn"
+                            onClick={() => onOpenEmployeeInfo(employee)}
+                          >
+                            Info
+                          </button>
+                          <button
+                            className="owner-btn-secondary"
+                            style={{ padding: "6px 12px", fontSize: 12 }}
+                            onClick={() => onOpenEditEmployee(employee)}
+                          >
+                            Edit
+                          </button>
+                          <button
+                            className="owner-btn-danger"
+                            onClick={() => onDeleteEmployee(employee)}
+                          >
+                            Delete
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  );
+                })
+              )}
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      {/* Pagination */}
       <div
-        className="table-pagination"
         style={{
           display: "flex",
           justifyContent: "space-between",
           alignItems: "center",
           marginTop: 14,
+          flexWrap: "wrap",
+          gap: 10,
         }}
       >
-        <div style={{ color: "#6b6b77", fontSize: 13 }}>
+        <div style={{ color: "#64748b", fontSize: 13 }}>
           Showing {filteredEmployees.length === 0 ? 0 : (employeesPage - 1) * PAGE_SIZE + 1} -{" "}
           {Math.min(employeesPage * PAGE_SIZE, filteredEmployees.length)} of{" "}
           {filteredEmployees.length}
         </div>
-        <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
+        <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
           <button
-            className="table-action"
+            className="owner-btn-secondary"
             disabled={employeesPage <= 1}
             onClick={() => setEmployeesPage((page) => Math.max(1, page - 1))}
           >
             Prev
           </button>
-          <span style={{ margin: "0 8px", fontSize: 13 }}>
+          <span style={{ margin: "0 6px", fontSize: 13, fontWeight: 600 }}>
             Page {employeesPage} / {employeesTotalPages}
           </span>
           <button
-            className="table-action"
+            className="owner-btn-secondary"
             disabled={employeesPage >= employeesTotalPages}
             onClick={() => setEmployeesPage((page) => Math.min(employeesTotalPages, page + 1))}
           >

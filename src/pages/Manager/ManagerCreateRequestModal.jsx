@@ -1,18 +1,38 @@
 import React, { useMemo, useState } from "react";
 import Modal from "../../components/Modal";
+import Icon from "../../components/Icon";
 
-const requestTypes = ["Edit Salesperson", "Delete Salesperson", "Transfer Salesperson"];
+const requestTypes = [
+  {
+    type: "Edit Salesperson",
+    title: "Edit Representative",
+    desc: "Update salesperson contact, territory region, or target quotas.",
+    icon: "document",
+  },
+  {
+    type: "Transfer Salesperson",
+    title: "Transfer Representative",
+    desc: "Reassign team member under a different branch manager.",
+    icon: "team",
+  },
+  {
+    type: "Delete Salesperson",
+    title: "Delete Representative",
+    desc: "Submit offboarding petition and account reallocations.",
+    icon: "alert",
+  },
+];
 
 const makeRequestId = () => `RQ-${Math.floor(1000 + Math.random() * 9000)}`;
 
 // Mock list of other managers under the same branch manager
 const mockTransferManagers = [
-  { id: 1, name: "Arun Patel" },
-  { id: 2, name: "Sneha Reddy" },
-  { id: 3, name: "Rajesh Kumar" },
+  { id: 1, name: "Arun Patel", branch: "North" },
+  { id: 2, name: "Sneha Reddy", branch: "South" },
+  { id: 3, name: "Rajesh Kumar", branch: "West" },
 ];
 
-export default function ManagerCreateRequestModal({ salesPeople, onClose, onSubmit }) {
+export default function ManagerCreateRequestModal({ salesPeople = [], onClose, onSubmit }) {
   const [selectedType, setSelectedType] = useState("");
   const [selectedSalespersonId, setSelectedSalespersonId] = useState("");
   const [transferManagerId, setTransferManagerId] = useState("");
@@ -43,12 +63,12 @@ export default function ManagerCreateRequestModal({ salesPeople, onClose, onSubm
     }
 
     setFormValues({
-      name: selectedSalesperson.name,
-      role: selectedSalesperson.role,
-      email: selectedSalesperson.email,
-      phone: selectedSalesperson.phone,
-      region: selectedSalesperson.region,
-      quota: selectedSalesperson.quota,
+      name: selectedSalesperson.name || "",
+      role: selectedSalesperson.role || "",
+      email: selectedSalesperson.email || "",
+      phone: selectedSalesperson.phone || "",
+      region: selectedSalesperson.region || "",
+      quota: selectedSalesperson.quota || "",
     });
   }, [selectedSalesperson]);
 
@@ -97,151 +117,192 @@ export default function ManagerCreateRequestModal({ salesPeople, onClose, onSubm
     onClose();
   };
 
+  const initials = selectedSalesperson?.name
+    ? selectedSalesperson.name
+        .split(" ")
+        .map((n) => n[0])
+        .join("")
+        .slice(0, 2)
+        .toUpperCase()
+    : "SP";
+
   return (
-    <Modal title="Create Request" onClose={onClose} closeLabel="Close">
-      <div style={{ display: "grid", gap: 18, minWidth: 320, maxWidth: 680 }}>
+    <Modal title="Create Change Request" onClose={onClose} closeLabel="Close">
+      <div style={{ display: "grid", gap: 18, minWidth: 320, maxWidth: 660 }}>
         {!selectedType ? (
-          <div style={{ display: "grid", gap: 14 }}>
-            <p className="dashboard-eyebrow">Select request type</p>
-            <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(180px, 1fr))", gap: 14 }}>
-              {requestTypes.map((type) => (
+          <div>
+            <p className="manager-header-eyebrow" style={{ margin: "0 0 6px" }}>Step 1: Select Request Category</p>
+            <h2 style={{ margin: "0 0 14px", fontSize: 18, fontWeight: 800 }}>What change do you want to submit?</h2>
+            
+            <div className="manager-type-grid">
+              {requestTypes.map((item) => (
                 <button
-                  key={type}
+                  key={item.type}
                   type="button"
-                  className="table-action"
-                  style={{
-                    minHeight: 120,
-                    display: "grid",
-                    placeItems: "center",
-                    padding: 18,
-                    borderRadius: 20,
-                    border: "1px solid #e7e7f5",
-                    background: "#fff",
-                    color: "#1d2330",
-                    fontWeight: 700,
-                  }}
-                  onClick={() => setSelectedType(type)}
+                  className="manager-type-card"
+                  onClick={() => setSelectedType(item.type)}
                 >
-                  {type}
+                  <div className="manager-type-card-icon">
+                    <Icon name={item.icon} size={18} />
+                  </div>
+                  <div>
+                    <h3 className="manager-type-card-title">{item.title}</h3>
+                    <p className="manager-type-card-desc">{item.desc}</p>
+                  </div>
                 </button>
               ))}
             </div>
           </div>
         ) : (
-          <div style={{ display: "grid", gap: 18 }}>
-            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: 12 }}>
+          <div style={{ display: "grid", gap: 16 }}>
+            {/* Type Header Pill & Change Button */}
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: 12, paddingBottom: 14, borderBottom: "1px solid rgba(140, 95, 248, 0.14)" }}>
               <div>
-                <p className="dashboard-eyebrow">{selectedType}</p>
-                <h2 style={{ margin: 0 }}>
-                  {selectedType === "Edit Salesperson" ? "Edit salesperson details" : selectedType === "Transfer Salesperson" ? "Transfer salesperson" : "Delete salesperson"}
-                </h2>
+                <p className="manager-header-eyebrow" style={{ margin: 0 }}>Category</p>
+                <h3 style={{ margin: "2px 0 0", fontSize: 18, fontWeight: 800 }}>{selectedType}</h3>
               </div>
-              <button className="table-action" type="button" onClick={() => setSelectedType("")}>Change type</button>
+              <button
+                type="button"
+                className="manager-btn-secondary"
+                onClick={() => setSelectedType("")}
+              >
+                Change Category
+              </button>
             </div>
 
-            <label className="field-label">
-              Salesperson
-              <select value={selectedSalespersonId} onChange={(event) => setSelectedSalespersonId(event.target.value)}>
-                <option value="">Select salesperson</option>
+            {/* Salesperson Selector */}
+            <label className="field-label" style={{ margin: 0 }}>
+              <span>Target Sales Representative</span>
+              <select
+                className="manager-filter-select"
+                value={selectedSalespersonId}
+                onChange={(event) => setSelectedSalespersonId(event.target.value)}
+              >
+                <option value="">Choose a representative...</option>
                 {salesPeople.map((person) => (
-                  <option key={person.id} value={person.id}>{person.name}</option>
+                  <option key={person.id} value={person.id}>
+                    {person.name} ({person.role} • {person.branch || "Branch"})
+                  </option>
                 ))}
               </select>
             </label>
 
-            {selectedSalesperson ? (
+            {selectedSalesperson && (
               <div style={{ display: "grid", gap: 16 }}>
+                {/* Profile mini-card */}
+                <div className="manager-modal-profile" style={{ margin: 0, padding: 12, borderRadius: 12, background: "rgba(140, 95, 248, 0.06)", border: "1px solid rgba(140, 95, 248, 0.14)" }}>
+                  <div className="manager-modal-avatar" style={{ width: 44, height: 44, fontSize: 15 }}>{initials}</div>
+                  <div>
+                    <strong style={{ fontSize: 15, display: "block" }}>{selectedSalesperson.name}</strong>
+                    <span style={{ fontSize: 12.5, color: "#7a748e" }}>
+                      {selectedSalesperson.role} • {selectedSalesperson.branch} Branch • Quota: {selectedSalesperson.quota || "₹100k"}
+                    </span>
+                  </div>
+                </div>
+
                 {selectedType === "Edit Salesperson" ? (
                   <>
-                    <label className="field-label">
-                      Reason for Edit
-                      <textarea
-                        value={reason}
-                        onChange={(event) => setReason(event.target.value)}
-                        rows={4}
-                        placeholder="Explain why these changes are needed"
-                        style={{ resize: "vertical", minHeight: 110, padding: 12, borderRadius: 8, border: "1px solid #dedfe1", font: "inherit" }}
-                        required
-                      />
-                    </label>
-
-                    <div style={{ display: "grid", gap: 18 }}>
-                      <label className="field-label">
-                        Name
+                    <div className="manager-form-grid-2">
+                      <label className="field-label" style={{ margin: 0 }}>
+                        <span>Full Name</span>
                         <input name="name" value={formValues.name} onChange={handleFieldChange} />
                       </label>
-                      <label className="field-label">
-                        Role
+
+                      <label className="field-label" style={{ margin: 0 }}>
+                        <span>Designation / Role</span>
                         <input name="role" value={formValues.role} onChange={handleFieldChange} />
                       </label>
-                      <label className="field-label">
-                        Email
+
+                      <label className="field-label" style={{ margin: 0 }}>
+                        <span>Email Address</span>
                         <input name="email" value={formValues.email} onChange={handleFieldChange} />
                       </label>
-                      <label className="field-label">
-                        Phone
+
+                      <label className="field-label" style={{ margin: 0 }}>
+                        <span>Phone Number</span>
                         <input name="phone" value={formValues.phone} onChange={handleFieldChange} />
                       </label>
-                      <label className="field-label">
-                        Region
+
+                      <label className="field-label" style={{ margin: 0 }}>
+                        <span>Assigned Territory</span>
                         <input name="region" value={formValues.region} onChange={handleFieldChange} />
                       </label>
-                      <label className="field-label">
-                        Quota
+
+                      <label className="field-label" style={{ margin: 0 }}>
+                        <span>Monthly Target Quota</span>
                         <input name="quota" value={formValues.quota} onChange={handleFieldChange} />
                       </label>
                     </div>
+
+                    <label className="field-label" style={{ margin: 0 }}>
+                      <span>Justification & Reason for Edit</span>
+                      <textarea
+                        className="manager-textarea"
+                        value={reason}
+                        onChange={(event) => setReason(event.target.value)}
+                        placeholder="Explain why these field changes are necessary..."
+                        required
+                      />
+                    </label>
                   </>
                 ) : selectedType === "Transfer Salesperson" ? (
                   <>
-                    <label className="field-label">
-                      Transfer To (Manager)
-                      <select value={transferManagerId} onChange={(event) => setTransferManagerId(event.target.value)}>
-                        <option value="">Select new manager</option>
+                    <label className="field-label" style={{ margin: 0 }}>
+                      <span>Transfer to New Branch Manager</span>
+                      <select
+                        className="manager-filter-select"
+                        value={transferManagerId}
+                        onChange={(event) => setTransferManagerId(event.target.value)}
+                      >
+                        <option value="">Select destination manager...</option>
                         {mockTransferManagers.map((manager) => (
-                          <option key={manager.id} value={manager.id}>{manager.name}</option>
+                          <option key={manager.id} value={manager.id}>
+                            {manager.name} ({manager.branch} Zone)
+                          </option>
                         ))}
                       </select>
                     </label>
-                    <label className="field-label">
-                      Reason for Transfer
+
+                    <label className="field-label" style={{ margin: 0 }}>
+                      <span>Reason for Territory Transfer</span>
                       <textarea
+                        className="manager-textarea"
                         value={reason}
                         onChange={(event) => setReason(event.target.value)}
-                        rows={4}
-                        placeholder="Explain why this salesperson should be transferred"
-                        style={{ resize: "vertical", minHeight: 110, padding: 12, borderRadius: 8, border: "1px solid #dedfe1", font: "inherit" }}
+                        placeholder="Detail the operational reasons for transferring this representative..."
                         required
                       />
                     </label>
                   </>
                 ) : (
-                  <label className="field-label">
-                    Reason for Deletion
+                  <label className="field-label" style={{ margin: 0 }}>
+                    <span>Reason for Account Deletion</span>
                     <textarea
+                      className="manager-textarea"
                       value={reason}
                       onChange={(event) => setReason(event.target.value)}
-                      rows={4}
-                      placeholder="Explain why this salesperson should be deleted"
-                      style={{ resize: "vertical", minHeight: 110, padding: 12, borderRadius: 8, border: "1px solid #dedfe1", font: "inherit" }}
+                      placeholder="Specify offboarding reasons and client account reallocation plan..."
                       required
                     />
                   </label>
                 )}
 
-                <div style={{ display: "flex", justifyContent: "flex-end", flexWrap: "wrap", gap: 10 }}>
-                  <button className="table-action" type="button" onClick={onClose}>Cancel</button>
-                  <button 
-                    className="primary-button" 
-                    type="button" 
-                    onClick={handleSubmit} 
+                <div style={{ display: "flex", justifyContent: "flex-end", gap: 12, marginTop: 8 }}>
+                  <button className="manager-btn-secondary" type="button" onClick={onClose}>
+                    Cancel
+                  </button>
+                  <button
+                    className="manager-btn-primary"
+                    type="button"
+                    onClick={handleSubmit}
                     disabled={!reason.trim() || !selectedSalespersonId || (selectedType === "Transfer Salesperson" && !transferManagerId)}
                   >
-                    Submit Request
+                    <Icon name="check" size={15} />
+                    <span>Submit Request</span>
                   </button>
                 </div>
               </div>
-            ) : null}
+            )}
           </div>
         )}
       </div>

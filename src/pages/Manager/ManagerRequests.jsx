@@ -1,12 +1,12 @@
 import React, { useMemo, useState } from "react";
+import Icon from "../../components/Icon";
 import RequestTable from "./RequestTable";
 import RequestHistory from "./RequestHistory";
 import RequestModal from "./RequestModal";
 import { mockRequests } from "./mockRequests";
 import ManagerCreateRequestModal from "./ManagerCreateRequestModal";
-import { mockClients } from "../Sales/mockClients";
 
-export default function ManagerRequests({ branchTeamNames, managedRegion, branchTeam }) {
+export default function ManagerRequests({ branchTeamNames = [], managedRegion = "East Zone", branchTeam = [] }) {
   const [activeTab, setActiveTab] = useState("Pending");
   const [requests, setRequests] = useState(mockRequests);
   const [myRequests, setMyRequests] = useState([]);
@@ -34,7 +34,7 @@ export default function ManagerRequests({ branchTeamNames, managedRegion, branch
   };
 
   const updateStatus = (requestId, nextStatus) => {
-    const now = new Date().toISOString().split('T')[0];
+    const now = new Date().toISOString().split("T")[0];
     setRequests((prev) =>
       prev.map((request) =>
         request.id === requestId
@@ -43,86 +43,107 @@ export default function ManagerRequests({ branchTeamNames, managedRegion, branch
               status: nextStatus,
               decisionDate: now,
               approvedAt: now,
-              approvedBy: 'Manager',
+              approvedBy: "Manager",
             }
           : request
       )
     );
     setSelectedRequest((current) =>
-      current && current.id === requestId ? { ...current, status: nextStatus, decisionDate: now, approvedAt: now, approvedBy: 'Manager' } : current
+      current && current.id === requestId
+        ? { ...current, status: nextStatus, decisionDate: now, approvedAt: now, approvedBy: "Manager" }
+        : current
     );
   };
 
-  const handleApprove = (requestId) => updateStatus(requestId, 'Approved');
-  const handleReject = (requestId) => updateStatus(requestId, 'Rejected');
+  const handleApprove = (requestId) => updateStatus(requestId, "Approved");
+  const handleReject = (requestId) => updateStatus(requestId, "Rejected");
 
   return (
-    <section>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: 12, marginBottom: 24 }}>
-        <div>
-          <p className="dashboard-eyebrow">Client Requests</p>
-          <h1 style={{ margin: 0 }}>Client Requests</h1>
-          <p className="dashboard-copy" style={{ maxWidth: 640, marginTop: 8 }}>
-            Review pending requests from your sales team and track historical decisions for completed requests.
+    <section className="manager-page-view">
+      {/* Header Banner */}
+      <div className="manager-header-banner">
+        <div className="manager-header-info">
+          <p className="manager-header-eyebrow">Approvals & Workflow</p>
+          <h1 className="manager-header-title">Client Change Requests</h1>
+          <p className="manager-header-subtitle">
+            Review sales team modification requests, handle client deletion petitions, and track approval histories.
           </p>
         </div>
-        <button type="button" className="primary-button" onClick={() => setShowCreateModal(true)}>
-          + Create Request
+        <button
+          type="button"
+          className="manager-btn-primary"
+          onClick={() => setShowCreateModal(true)}
+        >
+          <Icon name="plus" size={15} />
+          <span>Create Request</span>
         </button>
       </div>
 
-      <div style={{ display: 'flex', flexWrap: 'wrap', gap: 10, marginBottom: 24 }}>
-        {['Pending', 'Review', 'History'].map((tab) => (
-          <button
-            key={tab}
-            type="button"
-            className="table-action"
-            style={{
-              background: activeTab === tab ? '#4e7cff' : '#fff',
-              color: activeTab === tab ? '#fff' : '#1b1b23',
-              border: activeTab === tab ? '1px solid #4e7cff' : '1px solid #e7e7f5',
-              minWidth: 160,
-            }}
-            onClick={() => setActiveTab(tab)}
-          >
-            {tab === 'Pending' ? 'Pending Requests' : tab === 'Review' ? 'Review Request' : 'Request History'}
-          </button>
-        ))}
+      {/* Segmented Tabs Strip */}
+      <div className="manager-tabs-strip">
+        <button
+          type="button"
+          className={`manager-tab-btn ${activeTab === "Pending" ? "active" : ""}`}
+          onClick={() => setActiveTab("Pending")}
+        >
+          <Icon name="clock" size={15} />
+          <span>My Requests</span>
+          <span className="manager-tab-count">{myRequests.length}</span>
+        </button>
+
+        <button
+          type="button"
+          className={`manager-tab-btn ${activeTab === "Review" ? "active" : ""}`}
+          onClick={() => setActiveTab("Review")}
+        >
+          <Icon name="alert" size={15} />
+          <span>Pending Team Review</span>
+          <span className="manager-tab-count">{pendingRequests.length}</span>
+        </button>
+
+        <button
+          type="button"
+          className={`manager-tab-btn ${activeTab === "History" ? "active" : ""}`}
+          onClick={() => setActiveTab("History")}
+        >
+          <Icon name="history" size={15} />
+          <span>Decision History</span>
+          <span className="manager-tab-count">{historyRequests.length}</span>
+        </button>
       </div>
 
-      {notification ? (
-        <div style={{ marginBottom: 18, padding: 16, borderRadius: 16, background: "#e7f6ff", color: "#175f8f", border: "1px solid #c7e5f7" }}>
-          {notification}
+      {notification && (
+        <div className="manager-alert-banner">
+          <Icon name="checkCircle" size={16} />
+          <span>{notification}</span>
         </div>
-      ) : null}
+      )}
 
-      {activeTab === 'Pending' ? (
+      {activeTab === "Pending" ? (
         <div>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 10, marginBottom: 14 }}>
-            <div>
-              <p className="eyebrow">Pending requests</p>
-              <p style={{ margin: 0, color: '#6b6b77', fontSize: 13 }}>
-                {myRequests.length === 0 ? "No pending requests." : `${myRequests.length} pending requests created by you.`}
+          {myRequests.length > 0 ? (
+            <RequestTable requests={myRequests} onView={handleViewRequest} />
+          ) : (
+            <div className="analytics-card manager-empty-state">
+              <Icon name="document" size={32} style={{ margin: "0 auto 12px", opacity: 0.5, display: "block" }} />
+              <strong>No pending manager requests created yet.</strong>
+              <p style={{ margin: "6px 0 0", color: "#7a748e", fontSize: 13 }}>
+                Click "+ Create Request" at the top right to submit a new account transfer or client update request.
               </p>
             </div>
-          </div>
-          {myRequests.length > 0 && <RequestTable requests={myRequests} onView={handleViewRequest} />}
+          )}
         </div>
-      ) : activeTab === 'Review' ? (
+      ) : activeTab === "Review" ? (
         <div>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 10, marginBottom: 14 }}>
-            <div>
-              <p className="eyebrow">Review requests</p>
-              <p style={{ margin: 0, color: '#6b6b77', fontSize: 13 }}>
-                {pendingRequests.length} requests to review from your sales team in {managedRegion}.
-              </p>
-            </div>
-          </div>
           <RequestTable requests={pendingRequests} onView={handleViewRequest} />
         </div>
       ) : (
         <div>
-          <RequestHistory receivedRequests={historyRequests} sentRequests={myRequests} onView={handleViewRequest} />
+          <RequestHistory
+            receivedRequests={historyRequests}
+            sentRequests={myRequests}
+            onView={handleViewRequest}
+          />
         </div>
       )}
 
@@ -132,7 +153,7 @@ export default function ManagerRequests({ branchTeamNames, managedRegion, branch
           onClose={() => setSelectedRequest(null)}
           onApprove={handleApprove}
           onReject={handleReject}
-          readOnly={activeTab === 'History' || activeTab === 'Pending'}
+          readOnly={activeTab === "History" || activeTab === "Pending"}
         />
       )}
 

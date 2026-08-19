@@ -6,44 +6,54 @@ export default function BranchManagerReportsPage({
   myBranch = "East",
 }) {
   const performanceMetrics = [
-    { label: "Quarterly Target", value: "₹4,500,000", achieved: "₹4,120,000", rate: "91.5%" },
-    { label: "Client Conversion Rate", value: "68.4%", achieved: "+5.2% MoM", rate: "Optimal" },
-    { label: "Average Case TAT", value: "4.2 Days", achieved: "-1.1 Days", rate: "Fast Track" },
-    { label: "Milestone Clearance Rate", value: "94.8%", achieved: "5-Point Compliant", rate: "Excellent" },
+    { label: "Quarterly Target", value: "₹4,500,000", achieved: "₹4,120,000 Realized", rate: "91.5%", isPositive: true },
+    { label: "Client Conversion", value: "68.4%", achieved: "+5.2% MoM Velocity", rate: "Optimal", isPositive: true },
+    { label: "Average Case TAT", value: "4.2 Days", achieved: "-1.1 Days Faster", rate: "Fast Track", isPositive: true },
+    { label: "Milestone Clearance", value: "94.8%", achieved: "5-Point Compliance", rate: "Excellent", isPositive: true },
   ];
 
   return (
-    <section className="bm-page-section">
-      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 20, flexWrap: "wrap", gap: 12 }}>
-        <div>
-          <p className="eyebrow">{myBranch} Branch</p>
-          <h2 style={{ margin: 0 }}>Branch Performance & Analytics Reports</h2>
-          <p style={{ margin: "4px 0 0", color: "#6b6b77", fontSize: 13 }}>
-            Comprehensive operational reports, conversion rates, and milestone turnaround velocity.
+    <section className="bm-page-view">
+      {/* Header Banner */}
+      <div className="bm-header-banner">
+        <div className="bm-header-info">
+          <p className="bm-header-eyebrow">{myBranch} Branch Headquarters</p>
+          <h1 className="bm-header-title">Branch Performance & Analytics Reports</h1>
+          <p className="bm-header-subtitle">
+            Quarterly target realisations, conversion trajectories, and operational turnaround velocity metrics.
           </p>
         </div>
       </div>
 
-      {/* KPI Cards */}
-      <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))", gap: 16, marginBottom: 24 }}>
+      {/* KPI Cards Ribbon */}
+      <div className="bm-kpi-ribbon">
         {performanceMetrics.map((item) => (
-          <div key={item.label} style={{ background: "#fff", padding: 20, borderRadius: 16, border: "1px solid #e7e7f5" }}>
-            <p className="eyebrow" style={{ margin: "0 0 6px", color: "#4e7cff" }}>{item.label}</p>
-            <div style={{ display: "flex", alignItems: "baseline", gap: 10 }}>
-              <h2 style={{ margin: 0, fontSize: 24, fontWeight: 800 }}>{item.value}</h2>
-              <span style={{ fontSize: 12, color: "#10b981", fontWeight: 700 }}>{item.rate}</span>
+          <div key={item.label} className="analytics-card bm-kpi-tile">
+            <div className="bm-kpi-tile-top">
+              <span className="bm-kpi-tile-label">{item.label}</span>
+              <span className="bm-trend-pill positive">{item.rate}</span>
             </div>
-            <small style={{ color: "#7a748e", marginTop: 4, display: "block" }}>{item.achieved}</small>
+            <div>
+              <strong className="bm-kpi-tile-value">{item.value}</strong>
+              <span className="bm-kpi-tile-sub">
+                {item.achieved}
+              </span>
+            </div>
           </div>
         ))}
       </div>
 
-      {/* Revenue & Growth Analysis */}
-      <div style={{ background: "#fff", padding: 22, borderRadius: 16, border: "1px solid #e7e7f5", marginBottom: 20 }}>
-        <h3 style={{ margin: "0 0 4px" }}>Branch Revenue Comparison Chart</h3>
-        <p style={{ margin: "0 0 16px", color: "#7a748e", fontSize: 13 }}>
-          Comparative revenue analysis across operational regional zones.
-        </p>
+      {/* Revenue & Growth Analysis Card */}
+      <div className="analytics-card bm-analytics-card">
+        <div className="panel-header" style={{ marginBottom: 18 }}>
+          <div>
+            <p className="eyebrow" style={{ margin: "0 0 4px" }}>Cross-Territorial Analysis</p>
+            <h2 className="bm-header-title">Branch Revenue Comparison Chart</h2>
+            <p className="bm-header-subtitle">
+              Comparative billing volume and target settlement distribution across operational regional zones.
+            </p>
+          </div>
+        </div>
         <BranchRevenueChart data={branchRevenueData} />
       </div>
     </section>

@@ -43,40 +43,62 @@ export default function OwnerReportsPage({
   });
 
   return (
-    <section style={{ animation: "fadeIn 0.25s ease-out" }}>
-      <div
-        style={{
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "space-between",
-          gap: 12,
-          marginBottom: 16,
-          flexWrap: "wrap",
-        }}
-      >
-        <div>
-          <h2 style={{ margin: 0, fontSize: 22, fontWeight: 700, letterSpacing: "-0.02em" }}>
-            Employee reports
-          </h2>
-          <div style={{ color: "#7a748e", fontSize: 13, marginTop: 4 }}>
-            Last month vs this month performance &amp; team leaderboards
-          </div>
+    <section className="owner-page-view">
+      {/* Header Banner */}
+      <div className="owner-header-banner">
+        <div className="owner-header-info">
+          <p className="owner-header-eyebrow">Executive Intelligence</p>
+          <h1 className="owner-header-title">Employee Performance & Analytics</h1>
+          <p className="owner-header-subtitle">
+            Month-over-Month realization trajectories, departmental productivity, and cross-branch leaderboards.
+          </p>
         </div>
       </div>
 
-      <div
-        className="report-action-group"
-        style={{ display: "flex", gap: 10, flexWrap: "wrap", marginBottom: 16 }}
-      >
-        <button type="button" className="table-action" onClick={resetReportFilters}>
-          Reset filters
-        </button>
+      {/* Toolbar & Filter Card */}
+      <div className="analytics-card owner-toolbar-card">
+        <div className="owner-toolbar-filters">
+          <label className="field-label" style={{ margin: 0 }}>
+            <span>Role:</span>
+            <select
+              className="owner-filter-select"
+              value={reportRoleFilter}
+              onChange={(e) => setReportRoleFilter(e.target.value)}
+            >
+              {reportRoleOptions.map((opt) => (
+                <option key={opt.value} value={opt.value}>
+                  {opt.label}
+                </option>
+              ))}
+            </select>
+          </label>
+
+          <label className="field-label" style={{ margin: 0 }}>
+            <span>Branch:</span>
+            <select
+              className="owner-filter-select"
+              value={reportBranchFilter}
+              onChange={(e) => setReportBranchFilter(e.target.value)}
+            >
+              {branchOptions.map((opt) => (
+                <option key={opt.value} value={opt.value}>
+                  {opt.label}
+                </option>
+              ))}
+            </select>
+          </label>
+
+          <button type="button" className="owner-btn-secondary" onClick={resetReportFilters}>
+            Reset Filters
+          </button>
+        </div>
+
         <button
           type="button"
-          className="table-action"
+          className="owner-btn-primary"
           onClick={() => setShowLeaderboard((show) => !show)}
         >
-          {showLeaderboard ? "Hide leaderboard" : "Leaderboard"}
+          {showLeaderboard ? "Hide Leaderboard" : "View Leaderboard"}
         </button>
       </div>
 
@@ -85,141 +107,109 @@ export default function OwnerReportsPage({
           <TopPerformerLeaderboard performers={topPerformers} />
         </div>
       ) : (
-        <>
-          <div
-            style={{
-              display: "flex",
-              gap: 10,
-              alignItems: "center",
-              marginBottom: 16,
-              flexWrap: "wrap",
-            }}
-          >
-            <label style={{ fontSize: 13, color: "#6b6b77", marginRight: 6, fontWeight: 500 }}>
-              Role:
-            </label>
-            <select
-              value={reportRoleFilter}
-              onChange={(e) => setReportRoleFilter(e.target.value)}
-              style={{ padding: "6px 12px", borderRadius: 8, border: "1px solid #cbd5e1", fontSize: 13 }}
-            >
-              {reportRoleOptions.map((opt) => (
-                <option key={opt.value} value={opt.value}>
-                  {opt.label}
-                </option>
-              ))}
-            </select>
-
-            <label style={{ fontSize: 13, color: "#6b6b77", margin: "0 6px 0 10px", fontWeight: 500 }}>
-              Branch:
-            </label>
-            <select
-              value={reportBranchFilter}
-              onChange={(e) => setReportBranchFilter(e.target.value)}
-              style={{ padding: "6px 12px", borderRadius: 8, border: "1px solid #cbd5e1", fontSize: 13 }}
-            >
-              {branchOptions.map((opt) => (
-                <option key={opt.value} value={opt.value}>
-                  {opt.label}
-                </option>
-              ))}
-            </select>
-          </div>
-
-          <table className="clients-table">
-            <thead>
-              <tr>
-                <th>Name</th>
-                <th>Branch</th>
-                <th>Role</th>
-                <th>Last month</th>
-                <th>This month</th>
-                <th style={{ textAlign: "right" }}>Actions</th>
-              </tr>
-            </thead>
-            <tbody>
-              {filteredEmployees.length === 0 ? (
+        /* Reports Table Card */
+        <div className="analytics-card owner-table-card">
+          <div className="owner-table-scroll">
+            <table className="owner-table">
+              <thead>
                 <tr>
-                  <td colSpan={6} style={{ textAlign: "center", padding: 36, color: "#64748b" }}>
-                    No employee reports found matching the filters.
-                  </td>
+                  <th>Employee</th>
+                  <th>Branch Location</th>
+                  <th>Role Designation</th>
+                  <th>Last Month</th>
+                  <th>This Month</th>
+                  <th style={{ textAlign: "right" }}>Actions</th>
                 </tr>
-              ) : (
-                filteredEmployees.map((employee) => {
-                  const series = generateYearlySeries(employee);
-                  const lastMonth = series[10];
-                  const thisMonth = series[11];
-                  return (
-                    <tr key={employee.id}>
-                      <td>
-                        <strong style={{ color: "#1e293b" }}>{employee.name}</strong>
-                      </td>
-                      <td>{employee.branch}</td>
-                      <td>
-                        <span
-                          style={{
-                            padding: "3px 8px",
-                            borderRadius: 6,
-                            background: "#f1f5f9",
-                            fontSize: 12,
-                            fontWeight: 600,
-                            color: "#475569",
-                            textTransform: "capitalize",
-                          }}
-                        >
-                          {employee.role}
-                        </span>
-                      </td>
-                      <td>₹{lastMonth.toLocaleString()}</td>
-                      <td>
-                        <strong style={{ color: "#059669" }}>
-                          ₹{thisMonth.toLocaleString()}
-                        </strong>
-                      </td>
-                      <td style={{ textAlign: "right" }}>
-                        <button
-                          className="table-action"
-                          onClick={() => openPerformance(employee)}
-                        >
-                          View chart
-                        </button>
-                      </td>
-                    </tr>
-                  );
-                })
-              )}
-            </tbody>
-          </table>
-        </>
+              </thead>
+              <tbody>
+                {filteredEmployees.length === 0 ? (
+                  <tr>
+                    <td colSpan={6} className="owner-empty-state">
+                      No employee reports found matching the selected filters.
+                    </td>
+                  </tr>
+                ) : (
+                  filteredEmployees.map((employee) => {
+                    const series = generateYearlySeries(employee);
+                    const lastMonth = series[10];
+                    const thisMonth = series[11];
+
+                    const initials = employee.name
+                      ? employee.name
+                          .split(" ")
+                          .map((n) => n[0])
+                          .join("")
+                          .slice(0, 2)
+                          .toUpperCase()
+                      : "EM";
+
+                    return (
+                      <tr key={employee.id}>
+                        <td>
+                          <div className="owner-member-avatar-cell">
+                            <div className="owner-member-avatar">{initials}</div>
+                            <div className="owner-member-details">
+                              <strong className="owner-member-name">{employee.name}</strong>
+                              <span className="owner-member-branch">
+                                {employee.branch} Operations
+                              </span>
+                            </div>
+                          </div>
+                        </td>
+                        <td>
+                          <span className="owner-rep-pill">
+                            {employee.branch} Branch
+                          </span>
+                        </td>
+                        <td>
+                          <span className="owner-role-tag">
+                            {employee.role}
+                          </span>
+                        </td>
+                        <td>₹{lastMonth.toLocaleString()}</td>
+                        <td>
+                          <strong className="owner-revenue-text">
+                            ₹{thisMonth.toLocaleString()}
+                          </strong>
+                        </td>
+                        <td style={{ textAlign: "right" }}>
+                          <button
+                            className="owner-view-btn"
+                            type="button"
+                            onClick={() => openPerformance(employee)}
+                          >
+                            View Chart
+                          </button>
+                        </td>
+                      </tr>
+                    );
+                  })
+                )}
+              </tbody>
+            </table>
+          </div>
+        </div>
       )}
 
       {selectedEmployeeForChart && (
         <SimpleModal onClose={closePerformance}>
-          <div
-            style={{
-              display: "flex",
-              justifyContent: "space-between",
-              alignItems: "center",
-              borderBottom: "1px solid #eef0f5",
-              paddingBottom: 12,
-              marginBottom: 16,
-            }}
-          >
+          <div className="owner-modal-profile">
+            <div className="owner-modal-avatar">
+              {selectedEmployeeForChart.name.slice(0, 2).toUpperCase()}
+            </div>
             <div>
-              <h3 style={{ margin: 0, fontSize: 18, fontWeight: 700 }}>
-                Performance Trend — {selectedEmployeeForChart.name}
-              </h3>
-              <div style={{ color: "#7a748e", fontSize: 13, marginTop: 2 }}>
+              <h2 className="owner-header-title">{selectedEmployeeForChart.name}</h2>
+              <span className="owner-header-subtitle">
                 Role: {selectedEmployeeForChart.role} | Branch: {selectedEmployeeForChart.branch}
-              </div>
+              </span>
             </div>
           </div>
           <PerformanceChart
             series={selectedEmployeeForChart.series}
             label={`Employee: ${selectedEmployeeForChart.name}`}
           />
-          <div style={{ display: "flex", justifyContent: "flex-end", marginTop: 16 }}>
-            <button className="table-action" type="button" onClick={closePerformance}>
+          <div className="owner-modal-actions">
+            <button className="owner-btn-secondary" type="button" onClick={closePerformance}>
               Close
             </button>
           </div>

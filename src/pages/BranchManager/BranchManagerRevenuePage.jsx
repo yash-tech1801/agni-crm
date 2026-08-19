@@ -23,12 +23,18 @@ function RevenueTrendChart({ data }) {
 
   return (
     <svg viewBox={`0 0 ${width} ${height}`} className="dashboard-chart" aria-hidden="true">
-      <path d={areaPath} fill="rgba(154, 116, 233, 0.16)" />
-      <path d={linePath} fill="none" stroke="#9a74e9" strokeWidth="3" strokeLinecap="round" />
+      <defs>
+        <linearGradient id="bmRevGrad" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stopColor="#8c5ff8" stopOpacity="0.35" />
+          <stop offset="100%" stopColor="#8c5ff8" stopOpacity="0.0" />
+        </linearGradient>
+      </defs>
+      <path d={areaPath} fill="url(#bmRevGrad)" />
+      <path d={linePath} fill="none" stroke="#8c5ff8" strokeWidth="3" strokeLinecap="round" />
       {points.map((point) => (
         <g key={point.label}>
-          <circle cx={point.x} cy={point.y} r="4.5" fill="#fff" stroke="#9a74e9" strokeWidth="2" />
-          <text x={point.x} y={height - 6} textAnchor="middle" fill="#7d79a8" fontSize="11">
+          <circle cx={point.x} cy={point.y} r="4.5" fill="#fff" stroke="#8c5ff8" strokeWidth="2.5" />
+          <text x={point.x} y={height - 6} textAnchor="middle" fill="currentColor" opacity="0.65" fontSize="10.5" fontWeight="600">
             {point.label}
           </text>
         </g>
@@ -49,80 +55,103 @@ export default function BranchManagerRevenuePage({
 
   const revenueSummaryCards = [
     {
-      label: "Payment received",
-      value: `₹${revenueReceived.toLocaleString()}`,
+      label: "Branch Payment Received",
+      value: `₹${revenueReceived.toLocaleString("en-IN")}`,
       hint: "Collected from clients",
       accentClass: "received",
       icon: "arrowUp",
     },
     {
-      label: "Payment pending",
-      value: `₹${revenuePending.toLocaleString()}`,
-      hint: "Awaiting confirmation",
+      label: "Branch Payment Pending",
+      value: `₹${revenuePending.toLocaleString("en-IN")}`,
+      hint: "Awaiting invoice settlement",
       accentClass: "pending",
       icon: "overview",
     },
     {
-      label: "Total payment",
-      value: `₹${revenueTotal.toLocaleString()}`,
-      hint: "Overall revenue range",
+      label: "Total Branch Revenue",
+      value: `₹${revenueTotal.toLocaleString("en-IN")}`,
+      hint: "Cumulative pipeline revenue",
       accentClass: "total",
-      icon: "revenue",
+      icon: "wallet",
     },
   ];
 
   return (
-    <section className="bm-page-section">
-      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 12, marginBottom: 12, flexWrap: "wrap" }}>
-        <div>
-          <h2 style={{ margin: 0 }}>Revenue Analytics — {myBranch} Branch</h2>
-          <div style={{ color: "#7a748e", fontSize: 13, marginTop: 4 }}>Track revenue performance for your branch over time</div>
-        </div>
-        <div>
-          <label style={{ fontSize: 13, color: "#6b6b77", marginRight: 8 }}>Time range:</label>
-          <select
-            value={revenueRange}
-            onChange={(event) => setRevenueRange(event.target.value)}
-            style={{ padding: "6px 12px", borderRadius: 8, border: "1px solid #dedfe1", fontWeight: 600 }}
-          >
-            <option value="daily">Daily</option>
-            <option value="weekly">Weekly</option>
-            <option value="monthly">Monthly</option>
-            <option value="yearly">Yearly</option>
-            <option value="allTime">All time</option>
-          </select>
+    <section className="bm-page-view">
+      {/* Header Banner */}
+      <div className="bm-header-banner">
+        <div className="bm-header-info">
+          <p className="bm-header-eyebrow">{myBranch} Branch Financials</p>
+          <h1 className="bm-header-title">Revenue Intelligence & Analytics</h1>
+          <p className="bm-header-subtitle">
+            Comprehensive billing volume, collection rate trajectories, and commercial pipeline horizons.
+          </p>
         </div>
       </div>
 
-      <div className="revenue-panel" style={{ display: "grid", gridTemplateColumns: "1.2fr 0.8fr", gap: 16, alignItems: "stretch", marginBottom: 20 }}>
-        <div className="revenue-summary" style={{ minHeight: 220 }}>
-          <p className="eyebrow">Revenue overview</p>
-          <h2>₹{revenueTotal.toLocaleString()}</h2>
-          <p className="revenue-copy">Selected range: {revenueRange.charAt(0).toUpperCase() + revenueRange.slice(1)}</p>
+      {/* Toolbar Filter */}
+      <div className="analytics-card bm-toolbar-card">
+        <div className="bm-toolbar-filters">
+          <label className="field-label">
+            <span>Time Horizon:</span>
+            <select
+              className="bm-filter-select"
+              value={revenueRange}
+              onChange={(event) => setRevenueRange(event.target.value)}
+            >
+              <option value="daily">Daily Collection</option>
+              <option value="weekly">Weekly Cycle</option>
+              <option value="monthly">Monthly Cycle</option>
+              <option value="yearly">Yearly Aggregate</option>
+              <option value="allTime">All-Time Cumulative</option>
+            </select>
+          </label>
+        </div>
+
+        <div className="bm-count-badge">
+          <span>Active Cycle:</span>
+          <strong>{revenueRange.toUpperCase()}</strong>
+        </div>
+      </div>
+
+      {/* Hero Sparkline Section */}
+      <div className="revenue-panel">
+        <div className="revenue-summary">
+          <div>
+            <p className="eyebrow">Branch Revenue Performance</p>
+            <h2>₹{revenueTotal.toLocaleString("en-IN")}</h2>
+            <p className="revenue-copy">
+              Aggregate billing revenue captured for the {revenueRange} horizon across all regional sales accounts.
+            </p>
+          </div>
+
           <div className="revenue-breakdown">
             <div>
-              <span>Average</span>
-              <strong>₹{Math.round(revenueTotal / selectedRevenueData.length).toLocaleString()}</strong>
+              <span>Average Run Rate</span>
+              <strong>₹{Math.round(revenueTotal / selectedRevenueData.length).toLocaleString("en-IN")}</strong>
             </div>
             <div>
-              <span>Peak</span>
-              <strong>₹{Math.max(...selectedRevenueData.map((item) => item.value)).toLocaleString()}</strong>
+              <span>Cycle Peak</span>
+              <strong>₹{Math.max(...selectedRevenueData.map((item) => item.value)).toLocaleString("en-IN")}</strong>
             </div>
             <div>
-              <span>Points</span>
-              <strong>{selectedRevenueData.length}</strong>
+              <span>Data Checkpoints</span>
+              <strong>{selectedRevenueData.length} Points</strong>
             </div>
           </div>
         </div>
-        <div className="revenue-chart-panel" style={{ minHeight: 220 }}>
+
+        <div className="revenue-chart-panel">
           <div className="revenue-chip">
             <Icon name="arrowUp" size={14} />
-            <span>Trend</span>
+            <span>Branch Pipeline Trend</span>
           </div>
           <RevenueTrendChart data={selectedRevenueData} />
         </div>
       </div>
 
+      {/* Summary Cards */}
       <div className="revenue-summary-grid">
         {revenueSummaryCards.map((card) => (
           <RevenueSummaryCard key={card.label} card={card} />

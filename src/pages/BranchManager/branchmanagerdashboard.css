@@ -1,0 +1,711 @@
+/* ==========================================================================
+   AGNI CRM — Branch Manager Dashboard Stylesheet (branchmanagerdashboard.css)
+   ========================================================================== */
+
+/* --------------------------------------------------------------------------
+   1. Animations
+   -------------------------------------------------------------------------- */
+@keyframes bmFadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* --------------------------------------------------------------------------
+   2. Core Layout & Header Banners
+   -------------------------------------------------------------------------- */
+.branch-manager-dashboard {
+  animation: bmFadeIn 0.3s ease-out;
+}
+
+.bm-page-view {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  animation: bmFadeIn 0.25s ease;
+}
+
+.bm-header-banner {
+  display: flex;
+  justifyContent: space-between;
+  align-items: center;
+  flex-wrap: nowrap;
+  gap: 20px;
+  width: 100%;
+  margin-bottom: 18px;
+}
+
+@media (max-width: 768px) {
+  .bm-header-banner {
+    flex-wrap: wrap;
+  }
+}
+
+.bm-header-info {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+.bm-header-eyebrow {
+  margin: 0 0 4px;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  font-size: 11.5px;
+  color: #8c5ff8;
+  font-weight: 700;
+}
+
+.bm-header-title {
+  margin: 0 0 4px;
+  font-size: 24px;
+  font-weight: 800;
+  letter-spacing: -0.5px;
+}
+
+.bm-header-subtitle {
+  margin: 0;
+  color: #7a748e;
+  font-size: 13px;
+}
+
+/* --------------------------------------------------------------------------
+   3. Summary KPI Stats Ribbon
+   -------------------------------------------------------------------------- */
+.bm-kpi-ribbon {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 14px;
+  margin-bottom: 18px;
+}
+
+.bm-kpi-tile {
+  padding: 16px 18px;
+  margin: 0;
+  border-radius: 18px;
+  display: flex;
+  flex-direction: column;
+  justifyContent: space-between;
+}
+
+.bm-kpi-tile-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.bm-kpi-tile-label {
+  font-size: 11.5px;
+  color: #7a748e;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.bm-kpi-tile-icon {
+  width: 32px;
+  height: 32px;
+  border-radius: 9px;
+  display: grid;
+  place-items: center;
+  background: rgba(140, 95, 248, 0.12);
+  color: #8c5ff8;
+}
+
+.bm-kpi-tile-icon.blue {
+  background: rgba(59, 130, 246, 0.12);
+  color: #3b82f6;
+}
+
+.bm-kpi-tile-icon.green {
+  background: rgba(16, 185, 129, 0.12);
+  color: #10b981;
+}
+
+.bm-kpi-tile-icon.pink {
+  background: rgba(236, 72, 153, 0.12);
+  color: #ec4899;
+}
+
+.bm-kpi-tile-icon.amber {
+  background: rgba(245, 158, 11, 0.12);
+  color: #f59e0b;
+}
+
+.bm-kpi-tile-value {
+  font-size: 22px;
+  font-weight: 800;
+  margin-top: 6px;
+  letter-spacing: -0.3px;
+  display: block;
+}
+
+.bm-kpi-tile-sub {
+  font-size: 11.5px;
+  color: #7a748e;
+  font-weight: 600;
+  margin-top: 2px;
+  display: block;
+}
+
+/* --------------------------------------------------------------------------
+   4. Toolbar, Search & Filter Controls
+   -------------------------------------------------------------------------- */
+.bm-toolbar-card {
+  padding: 14px 18px;
+  margin-bottom: 16px;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+}
+
+.bm-toolbar-filters {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+  flex: 1;
+}
+
+.bm-search-box {
+  position: relative;
+  min-width: 260px;
+  flex: 1 1 260px;
+}
+
+.bm-search-icon {
+  position: absolute;
+  left: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #7a748e;
+  display: flex;
+  align-items: center;
+  pointer-events: none;
+}
+
+.bm-search-box input {
+  width: 100%;
+  padding: 9px 14px 9px 36px;
+  border-radius: 10px;
+  border: 1px solid rgba(140, 95, 248, 0.2);
+  background: rgba(255, 255, 255, 0.05);
+  font-size: 13px;
+  color: inherit;
+  transition: all 0.2s ease;
+}
+
+.bm-search-box input:focus {
+  outline: none;
+  border-color: #8c5ff8;
+  box-shadow: 0 0 0 3px rgba(140, 95, 248, 0.25);
+}
+
+.bm-filter-select {
+  padding: 9px 14px;
+  border-radius: 10px;
+  border: 1px solid rgba(140, 95, 248, 0.2);
+  background: rgba(255, 255, 255, 0.05);
+  font-size: 13px;
+  color: inherit;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.bm-filter-select:focus {
+  outline: none;
+  border-color: #8c5ff8;
+  box-shadow: 0 0 0 3px rgba(140, 95, 248, 0.25);
+}
+
+.bm-count-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px;
+  border-radius: 999px;
+  background: rgba(140, 95, 248, 0.08);
+  color: #7a748e;
+  font-size: 12.5px;
+  font-weight: 500;
+}
+
+.bm-count-badge strong {
+  color: #8c5ff8;
+}
+
+/* --------------------------------------------------------------------------
+   5. Action Buttons & Controls
+   -------------------------------------------------------------------------- */
+.bm-btn-primary {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 20px;
+  border-radius: 12px;
+  border: none;
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+  background: linear-gradient(135deg, #8c5ff8 0%, #6d3bf5 100%);
+  color: #ffffff;
+  box-shadow: 0 4px 14px rgba(109, 59, 245, 0.35);
+  transition: all 0.2s ease;
+}
+
+.bm-btn-primary:hover {
+  transform: translateY(-2px);
+  filter: brightness(1.06);
+}
+
+.bm-btn-secondary {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 16px;
+  border-radius: 10px;
+  border: 1px solid rgba(140, 95, 248, 0.2);
+  background: rgba(140, 95, 248, 0.06);
+  color: inherit;
+  font-size: 12.5px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.bm-btn-secondary:hover {
+  background: rgba(140, 95, 248, 0.12);
+  transform: translateY(-1px);
+}
+
+.bm-view-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 14px;
+  border-radius: 9px;
+  border: 1px solid rgba(140, 95, 248, 0.25);
+  background: rgba(140, 95, 248, 0.08);
+  color: #8c5ff8;
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.bm-view-btn:hover {
+  background: #8c5ff8;
+  color: #ffffff;
+  border-color: #8c5ff8;
+  box-shadow: 0 3px 10px rgba(140, 95, 248, 0.35);
+  transform: translateY(-1px);
+}
+
+.bm-btn-danger {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px;
+  border-radius: 9px;
+  border: 1px solid rgba(244, 63, 94, 0.25);
+  background: rgba(244, 63, 94, 0.08);
+  color: #f43f5e;
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.bm-btn-danger:hover {
+  background: #f43f5e;
+  color: #ffffff;
+  border-color: #f43f5e;
+  box-shadow: 0 3px 10px rgba(244, 63, 94, 0.35);
+  transform: translateY(-1px);
+}
+
+/* --------------------------------------------------------------------------
+   6. Table & Cell Elements
+   -------------------------------------------------------------------------- */
+.bm-table-card {
+  padding: 0;
+  overflow: hidden;
+  border-radius: 20px;
+}
+
+.bm-table-scroll {
+  overflow-x: auto;
+}
+
+.bm-table {
+  width: 100%;
+  min-width: 850px;
+  margin: 0;
+  border-collapse: separate;
+  border-spacing: 0;
+  font-size: 13px;
+}
+
+.bm-table th {
+  padding: 14px 18px;
+  text-align: left;
+  font-weight: 700;
+  font-size: 11.5px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: #7a748e;
+  border-bottom: 1px solid rgba(140, 95, 248, 0.12);
+  white-space: nowrap;
+}
+
+.bm-table td {
+  padding: 14px 18px;
+  vertical-align: middle;
+  border-bottom: 1px solid rgba(140, 95, 248, 0.08);
+  transition: background 0.15s ease;
+}
+
+.bm-table tr:hover td {
+  background: rgba(140, 95, 248, 0.03);
+}
+
+.bm-member-avatar-cell {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.bm-member-avatar {
+  width: 38px;
+  height: 38px;
+  border-radius: 10px;
+  background: linear-gradient(135deg, rgba(140, 95, 248, 0.25) 0%, rgba(109, 59, 245, 0.15) 100%);
+  border: 1px solid rgba(140, 95, 248, 0.35);
+  color: #8c5ff8;
+  font-weight: 800;
+  font-size: 13px;
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+  letter-spacing: 0.5px;
+}
+
+.bm-member-avatar.marketing {
+  background: linear-gradient(135deg, rgba(236, 72, 153, 0.25) 0%, rgba(219, 39, 119, 0.15) 100%);
+  border-color: rgba(236, 72, 153, 0.35);
+  color: #ec4899;
+}
+
+.bm-member-avatar.admin {
+  background: linear-gradient(135deg, rgba(245, 158, 11, 0.25) 0%, rgba(217, 119, 6, 0.15) 100%);
+  border-color: rgba(245, 158, 11, 0.35);
+  color: #f59e0b;
+}
+
+.bm-member-details {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.bm-member-name {
+  display: block;
+  font-weight: 700;
+  font-size: 13.5px;
+  line-height: 1.3;
+  margin: 0;
+}
+
+.bm-member-branch {
+  display: block;
+  font-size: 12px;
+  color: #7a748e;
+  line-height: 1.3;
+  margin: 0;
+}
+
+.bm-role-tag {
+  display: inline-block;
+  padding: 4px 10px;
+  border-radius: 8px;
+  background: rgba(140, 95, 248, 0.1);
+  border: 1px solid rgba(140, 95, 248, 0.2);
+  color: #8c5ff8;
+  font-weight: 700;
+  font-size: 11.5px;
+  white-space: nowrap;
+}
+
+.bm-role-tag.marketing {
+  background: rgba(236, 72, 153, 0.1);
+  border-color: rgba(236, 72, 153, 0.2);
+  color: #ec4899;
+}
+
+.bm-role-tag.admin {
+  background: rgba(245, 158, 11, 0.1);
+  border-color: rgba(245, 158, 11, 0.2);
+  color: #f59e0b;
+}
+
+.bm-rep-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 3px 9px;
+  border-radius: 999px;
+  background: rgba(140, 95, 248, 0.08);
+  border: 1px solid rgba(140, 95, 248, 0.16);
+  color: #8c5ff8;
+  font-size: 11.5px;
+  font-weight: 600;
+}
+
+.bm-service-pill {
+  display: inline-block;
+  padding: 3px 9px;
+  border-radius: 8px;
+  background: rgba(59, 130, 246, 0.1);
+  border: 1px solid rgba(59, 130, 246, 0.2);
+  color: #3b82f6;
+  font-size: 11.5px;
+  font-weight: 700;
+}
+
+.bm-service-pill.marketing {
+  background: rgba(236, 72, 153, 0.1);
+  border-color: rgba(236, 72, 153, 0.2);
+  color: #ec4899;
+}
+
+.bm-service-pill.admin {
+  background: rgba(245, 158, 11, 0.1);
+  border-color: rgba(245, 158, 11, 0.2);
+  color: #f59e0b;
+}
+
+.bm-revenue-text {
+  font-size: 14px;
+  color: #10b981;
+  font-weight: 800;
+}
+
+.bm-phone-text {
+  font-size: 12px;
+  color: #7a748e;
+  font-family: monospace;
+}
+
+.bm-date-text {
+  font-size: 12.5px;
+  color: #7a748e;
+}
+
+.bm-trend-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 3px 8px;
+  border-radius: 999px;
+  font-size: 11px;
+  font-weight: 700;
+}
+
+.bm-trend-pill.positive {
+  background: rgba(16, 185, 129, 0.12);
+  color: #10b981;
+}
+
+.bm-trend-pill.negative {
+  background: rgba(244, 63, 94, 0.12);
+  color: #f43f5e;
+}
+
+.bm-empty-state {
+  text-align: center;
+  padding: 48px 16px;
+  color: #7a748e;
+  font-size: 13.5px;
+}
+
+.bm-actions-cell {
+  display: inline-flex;
+  gap: 8px;
+}
+
+/* --------------------------------------------------------------------------
+   7. Modal Details & Cards
+   -------------------------------------------------------------------------- */
+.bm-modal-profile {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 20px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid rgba(140, 95, 248, 0.14);
+}
+
+.bm-modal-avatar {
+  width: 52px;
+  height: 52px;
+  border-radius: 14px;
+  background: linear-gradient(135deg, #8c5ff8 0%, #6d3bf5 100%);
+  color: #ffffff;
+  font-weight: 800;
+  font-size: 18px;
+  display: grid;
+  place-items: center;
+  box-shadow: 0 4px 16px rgba(140, 95, 248, 0.35);
+}
+
+.bm-modal-avatar.marketing {
+  background: linear-gradient(135deg, #ec4899 0%, #db2777 100%);
+}
+
+.bm-modal-avatar.admin {
+  background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+}
+
+.bm-modal-info-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+
+@media (max-width: 560px) {
+  .bm-modal-info-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.bm-modal-card {
+  padding: 14px 16px;
+  border-radius: 12px;
+  background: rgba(140, 95, 248, 0.05);
+  border: 1px solid rgba(140, 95, 248, 0.12);
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.bm-modal-card-label {
+  font-size: 11px;
+  color: #7a748e;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.bm-modal-card-val {
+  font-size: 14px;
+  font-weight: 700;
+  color: inherit;
+}
+
+.bm-modal-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  margin-top: 16px;
+}
+
+/* --------------------------------------------------------------------------
+   8. Full-Height Activity Feed Sidebar
+   -------------------------------------------------------------------------- */
+.bm-activity-panel {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  min-height: 100%;
+  padding: 22px 20px;
+  justify-content: space-between;
+}
+
+.bm-activity-list {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  gap: 10px;
+  overflow: hidden;
+}
+
+.bm-activity-row {
+  padding: 13px 14px;
+  border-radius: 14px;
+  background: rgba(140, 95, 248, 0.05);
+  border: 1px solid rgba(140, 95, 248, 0.1);
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex: 1 1 0%;
+  min-height: 56px;
+  transition: all 0.2s ease;
+}
+
+.bm-activity-row:hover {
+  background: rgba(140, 95, 248, 0.09);
+  transform: translateX(2px);
+}
+
+.bm-activity-mark {
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.bm-analytics-card {
+  padding: 24px;
+  border-radius: 20px;
+}
+
+/* --------------------------------------------------------------------------
+   9. Dark Theme Overrides
+   -------------------------------------------------------------------------- */
+.dashboard-dark .branch-manager-dashboard {
+  color: #f3f0fb;
+}
+
+.dashboard-dark .bm-search-box input,
+.dashboard-dark .bm-filter-select {
+  background: rgba(26, 32, 52, 0.7);
+  border-color: rgba(140, 95, 248, 0.22);
+  color: #f8fafc;
+}
+
+.dashboard-dark .bm-table th {
+  color: #94a3b8;
+  border-bottom-color: rgba(140, 95, 248, 0.16);
+}
+
+.dashboard-dark .bm-table td {
+  border-bottom-color: rgba(140, 95, 248, 0.08);
+}
+
+.dashboard-dark .bm-table tr:hover td {
+  background: rgba(140, 95, 248, 0.05);
+}
+
+.dashboard-dark .bm-modal-card {
+  background: rgba(26, 32, 52, 0.6);
+  border-color: rgba(140, 95, 248, 0.18);
+}
+
+.dashboard-dark .bm-activity-row {
+  background: rgba(30, 41, 59, 0.5);
+  border-color: rgba(140, 95, 248, 0.16);
+}
+
+.dashboard-dark .bm-activity-row:hover {
+  background: rgba(30, 41, 59, 0.75);
+}

@@ -74,9 +74,12 @@ export default function ManagerOverviewPage({ onNavigate, dark }) {
 
         <section className="revenue-panel">
           <div className="revenue-summary">
-            <p className="eyebrow">Performance overview</p>
-            <h2>₹184.6k</h2>
-            <p className="revenue-copy">Pipeline value across active opportunities this month.</p>
+            <div>
+              <p className="eyebrow">Performance overview</p>
+              <h2>₹184.6k</h2>
+              <p className="revenue-copy">Pipeline value across active opportunities this month.</p>
+            </div>
+
             <div className="revenue-breakdown">
               <div>
                 <span>Won revenue</span>
@@ -92,6 +95,7 @@ export default function ManagerOverviewPage({ onNavigate, dark }) {
               </div>
             </div>
           </div>
+
           <div className="revenue-chart-panel">
             <div className="revenue-chip">
               <Icon name="arrowUp" size={14} />

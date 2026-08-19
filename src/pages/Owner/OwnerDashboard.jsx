@@ -16,7 +16,8 @@ import OwnerRevenuePage from "./OwnerRevenuePage";
 import OwnerInvoicePage from "./OwnerInvoicePage";
 import OwnerRequestsPage from "./OwnerRequestsPage";
 import OwnerReportsPage from "./OwnerReportsPage";
-import AgreementPage from "../Agreement/AgreementPage";
+import OwnerAgreementPage from "./OwnerAgreementPage";
+import "./owner.css";
 
 // Dedicated Modals
 import OwnerClientInfoModal from "./OwnerClientInfoModal";
@@ -208,6 +209,7 @@ export default function OwnerDashboard({ onSignOut, userEmail }) {
   };
 
   const handleOpenEditClient = (client) => {
+    setSelectedClient(null);
     setEditModal({
       type: "client",
       item: client,
@@ -492,6 +494,7 @@ export default function OwnerDashboard({ onSignOut, userEmail }) {
                 onNavigate={handleNavChange}
                 onSelectEmployeeRole={setSelectedRole}
                 onSelectRevenueRange={setRevenueRange}
+                dark={dark}
               />
             }
           />
@@ -503,6 +506,7 @@ export default function OwnerDashboard({ onSignOut, userEmail }) {
                 onNavigate={handleNavChange}
                 onSelectEmployeeRole={setSelectedRole}
                 onSelectRevenueRange={setRevenueRange}
+                dark={dark}
               />
             }
           />
@@ -514,6 +518,7 @@ export default function OwnerDashboard({ onSignOut, userEmail }) {
                 onNavigate={handleNavChange}
                 onSelectEmployeeRole={setSelectedRole}
                 onSelectRevenueRange={setRevenueRange}
+                dark={dark}
               />
             }
           />
@@ -540,10 +545,18 @@ export default function OwnerDashboard({ onSignOut, userEmail }) {
           <Route
             path="agreement"
             element={
-              <AgreementPage
+              <OwnerAgreementPage
                 clients={clients}
                 showToast={showToast}
-                selectedBranch="Executive HQ"
+              />
+            }
+          />
+          <Route
+            path="agreements"
+            element={
+              <OwnerAgreementPage
+                clients={clients}
+                showToast={showToast}
               />
             }
           />
@@ -690,20 +703,25 @@ export default function OwnerDashboard({ onSignOut, userEmail }) {
         {/* Global Modals */}
         {editModal && (
           <Modal
-            title={editModal.type === "client" ? "Edit Client" : "Edit Employee"}
+            title={editModal.type === "client" ? "Edit Client Portfolio" : "Edit Employee Profile"}
             onClose={() => setEditModal(null)}
           >
-            <EditForm values={editModal.values} onChange={handleEditChange} />
-            <div className="modal-actions">
+            <div style={{ padding: "4px 0" }}>
+              <div style={{ marginBottom: 18, fontSize: 13, color: "#64748b" }}>
+                Make necessary changes to {editModal.type === "client" ? "the client's portfolio records" : "the employee's system credentials"} below and save updates.
+              </div>
+              <EditForm values={editModal.values} onChange={handleEditChange} />
+            </div>
+            <div className="owner-modal-actions" style={{ marginTop: 22 }}>
               <button
-                className="table-action"
+                className="owner-btn-secondary"
                 type="button"
                 onClick={() => setEditModal(null)}
               >
                 Cancel
               </button>
-              <button className="table-action" type="button" onClick={saveEditItem}>
-                Save
+              <button className="owner-btn-primary" type="button" onClick={saveEditItem}>
+                Save Changes
               </button>
             </div>
           </Modal>

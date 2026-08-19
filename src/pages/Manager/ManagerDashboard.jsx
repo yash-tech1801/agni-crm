@@ -11,6 +11,7 @@ import ManagerClientsPage from "./ManagerClientsPage";
 import ManagerRequestsPage from "./ManagerRequestsPage";
 import ManagerRevenuePage from "./ManagerRevenuePage";
 import ManagerReportsPage from "./ManagerReportsPage";
+import "./manager.css";
 
 // Mock & Initial Data
 import {

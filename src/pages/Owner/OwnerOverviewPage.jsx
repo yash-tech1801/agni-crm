@@ -27,24 +27,26 @@ export default function OwnerOverviewPage({
   onNavigate,
   onSelectEmployeeRole,
   onSelectRevenueRange,
+  dark,
 }) {
   return (
-    <div className="owner-dashboard-layout" style={{ animation: "fadeIn 0.25s ease-out" }}>
+    <div className="owner-dashboard-layout" style={{ animation: "ownerFadeIn 0.25s ease-out" }}>
       <div className="dashboard-main">
         {/* Revenue & Financial KPIs */}
         <div style={{ marginBottom: 26 }}>
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 14 }}>
-            <h3 style={{ margin: 0, fontSize: 16, fontWeight: 700, color: '#0f172a', display: 'flex', alignItems: 'center', gap: 8 }}>
-              <span style={{ width: 8, height: 8, borderRadius: '50%', background: '#6366f1' }} />
+          <div className="owner-section-header">
+            <h3 className="owner-section-title">
+              <span className="owner-section-title-dot" style={{ background: '#6366f1' }} />
               Revenue &amp; Payment Overview
             </h3>
-            <span style={{ fontSize: 12, color: '#64748b', fontWeight: 500 }}>Real-time Financial Metrics</span>
+            <span className="owner-section-subtitle">Real-time Financial Metrics</span>
           </div>
           <section className="kpi-grid">
             {revenueKpiCards.map((card) => (
               <KpiCard
                 key={card.label}
                 card={card}
+                dark={dark}
                 onAction={(c) => {
                   if (c.linkTo === "Employees") {
                     if (onSelectEmployeeRole) onSelectEmployeeRole(c.employeeRole || "All roles");
@@ -63,18 +65,19 @@ export default function OwnerOverviewPage({
 
         {/* Workforce & Operations KPIs */}
         <div style={{ marginBottom: 26 }}>
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 14 }}>
-            <h3 style={{ margin: 0, fontSize: 16, fontWeight: 700, color: '#0f172a', display: 'flex', alignItems: 'center', gap: 8 }}>
-              <span style={{ width: 8, height: 8, borderRadius: '50%', background: '#10b981' }} />
+          <div className="owner-section-header">
+            <h3 className="owner-section-title">
+              <span className="owner-section-title-dot" style={{ background: '#10b981' }} />
               Workforce &amp; Client Operations
             </h3>
-            <span style={{ fontSize: 12, color: '#64748b', fontWeight: 500 }}>Team &amp; Account Metrics</span>
+            <span className="owner-section-subtitle">Team &amp; Account Metrics</span>
           </div>
           <section className="kpi-grid">
             {workforceKpiCards.map((card) => (
               <KpiCard
                 key={card.label}
                 card={card}
+                dark={dark}
                 onAction={(c) => {
                   if (c.linkTo === "Employees") {
                     if (onSelectEmployeeRole) onSelectEmployeeRole(c.employeeRole || "All roles");
@@ -127,11 +130,11 @@ export default function OwnerOverviewPage({
               <p className="eyebrow">Milestone pipeline</p>
               <h2>Activity Status Breakdown</h2>
             </div>
-            <span style={{ fontSize: 11, fontWeight: 700, padding: '3px 8px', borderRadius: 999, background: 'rgba(16, 185, 129, 0.12)', color: '#059669' }}>
+            <span className="owner-status-pill completed">
               Scheme-Driven
             </span>
           </div>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 8, marginTop: 12 }}>
+          <div className="owner-milestone-panel">
             {ACTIVITY_STAGES.map((st) => {
               const clientsInStage = clients.filter(c => {
                 const clientScheme = c.serviceName || c.scheme || c.serviceType || "PMEGP";
@@ -141,13 +144,13 @@ export default function OwnerOverviewPage({
               const percentOfClients = Math.round((clientsInStage / Math.max(1, clients.length)) * 100);
 
               return (
-                <div key={st.name} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '8px 10px', borderRadius: 8, background: '#f8fafc', border: '1px solid #f1f5f9' }}>
+                <div key={st.name} className="owner-milestone-stage-row">
                   <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                    <span style={{ width: 8, height: 8, borderRadius: '50%', background: st.badgeColor || '#10b981' }} />
-                    <span style={{ fontSize: 12.5, fontWeight: 600, color: '#1e293b' }}>{st.name}</span>
+                    <span className="owner-milestone-stage-dot" style={{ background: st.badgeColor || '#10b981' }} />
+                    <span className="owner-milestone-stage-name">{st.name}</span>
                     <span style={{ fontSize: 11, color: '#64748b' }}>({st.percent}%)</span>
                   </div>
-                  <span style={{ fontSize: 12, fontWeight: 700, color: '#059669' }}>
+                  <span className="owner-milestone-stage-count">
                     {clientsInStage} Clients ({percentOfClients}%)
                   </span>
                 </div>

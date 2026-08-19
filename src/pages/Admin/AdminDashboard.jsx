@@ -335,42 +335,6 @@ export default function AdminDashboard({ onSignOut, userEmail }) {
           className="admin-dashboard-top"
         >
           <div className="top-actions">
-            {/* Branch Selector Dropdown */}
-            <div
-              style={{
-                display: "inline-flex",
-                alignItems: "center",
-                gap: 8,
-                background: dark ? "rgba(22, 30, 49, 0.85)" : "rgba(255, 255, 255, 0.85)",
-                backdropFilter: "blur(20px)",
-                padding: "6px 12px",
-                borderRadius: 12,
-                border: "1px solid rgba(154, 116, 233, 0.2)",
-                boxShadow: "0 4px 12px rgba(154, 116, 233, 0.06)",
-              }}
-            >
-              <Icon name="branches" size={15} />
-              <select
-                value={selectedBranch}
-                onChange={(e) => setSelectedBranch(e.target.value)}
-                style={{
-                  border: "none",
-                  background: "transparent",
-                  font: "inherit",
-                  fontWeight: 700,
-                  color: dark ? "#ffffff" : "#1d2330",
-                  cursor: "pointer",
-                  outline: "none",
-                }}
-              >
-                {initialBranches.map((b) => (
-                  <option key={b.id} value={b.name} style={{ background: dark ? "#1e293b" : "#fff", color: dark ? "#fff" : "#000" }}>
-                    {b.name}
-                  </option>
-                ))}
-              </select>
-            </div>
-
             {searchOpen ? (
               <div className="search-field">
                 <input

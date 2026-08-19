@@ -27,12 +27,18 @@ function RevenueTrendChart({ data }) {
 
   return (
     <svg viewBox={`0 0 ${width} ${height}`} className="dashboard-chart" aria-hidden="true">
-      <path d={areaPath} fill="rgba(154, 116, 233, 0.16)" />
-      <path d={linePath} fill="none" stroke="#9a74e9" strokeWidth="3" strokeLinecap="round" />
+      <defs>
+        <linearGradient id="ownerRevGrad" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stopColor="#6366f1" stopOpacity="0.35" />
+          <stop offset="100%" stopColor="#6366f1" stopOpacity="0.0" />
+        </linearGradient>
+      </defs>
+      <path d={areaPath} fill="url(#ownerRevGrad)" />
+      <path d={linePath} fill="none" stroke="#6366f1" strokeWidth="3" strokeLinecap="round" />
       {points.map((point) => (
         <g key={point.label}>
-          <circle cx={point.x} cy={point.y} r="4.5" fill="#fff" stroke="#9a74e9" strokeWidth="2" />
-          <text x={point.x} y={height - 6} textAnchor="middle" fill="#7d79a8" fontSize="11">
+          <circle cx={point.x} cy={point.y} r="4.5" fill="#fff" stroke="#6366f1" strokeWidth="2.5" />
+          <text x={point.x} y={height - 6} textAnchor="middle" fill="currentColor" opacity="0.65" fontSize="10.5" fontWeight="600">
             {point.label}
           </text>
         </g>
@@ -83,90 +89,84 @@ export default function OwnerRevenuePage({
   ];
 
   return (
-    <section style={{ animation: "fadeIn 0.25s ease-out" }}>
-      <div
-        style={{
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "space-between",
-          gap: 12,
-          marginBottom: 16,
-          flexWrap: "wrap",
-        }}
-      >
-        <div>
-          <h2 style={{ margin: 0, fontSize: 22, fontWeight: 700, letterSpacing: "-0.02em" }}>
-            Revenue analytics
-          </h2>
-          <div style={{ color: "#7a748e", fontSize: 13, marginTop: 4 }}>
-            Track revenue performance over time
-          </div>
-        </div>
-        <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-          <label style={{ fontSize: 13, color: "#6b6b77", fontWeight: 500 }}>Time range:</label>
-          <select
-            value={activeRange}
-            onChange={(event) => handleRangeChange(event.target.value)}
-            style={{
-              padding: "6px 12px",
-              borderRadius: 8,
-              border: "1px solid #cbd5e1",
-              fontSize: 13,
-              background: "#ffffff",
-            }}
-          >
-            <option value="daily">Daily</option>
-            <option value="weekly">Weekly</option>
-            <option value="monthly">Monthly</option>
-            <option value="yearly">Yearly</option>
-            <option value="allTime">All time</option>
-          </select>
+    <section className="owner-page-view">
+      {/* Header Banner */}
+      <div className="owner-header-banner">
+        <div className="owner-header-info">
+          <p className="owner-header-eyebrow">Financial Analytics</p>
+          <h1 className="owner-header-title">Executive Revenue Analytics</h1>
+          <p className="owner-header-subtitle">
+            Track revenue performance, collection volumes, and commercial billing trajectories across all regional branches.
+          </p>
         </div>
       </div>
 
-      <div
-        className="revenue-panel"
-        style={{
-          display: "grid",
-          gridTemplateColumns: "1.2fr 0.8fr",
-          gap: 16,
-          alignItems: "stretch",
-        }}
-      >
-        <div className="revenue-summary" style={{ minHeight: 220 }}>
-          <p className="eyebrow">Revenue overview</p>
-          <h2>₹{revenueTotal.toLocaleString()}</h2>
-          <p className="revenue-copy">
-            Selected range: {activeRange.charAt(0).toUpperCase() + activeRange.slice(1)}
-          </p>
+      {/* Toolbar Filter */}
+      <div className="analytics-card owner-toolbar-card">
+        <div className="owner-toolbar-filters">
+          <label className="field-label" style={{ margin: 0 }}>
+            <span>Time Horizon:</span>
+            <select
+              className="owner-filter-select"
+              value={activeRange}
+              onChange={(event) => handleRangeChange(event.target.value)}
+            >
+              <option value="daily">Daily Collection</option>
+              <option value="weekly">Weekly Cycle</option>
+              <option value="monthly">Monthly Cycle</option>
+              <option value="yearly">Yearly Aggregate</option>
+              <option value="allTime">All-Time Cumulative</option>
+            </select>
+          </label>
+        </div>
+
+        <div className="owner-count-badge">
+          <span>Active Cycle:</span>
+          <strong>{activeRange.toUpperCase()}</strong>
+        </div>
+      </div>
+
+      {/* Hero Sparkline Section */}
+      <div className="revenue-panel">
+        <div className="revenue-summary">
+          <div>
+            <p className="eyebrow">Revenue overview</p>
+            <h2>₹{revenueTotal.toLocaleString()}</h2>
+            <p className="revenue-copy">
+              Selected range: {activeRange.charAt(0).toUpperCase() + activeRange.slice(1)} horizon across all active enterprise portfolios.
+            </p>
+          </div>
+
           <div className="revenue-breakdown">
             <div>
-              <span>Average</span>
+              <span>Average Run Rate</span>
               <strong>
                 ₹{Math.round(revenueTotal / selectedRevenueData.length).toLocaleString()}
               </strong>
             </div>
             <div>
-              <span>Peak</span>
+              <span>Cycle Peak</span>
               <strong>
                 ₹{Math.max(...selectedRevenueData.map((item) => item.value)).toLocaleString()}
               </strong>
             </div>
             <div>
-              <span>Points</span>
-              <strong>{selectedRevenueData.length}</strong>
+              <span>Data Checkpoints</span>
+              <strong>{selectedRevenueData.length} Points</strong>
             </div>
           </div>
         </div>
-        <div className="revenue-chart-panel" style={{ minHeight: 220 }}>
+
+        <div className="revenue-chart-panel">
           <div className="revenue-chip">
             <Icon name="arrowUp" size={14} />
-            <span>Trend</span>
+            <span>Revenue Trend</span>
           </div>
           <RevenueTrendChart data={selectedRevenueData} />
         </div>
       </div>
 
+      {/* Summary Cards */}
       <div className="revenue-summary-grid">
         {revenueSummaryCards.map((card) => (
           <RevenueSummaryCard key={card.label} card={card} />

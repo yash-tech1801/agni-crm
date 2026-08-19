@@ -1,18 +1,18 @@
 import React from 'react';
 import Icon from './Icon';
 
-function hexToRgba(hex, alpha) {
-  if (!hex || typeof hex !== 'string' || !hex.startsWith('#')) return `rgba(78, 124, 255, ${alpha})`;
+function hexToRgb(hex) {
+  if (!hex || typeof hex !== 'string' || !hex.startsWith('#')) return '78, 124, 255';
   let c = hex.substring(1);
   if (c.length === 3) {
     c = c.split('').map((x) => x + x).join('');
   }
   const num = parseInt(c, 16);
-  if (isNaN(num)) return `rgba(78, 124, 255, ${alpha})`;
+  if (isNaN(num)) return '78, 124, 255';
   const r = (num >> 16) & 255;
   const g = (num >> 8) & 255;
   const b = num & 255;
-  return `rgba(${r}, ${g}, ${b}, ${alpha})`;
+  return `${r}, ${g}, ${b}`;
 }
 
 export default function KpiCard({ card, onAction, onClick, dark, ...props }) {
@@ -33,30 +33,22 @@ export default function KpiCard({ card, onAction, onClick, dark, ...props }) {
     }
   };
 
-  const bgGradient = dark
-    ? `linear-gradient(135deg, ${hexToRgba(accent, 0.35)} 0%, ${hexToRgba(accent, 0.16)} 55%, #353241 100%)`
-    : `linear-gradient(135deg, ${hexToRgba(accent, 0.45)} 0%, ${hexToRgba(accent, 0.22)} 50%, rgba(255, 255, 255, 0.70) 100%)`;
-
-  const cardStyle = {
-    background: bgGradient,
-    backdropFilter: 'blur(24px) saturate(180%)',
-    WebkitBackdropFilter: 'blur(24px) saturate(180%)',
-    border: `1px solid ${dark ? hexToRgba(accent, 0.35) : hexToRgba(accent, 0.45)}`,
-    boxShadow: dark
-      ? `0 14px 36px rgba(0, 0, 0, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.08)`
-      : `0 14px 36px ${hexToRgba(accent, 0.22)}, 0 4px 12px rgba(23, 19, 43, 0.04), inset 0 1px 1px rgba(255, 255, 255, 0.9)`,
-    cursor: onClick || onAction ? 'pointer' : 'default',
-  };
+  const rgb = hexToRgb(accent);
 
   return (
-    <article className="kpi-card" style={cardStyle} onClick={handleClick}>
+    <article
+      className="kpi-card"
+      style={{
+        '--kpi-accent': accent,
+        '--kpi-rgb': rgb,
+        cursor: onClick || onAction ? 'pointer' : 'default',
+      }}
+      onClick={handleClick}
+    >
       <div className="kpi-card-header">
         <div className="kpi-card-title">
           {icon && (
-            <span
-              className="kpi-card-icon"
-              style={{ background: hexToRgba(accent, 0.25), color: accent }}
-            >
+            <span className="kpi-card-icon">
               <Icon name={icon} size={18} />
             </span>
           )}
@@ -64,14 +56,7 @@ export default function KpiCard({ card, onAction, onClick, dark, ...props }) {
         </div>
         <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
           {trend && (
-            <span
-              className="metric-chip"
-              style={{
-                background: hexToRgba(accent, 0.2),
-                color: dark ? '#ffffff' : accent,
-                border: `1px solid ${hexToRgba(accent, 0.35)}`,
-              }}
-            >
+            <span className="metric-chip">
               {trend}
             </span>
           )}

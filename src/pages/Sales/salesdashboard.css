@@ -1,0 +1,794 @@
+/* ==========================================================================
+   AGNI CRM — Sales Person Dashboard Stylesheet (salesdashboard.css)
+   ========================================================================== */
+
+/* --------------------------------------------------------------------------
+   1. Animations
+   -------------------------------------------------------------------------- */
+@keyframes salesFadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes salesPulseGlow {
+  0%, 100% {
+    box-shadow: 0 0 0 0 rgba(140, 95, 248, 0.4);
+  }
+  50% {
+    box-shadow: 0 0 0 6px rgba(140, 95, 248, 0);
+  }
+}
+
+/* --------------------------------------------------------------------------
+   2. Core Layout & Containers
+   -------------------------------------------------------------------------- */
+.sales-dashboard {
+  animation: salesFadeIn 0.3s ease-out;
+}
+
+.sales-dashboard-top {
+  border-bottom: 1px solid rgba(140, 95, 248, 0.12);
+}
+
+.sales-clients-view,
+.sales-page-view {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  animation: salesFadeIn 0.25s ease;
+}
+
+.sales-clients-form-view {
+  max-width: 900px;
+  margin: 0 auto;
+  animation: salesFadeIn 0.3s ease;
+}
+
+.sales-layout-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
+}
+
+@media (max-width: 768px) {
+  .sales-layout-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* --------------------------------------------------------------------------
+   3. Header Banners & Titles
+   -------------------------------------------------------------------------- */
+.sales-header-banner {
+  display: flex;
+  justifyContent: space-between;
+  align-items: center;
+  flex-wrap: nowrap;
+  gap: 20px;
+  width: 100%;
+  margin-bottom: 20px;
+}
+
+.sales-header-info {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+.sales-header-eyebrow {
+  margin: 0;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  font-size: 11.5px;
+  color: #8c5ff8;
+  font-weight: 700;
+}
+
+.sales-header-title {
+  margin: 4px 0 2px;
+  font-size: 24px;
+  font-weight: 800;
+  letter-spacing: -0.5px;
+}
+
+.sales-header-subtitle {
+  margin: 0;
+  color: #7a748e;
+  font-size: 13px;
+}
+
+@media (max-width: 700px) {
+  .sales-header-banner {
+    flex-wrap: wrap;
+    align-items: flex-start;
+  }
+}
+
+/* --------------------------------------------------------------------------
+   4. Toast & Alert Notifications
+   -------------------------------------------------------------------------- */
+.sales-toast {
+  padding: 14px 20px;
+  margin-bottom: 18px;
+  border-radius: 12px;
+  background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+  color: #ffffff;
+  font-weight: 600;
+  font-size: 13.5px;
+  box-shadow: 0 4px 18px rgba(16, 185, 129, 0.35);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  animation: salesFadeIn 0.25s ease;
+}
+
+.sales-toast-close {
+  background: transparent;
+  border: none;
+  color: #ffffff;
+  cursor: pointer;
+  font-size: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 2px 6px;
+  border-radius: 4px;
+  transition: background 0.15s ease;
+}
+
+.sales-toast-close:hover {
+  background: rgba(255, 255, 255, 0.2);
+}
+
+.sales-notification-banner {
+  margin-bottom: 18px;
+  padding: 12px 18px;
+  border-radius: 12px;
+  background: linear-gradient(135deg, rgba(16, 185, 129, 0.15) 0%, rgba(5, 150, 105, 0.1) 100%);
+  color: #059669;
+  border: 1px solid rgba(16, 185, 129, 0.3);
+  font-weight: 600;
+  font-size: 13px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.sales-notification-banner button {
+  background: transparent;
+  border: none;
+  color: #059669;
+  cursor: pointer;
+  font-size: 14px;
+}
+
+/* --------------------------------------------------------------------------
+   5. Action Buttons & Interactive Controls
+   -------------------------------------------------------------------------- */
+.sales-add-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 10px 22px;
+  border-radius: 12px;
+  border: none;
+  font-size: 13.5px;
+  font-weight: 700;
+  cursor: pointer;
+  background: linear-gradient(135deg, #8c5ff8 0%, #6d3bf5 100%);
+  color: #ffffff;
+  box-shadow: 0 4px 14px rgba(109, 59, 245, 0.35);
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  text-decoration: none;
+  white-space: nowrap;
+}
+
+.sales-add-btn:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(109, 59, 245, 0.48);
+  filter: brightness(1.06);
+}
+
+.sales-add-btn:active:not(:disabled) {
+  transform: translateY(0);
+}
+
+.sales-add-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.sales-btn-secondary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 9px 18px;
+  border-radius: 12px;
+  border: 1px solid rgba(140, 95, 248, 0.22);
+  background: rgba(140, 95, 248, 0.06);
+  color: inherit;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+}
+
+.sales-btn-secondary:hover {
+  background: rgba(140, 95, 248, 0.12);
+  border-color: rgba(140, 95, 248, 0.4);
+  transform: translateY(-1px);
+}
+
+.sales-view-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 6px 14px;
+  border-radius: 9px;
+  border: 1px solid rgba(140, 95, 248, 0.25);
+  background: rgba(140, 95, 248, 0.08);
+  color: #8c5ff8;
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.sales-view-btn:hover {
+  background: #8c5ff8;
+  color: #ffffff;
+  border-color: #8c5ff8;
+  box-shadow: 0 3px 10px rgba(140, 95, 248, 0.35);
+  transform: translateY(-1px);
+}
+
+.sales-settle-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px;
+  border-radius: 9px;
+  border: none;
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+  background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+  color: #ffffff;
+  box-shadow: 0 2px 8px rgba(16, 185, 129, 0.3);
+  transition: all 0.2s ease;
+}
+
+.sales-settle-btn:hover {
+  transform: translateY(-1px);
+  filter: brightness(1.08);
+}
+
+.sales-activity-btn {
+  border: none;
+  background: transparent;
+  width: 100%;
+  text-align: left;
+  padding: 0;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+/* --------------------------------------------------------------------------
+   6. Segmented Pill Tab Switcher
+   -------------------------------------------------------------------------- */
+.sales-tabs-switcher {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px;
+  border-radius: 12px;
+  background: rgba(140, 95, 248, 0.08);
+  border: 1px solid rgba(140, 95, 248, 0.14);
+}
+
+.sales-tab-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 18px;
+  border-radius: 9px;
+  border: none;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  background: transparent;
+  color: #7a748e;
+}
+
+.sales-tab-btn.active {
+  background: linear-gradient(135deg, #8c5ff8 0%, #6d3bf5 100%);
+  color: #ffffff;
+  box-shadow: 0 4px 12px rgba(109, 59, 245, 0.3);
+}
+
+.sales-tab-count {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 18px;
+  height: 18px;
+  padding: 0 6px;
+  border-radius: 999px;
+  font-size: 11px;
+  font-weight: 700;
+  background: rgba(140, 95, 248, 0.12);
+  color: #8c5ff8;
+}
+
+.sales-tab-btn.active .sales-tab-count {
+  background: rgba(255, 255, 255, 0.25);
+  color: #ffffff;
+}
+
+/* --------------------------------------------------------------------------
+   7. KPI Stats Ribbon
+   -------------------------------------------------------------------------- */
+.sales-kpi-ribbon {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 14px;
+  margin-bottom: 20px;
+}
+
+.sales-kpi-tile {
+  padding: 16px 18px;
+  margin: 0;
+}
+
+.sales-kpi-tile-label {
+  font-size: 12px;
+  color: #7a748e;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  display: block;
+}
+
+.sales-kpi-tile-value {
+  font-size: 22px;
+  font-weight: 800;
+  margin-top: 4px;
+  display: block;
+}
+
+.sales-kpi-tile-sub {
+  font-size: 11.5px;
+  font-weight: 600;
+  margin-top: 2px;
+  display: block;
+}
+
+.sales-kpi-progress-bar {
+  width: 100%;
+  height: 4px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.1);
+  margin-top: 6px;
+  overflow: hidden;
+}
+
+.sales-kpi-progress-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #8c5ff8, #10b981);
+  border-radius: 999px;
+}
+
+/* --------------------------------------------------------------------------
+   8. Toolbars, Search & Filter Fields
+   -------------------------------------------------------------------------- */
+.sales-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  flex-wrap: wrap;
+}
+
+.sales-toolbar-card {
+  padding: 14px 18px;
+  margin-bottom: 16px;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+}
+
+.sales-toolbar-filters {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+  flex: 1;
+}
+
+.sales-search-box {
+  position: relative;
+  min-width: 240px;
+  flex: 1 1 240px;
+}
+
+.sales-search-icon {
+  position: absolute;
+  left: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #7a748e;
+  display: flex;
+  align-items: center;
+  pointer-events: none;
+}
+
+.sales-search-box input {
+  width: 100%;
+  padding: 9px 14px 9px 36px;
+  border-radius: 10px;
+  border: 1px solid rgba(140, 95, 248, 0.2);
+  background: rgba(255, 255, 255, 0.05);
+  font-size: 13px;
+  color: inherit;
+  transition: all 0.2s ease;
+}
+
+.sales-search-box input:focus {
+  outline: none;
+  border-color: #8c5ff8;
+  box-shadow: 0 0 0 3px rgba(140, 95, 248, 0.25);
+}
+
+.sales-filter-select {
+  padding: 9px 14px;
+  border-radius: 10px;
+  border: 1px solid rgba(140, 95, 248, 0.2);
+  background: rgba(255, 255, 255, 0.05);
+  font-size: 13px;
+  color: inherit;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.sales-filter-select:focus {
+  outline: none;
+  border-color: #8c5ff8;
+  box-shadow: 0 0 0 3px rgba(140, 95, 248, 0.25);
+}
+
+.sales-count-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px;
+  border-radius: 999px;
+  background: rgba(140, 95, 248, 0.08);
+  color: #7a748e;
+  font-size: 12.5px;
+  font-weight: 500;
+}
+
+.sales-count-badge strong {
+  color: #8c5ff8;
+}
+
+/* --------------------------------------------------------------------------
+   9. Form Sections, Live Ribbon & Grid Controls
+   -------------------------------------------------------------------------- */
+.sales-form-card {
+  padding: 28px 26px;
+}
+
+.sales-form-wrapper {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.sales-form-section {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.sales-section-title {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 15px;
+  font-weight: 700;
+  color: inherit;
+  border-bottom: 1px solid rgba(140, 95, 248, 0.12);
+  padding-bottom: 8px;
+}
+
+.sales-section-icon {
+  width: 28px;
+  height: 28px;
+  border-radius: 8px;
+  background: rgba(140, 95, 248, 0.15);
+  color: #8c5ff8;
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+}
+
+.sales-form-grid-2 {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 14px;
+}
+
+.sales-form-grid-3 {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 14px;
+}
+
+@media (max-width: 640px) {
+  .sales-form-grid-2,
+  .sales-form-grid-3 {
+    grid-template-columns: 1fr;
+  }
+}
+
+.sales-live-calc-box {
+  background: linear-gradient(135deg, rgba(140, 95, 248, 0.08) 0%, rgba(109, 59, 245, 0.03) 100%);
+  padding: 16px 20px;
+  border-radius: 14px;
+  border: 1px solid rgba(140, 95, 248, 0.2);
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  gap: 14px;
+}
+
+.sales-form-actions {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  gap: 12px;
+  margin-top: 8px;
+  padding-top: 14px;
+  border-top: 1px solid rgba(140, 95, 248, 0.12);
+  flex-wrap: wrap;
+}
+
+/* --------------------------------------------------------------------------
+   10. Interactive Category Selector Cards (Create Request / Create Invoice)
+   -------------------------------------------------------------------------- */
+.sales-req-type-card {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  text-align: left;
+  padding: 22px 20px;
+  border-radius: 18px;
+  border: 1.5px solid rgba(140, 95, 248, 0.2);
+  background: linear-gradient(145deg, rgba(255, 255, 255, 0.05) 0%, rgba(255, 255, 255, 0.01) 100%);
+  cursor: pointer;
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  position: relative;
+  overflow: hidden;
+}
+
+.sales-req-type-card:hover {
+  border-color: #8c5ff8;
+  transform: translateY(-3px);
+  box-shadow: 0 10px 24px rgba(140, 95, 248, 0.18);
+}
+
+/* --------------------------------------------------------------------------
+   11. Data Table Styling
+   -------------------------------------------------------------------------- */
+.sales-table-card {
+  padding: 0;
+  overflow: hidden;
+}
+
+.sales-table-scroll {
+  overflow-x: auto;
+}
+
+.sales-clients-table {
+  width: 100%;
+  min-width: 900px;
+  margin: 0;
+  border-collapse: separate;
+  border-spacing: 0;
+  font-size: 13px;
+}
+
+.sales-clients-table th {
+  padding: 14px 16px;
+  text-align: left;
+  font-weight: 700;
+  font-size: 11.5px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: #7a748e;
+  border-bottom: 1px solid rgba(140, 95, 248, 0.12);
+  white-space: nowrap;
+}
+
+.sales-clients-table td {
+  padding: 14px 16px;
+  vertical-align: middle;
+  border-bottom: 1px solid rgba(140, 95, 248, 0.08);
+  transition: background 0.15s ease;
+}
+
+.sales-clients-table tr:hover td {
+  background: rgba(140, 95, 248, 0.03);
+}
+
+.sales-empty-cell {
+  text-align: center;
+  padding: 48px 16px;
+  color: #7a748e;
+  font-size: 13.5px;
+}
+
+.client-avatar-cell {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.client-avatar {
+  width: 38px;
+  height: 38px;
+  border-radius: 10px;
+  background: linear-gradient(135deg, rgba(140, 95, 248, 0.25) 0%, rgba(109, 59, 245, 0.15) 100%);
+  border: 1px solid rgba(140, 95, 248, 0.35);
+  color: #8c5ff8;
+  font-weight: 800;
+  font-size: 13px;
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+  letter-spacing: 0.5px;
+}
+
+.client-name-title {
+  font-weight: 700;
+  font-size: 13.5px;
+  margin-bottom: 1px;
+}
+
+.client-company-sub {
+  font-size: 12px;
+  color: #7a748e;
+}
+
+.contact-cell {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.contact-phone {
+  font-size: 12px;
+  color: #7a748e;
+  font-family: monospace;
+}
+
+.scheme-tag {
+  display: inline-block;
+  padding: 4px 10px;
+  border-radius: 8px;
+  background: rgba(140, 95, 248, 0.1);
+  border: 1px solid rgba(140, 95, 248, 0.2);
+  color: #8c5ff8;
+  font-weight: 700;
+  font-size: 11.5px;
+  white-space: nowrap;
+}
+
+.stage-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 4px 10px;
+  border-radius: 999px;
+  font-size: 11.5px;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.stage-tag.active {
+  background: rgba(16, 185, 129, 0.12);
+  color: #10b981;
+}
+
+.stage-tag.onboarding {
+  background: rgba(59, 130, 246, 0.12);
+  color: #3b82f6;
+}
+
+.stage-tag.renewal {
+  background: rgba(140, 95, 248, 0.12);
+  color: #8c5ff8;
+}
+
+.stage-tag.prospect {
+  background: rgba(245, 158, 11, 0.12);
+  color: #f59e0b;
+}
+
+.payment-progress-cell {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.payment-mini-bar {
+  width: 100%;
+  height: 5px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.1);
+  overflow: hidden;
+}
+
+.payment-mini-fill {
+  height: 100%;
+  border-radius: 999px;
+  transition: width 0.3s ease;
+}
+
+.payment-mini-fill.paid {
+  background: linear-gradient(90deg, #10b981, #059669);
+}
+
+.payment-mini-fill.partial {
+  background: linear-gradient(90deg, #f59e0b, #d97706);
+}
+
+.payment-mini-fill.pending {
+  background: linear-gradient(90deg, #f43f5e, #e11d48);
+}
+
+/* --------------------------------------------------------------------------
+   12. Dark Mode Overrides
+   -------------------------------------------------------------------------- */
+.dashboard-dark .sales-dashboard {
+  color: #f3f0fb;
+}
+
+.dashboard-dark .sales-search-box input,
+.dashboard-dark .sales-filter-select {
+  background: rgba(26, 32, 52, 0.7);
+  border-color: rgba(140, 95, 248, 0.22);
+  color: #f8fafc;
+}
+
+.dashboard-dark .sales-req-type-card {
+  background: linear-gradient(145deg, rgba(26, 32, 52, 0.6) 0%, rgba(20, 24, 40, 0.4) 100%);
+}
+
+.dashboard-dark .sales-clients-table th {
+  color: #94a3b8;
+  border-bottom-color: rgba(140, 95, 248, 0.16);
+}
+
+.dashboard-dark .sales-clients-table td {
+  border-bottom-color: rgba(140, 95, 248, 0.08);
+}
+
+.dashboard-dark .sales-clients-table tr:hover td {
+  background: rgba(140, 95, 248, 0.05);
+}

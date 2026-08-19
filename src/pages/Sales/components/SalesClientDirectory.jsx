@@ -2,8 +2,8 @@ import React from "react";
 import Icon from "../../../components/Icon";
 
 export default function SalesClientDirectory({
-  clients,
-  filteredClients,
+  clients = [],
+  filteredClients = [],
   clientSearch,
   setClientSearch,
   stageFilter,
@@ -16,24 +16,28 @@ export default function SalesClientDirectory({
 }) {
   return (
     <div className="sales-clients-view">
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 12, marginBottom: 4, flexWrap: 'wrap' }}>
-        <div>
-          <p className="eyebrow" style={{ margin: 0, textTransform: 'uppercase', letterSpacing: 1, fontSize: 11.5, color: '#8c5ff8', fontWeight: 700 }}>Client Dossier</p>
-          <h2 style={{ margin: '4px 0 2px', fontSize: 24, fontWeight: 800, color: dark ? '#f3effc' : '#1e1932' }}>Sales Client Directory</h2>
-          <p style={{ margin: 0, color: '#7a748e', fontSize: 13 }}>Click the <strong>View</strong> button on any client to view their complete profile, financials, and submitted documents.</p>
+      {/* Header Banner */}
+      <div className="sales-header-banner">
+        <div className="sales-header-info">
+          <p className="sales-header-eyebrow">Client Dossier</p>
+          <h1 className="sales-header-title">Sales Client Directory</h1>
+          <p className="sales-header-subtitle">
+            Click <strong>View</strong> on any client record to explore their full profile, commercials, and documentation.
+          </p>
         </div>
+
         <button
           type="button"
           className="sales-add-btn"
           onClick={onCreateNewClient}
         >
-          <Icon name="plus" size={16} />
-          <span>Create New Client</span>
+          <span style={{ fontSize: 16, lineHeight: 1 }}>+</span>
+          <span>Register New Client</span>
         </button>
       </div>
 
-      {/* Filter Toolbar */}
-      <div className="sales-toolbar" style={{ marginTop: 12 }}>
+      {/* Filter Toolbar Card */}
+      <div className="analytics-card sales-toolbar-card">
         <div className="sales-toolbar-filters">
           <div className="sales-search-box">
             <span className="sales-search-icon">
@@ -71,109 +75,132 @@ export default function SalesClientDirectory({
           </select>
         </div>
 
-        <div style={{ color: '#7a748e', fontSize: 13, fontWeight: 500 }}>
-          Showing <strong>{filteredClients.length}</strong> of {clients.length} clients
+        <div className="sales-count-badge">
+          <span>Showing</span>
+          <strong>{filteredClients.length}</strong>
+          <span>of {clients.length} clients</span>
         </div>
       </div>
 
-      {/* Directory Table */}
-      <div className="sales-table-card" style={{ marginTop: 14 }}>
-        <table className="sales-clients-table">
-          <thead>
-            <tr>
-              <th>ID</th>
-              <th>Client & Company</th>
-              <th>Contact</th>
-              <th>Scheme</th>
-              <th>Total Value</th>
-              <th>Payment Status</th>
-              <th>Stage</th>
-              <th style={{ textAlign: 'right' }}>Action</th>
-            </tr>
-          </thead>
-          <tbody>
-            {filteredClients.map((client) => {
-              const total = parseFloat(client.totalPayment) || 0;
-              const received = parseFloat(client.paymentReceived) || 0;
-              const pending = parseFloat(client.paymentPending) || 0;
-              const pct = total > 0 ? Math.min(Math.round((received / total) * 100), 100) : 0;
-              const isPaid = pending === 0 && received > 0;
-              const isPartial = pending > 0 && received > 0;
-
-              return (
-                <tr key={client.id}>
-                  <td><strong>#{client.id}</strong></td>
-                  <td>
-                    <div className="client-avatar-cell">
-                      <div className="client-avatar">
-                        {client.name ? client.name.slice(0, 2).toUpperCase() : "CL"}
-                      </div>
-                      <div>
-                        <div className="client-name-title">{client.name}</div>
-                        <div className="client-company-sub">{client.company}</div>
-                      </div>
-                    </div>
-                  </td>
-                  <td>
-                    <div className="contact-cell">
-                      <span>{client.email}</span>
-                      <span className="contact-phone">{client.phone}</span>
-                    </div>
-                  </td>
-                  <td>
-                    <span className="scheme-tag">
-                      {client.scheme || "Standard"}
-                    </span>
-                  </td>
-                  <td>
-                    <strong>₹{total.toLocaleString("en-IN")}</strong>
-                  </td>
-                  <td>
-                    <div className="payment-progress-cell">
-                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                        <span className={`payment-pill ${isPaid ? 'paid' : isPartial ? 'partial' : 'pending'}`}>
-                          {isPaid ? "✓ Paid" : isPartial ? `₹${pending.toLocaleString("en-IN")} pending` : "Unpaid"}
-                        </span>
-                      </div>
-                      <div className="payment-mini-bar">
-                        <div
-                          className={`payment-mini-fill ${isPaid ? 'paid' : isPartial ? 'partial' : 'pending'}`}
-                          style={{ width: `${isPaid ? 100 : pct}%` }}
-                        />
-                      </div>
-                    </div>
-                  </td>
-                  <td>
-                    <span
-                      className={`stage-tag ${
-                        client.stage === "Active"
-                          ? "active"
-                          : client.stage === "Onboarding"
-                          ? "onboarding"
-                          : client.stage === "Renewal"
-                          ? "renewal"
-                          : "prospect"
-                      }`}
-                    >
-                      {client.stage}
-                    </span>
-                  </td>
-                  <td style={{ textAlign: 'right' }}>
-                    <button
-                      type="button"
-                      className="sales-view-btn"
-                      onClick={() => onSelectClient(client)}
-                    >
-                      <Icon name="eye" size={14} />
-                      <span>View</span>
-                    </button>
-                  </td>
+      {/* Directory Table Card */}
+      <div className="analytics-card sales-table-card">
+        {filteredClients.length === 0 ? (
+          <div className="sales-empty-cell">
+            No clients found matching the search and filter criteria.
+          </div>
+        ) : (
+          <div className="sales-table-scroll">
+            <table className="sales-clients-table">
+              <thead>
+                <tr>
+                  <th style={{ width: 60 }}>ID</th>
+                  <th>Client & Company</th>
+                  <th>Contact Info</th>
+                  <th>Scheme</th>
+                  <th>Total Value</th>
+                  <th style={{ minWidth: 160 }}>Payment Status</th>
+                  <th>Stage</th>
+                  <th style={{ textAlign: "right" }}>Action</th>
                 </tr>
-              );
-            })}
-          </tbody>
-        </table>
+              </thead>
+              <tbody>
+                {filteredClients.map((client) => {
+                  const total = parseFloat(client.totalPayment) || 0;
+                  const received = parseFloat(client.paymentReceived) || 0;
+                  const pending = parseFloat(client.paymentPending) || 0;
+                  const pct = total > 0 ? Math.min(Math.round((received / total) * 100), 100) : 0;
+                  const isPaid = pending === 0 && received > 0;
+                  const isPartial = pending > 0 && received > 0;
+
+                  return (
+                    <tr key={client.id}>
+                      <td>
+                        <span style={{ fontWeight: 700, color: "#8c5ff8", fontFamily: "monospace", fontSize: 13 }}>
+                          #{client.id}
+                        </span>
+                      </td>
+                      <td>
+                        <div className="client-avatar-cell">
+                          <div className="client-avatar">
+                            {client.name ? client.name.slice(0, 2).toUpperCase() : "CL"}
+                          </div>
+                          <div>
+                            <strong className="client-name-title" style={{ display: "block" }}>{client.name}</strong>
+                            <span className="client-company-sub" style={{ display: "block" }}>{client.company || "Individual"}</span>
+                          </div>
+                        </div>
+                      </td>
+                      <td>
+                        <div className="contact-cell">
+                          <span>{client.email}</span>
+                          <span className="contact-phone">{client.phone}</span>
+                        </div>
+                      </td>
+                      <td>
+                        <span className="scheme-tag">
+                          {client.scheme || "Standard"}
+                        </span>
+                      </td>
+                      <td>
+                        <strong style={{ fontSize: 14, fontWeight: 700 }}>₹{total.toLocaleString("en-IN")}</strong>
+                      </td>
+                      <td>
+                        <div className="payment-progress-cell">
+                          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                            <span
+                              style={{
+                                fontSize: 12,
+                                fontWeight: 700,
+                                color: isPaid ? "#10b981" : isPartial ? "#f59e0b" : "#f43f5e",
+                              }}
+                            >
+                              {isPaid ? "✓ Paid" : isPartial ? `₹${pending.toLocaleString("en-IN")} pending` : "Unpaid"}
+                            </span>
+                            <span style={{ fontSize: 11, color: "#7a748e", fontWeight: 600 }}>{isPaid ? 100 : pct}%</span>
+                          </div>
+                          <div className="payment-mini-bar">
+                            <div
+                              className={`payment-mini-fill ${isPaid ? "paid" : isPartial ? "partial" : "pending"}`}
+                              style={{ width: `${isPaid ? 100 : pct}%` }}
+                            />
+                          </div>
+                        </div>
+                      </td>
+                      <td>
+                        <span
+                          className={`stage-tag ${
+                            client.stage === "Active"
+                              ? "active"
+                              : client.stage === "Onboarding"
+                              ? "onboarding"
+                              : client.stage === "Renewal"
+                              ? "renewal"
+                              : "prospect"
+                          }`}
+                        >
+                          <span style={{ width: 6, height: 6, borderRadius: 999, background: "currentColor" }} />
+                          {client.stage || "Active"}
+                        </span>
+                      </td>
+                      <td style={{ textAlign: "right" }}>
+                        <button
+                          type="button"
+                          className="sales-view-btn"
+                          onClick={() => onSelectClient(client)}
+                        >
+                          <Icon name="eye" size={13} />
+                          <span>View</span>
+                        </button>
+                      </td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          </div>
+        )}
       </div>
     </div>
   );
 }
+

@@ -25,66 +25,76 @@ export default function ManagerClientInfoModal({ client, onClose, onSave }) {
     setEditMode(false);
   }
 
+  const initials = client.name
+    ? client.name
+        .split(" ")
+        .map((n) => n[0])
+        .join("")
+        .slice(0, 2)
+        .toUpperCase()
+    : "CL";
+
   return (
     <SimpleModal onClose={onClose}>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 12 }}>
+      <div className="manager-modal-profile">
+        <div className="manager-modal-avatar">{initials}</div>
         <div>
-          <h3 style={{ margin: 0 }}>Client — {client.name}</h3>
-          <div style={{ color: '#7a748e', fontSize: 13 }}>{client.company}</div>
+          <h2 style={{ margin: "0 0 4px", fontSize: 20, fontWeight: 800 }}>{client.name}</h2>
+          <span style={{ color: "#7a748e", fontSize: 13 }}>{client.company || "Individual Account"}</span>
         </div>
       </div>
 
       {editMode ? (
-        <div style={{ display: 'grid', gap: 16, marginTop: 16 }}>
+        <div style={{ display: "grid", gap: 16 }}>
           <EditForm values={editValues} onChange={handleChange} />
-          <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 10 }}>
-            <button className="table-action" type="button" onClick={handleCancel}>
+          <div style={{ display: "flex", justifyContent: "flex-end", gap: 10, marginTop: 12 }}>
+            <button className="manager-btn-secondary" type="button" onClick={handleCancel}>
               Cancel
             </button>
-            <button className="table-action" type="button" onClick={handleSave}>
-              Save
+            <button className="manager-btn-primary" type="button" onClick={handleSave}>
+              Save Changes
             </button>
           </div>
         </div>
       ) : (
         <>
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12, marginTop: 16, padding: '12px 0' }}>
-            <div style={{ background: '#fbfbfe', padding: 12, borderRadius: 8 }}>
-              <div style={{ color: '#6b6b77', fontSize: 12 }}>Client</div>
-              <div style={{ marginTop: 6, fontWeight: 600 }}>{client.name}</div>
+          <div className="manager-modal-info-grid">
+            <div className="manager-modal-card">
+              <span className="manager-modal-card-label">Client Name</span>
+              <span className="manager-modal-card-val">{client.name}</span>
             </div>
-            <div style={{ background: '#fbfbfe', padding: 12, borderRadius: 8 }}>
-              <div style={{ color: '#6b6b77', fontSize: 12 }}>Company</div>
-              <div style={{ marginTop: 6, fontWeight: 600 }}>{client.company}</div>
+            <div className="manager-modal-card">
+              <span className="manager-modal-card-label">Company / Business</span>
+              <span className="manager-modal-card-val">{client.company || "—"}</span>
             </div>
-            <div style={{ background: '#fbfbfe', padding: 12, borderRadius: 8 }}>
-              <div style={{ color: '#6b6b77', fontSize: 12 }}>Assigned rep</div>
-              <div style={{ marginTop: 6, fontWeight: 600 }}>{client.salesRep}</div>
+            <div className="manager-modal-card">
+              <span className="manager-modal-card-label">Assigned Sales Representative</span>
+              <span className="manager-modal-card-val" style={{ color: "#8c5ff8" }}>{client.salesRep || "Unassigned"}</span>
             </div>
-            <div style={{ background: '#fbfbfe', padding: 12, borderRadius: 8 }}>
-              <div style={{ color: '#6b6b77', fontSize: 12 }}>Email</div>
-              <div style={{ marginTop: 6, fontWeight: 600 }}>{client.email}</div>
+            <div className="manager-modal-card">
+              <span className="manager-modal-card-label">Email Address</span>
+              <span className="manager-modal-card-val">{client.email}</span>
             </div>
-            <div style={{ background: '#fbfbfe', padding: 12, borderRadius: 8 }}>
-              <div style={{ color: '#6b6b77', fontSize: 12 }}>Phone</div>
-              <div style={{ marginTop: 6, fontWeight: 600 }}>{client.phone}</div>
+            <div className="manager-modal-card">
+              <span className="manager-modal-card-label">Phone Number</span>
+              <span className="manager-modal-card-val" style={{ fontFamily: "monospace" }}>{client.phone}</span>
             </div>
-            <div style={{ background: '#fbfbfe', padding: 12, borderRadius: 8 }}>
-              <div style={{ color: '#6b6b77', fontSize: 12 }}>Service</div>
-              <div style={{ marginTop: 6, fontWeight: 600 }}>{client.service}</div>
+            <div className="manager-modal-card">
+              <span className="manager-modal-card-label">Service Tier</span>
+              <span className="manager-modal-card-val" style={{ color: "#3b82f6" }}>{client.service || "Standard"}</span>
             </div>
-            <div style={{ background: '#fbfbfe', padding: 12, borderRadius: 8 }}>
-              <div style={{ color: '#6b6b77', fontSize: 12 }}>Start date</div>
-              <div style={{ marginTop: 6, fontWeight: 600 }}>{client.startDate}</div>
+            <div className="manager-modal-card">
+              <span className="manager-modal-card-label">Onboarding Date</span>
+              <span className="manager-modal-card-val">{client.startDate || "2025"}</span>
             </div>
-            <div style={{ background: '#fbfbfe', padding: 12, borderRadius: 8 }}>
-              <div style={{ color: '#6b6b77', fontSize: 12 }}>Revenue</div>
-              <div style={{ marginTop: 6, fontWeight: 600 }}>{client.revenue}</div>
+            <div className="manager-modal-card">
+              <span className="manager-modal-card-label">Contract Revenue Value</span>
+              <span className="manager-modal-card-val" style={{ color: "#10b981", fontWeight: 800 }}>{client.revenue || "—"}</span>
             </div>
           </div>
-          <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: 16 }}>
-            <button className="table-action" type="button" onClick={() => setEditMode(true)}>
-              Edit
+          <div style={{ display: "flex", justifyContent: "flex-end", marginTop: 20 }}>
+            <button className="manager-btn-primary" type="button" onClick={() => setEditMode(true)}>
+              Edit Client Profile
             </button>
           </div>
         </>

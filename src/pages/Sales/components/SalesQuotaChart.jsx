@@ -1,14 +1,48 @@
-import React from "react";
+import React, { useRef, useState, useEffect } from "react";
 
 export function SalesQuotaChart({ months, quotaData, acquiredData }) {
-  const width = 560;
+  const containerRef = useRef(null);
+  const [width, setWidth] = useState(800);
   const height = 260;
-  const padding = 44;
+  const paddingX = 24;
+  const paddingTop = 28;
+  const paddingBottom = 40;
+
+  useEffect(() => {
+    if (!containerRef.current) return;
+    const updateWidth = () => {
+      if (containerRef.current) {
+        const clientWidth = containerRef.current.clientWidth;
+        if (clientWidth > 0) {
+          setWidth(clientWidth);
+        }
+      }
+    };
+    updateWidth();
+
+    if (typeof ResizeObserver !== "undefined") {
+      const ro = new ResizeObserver((entries) => {
+        for (const entry of entries) {
+          if (entry.contentRect.width > 0) {
+            setWidth(entry.contentRect.width);
+          }
+        }
+      });
+      ro.observe(containerRef.current);
+      return () => ro.disconnect();
+    } else {
+      window.addEventListener("resize", updateWidth);
+      return () => window.removeEventListener("resize", updateWidth);
+    }
+  }, []);
+
   const maxValue = Math.max(...quotaData, ...acquiredData);
+  const plotHeight = height - paddingTop - paddingBottom;
+
   const points = months.map((label, index) => {
-    const x = padding + (index * (width - padding * 2)) / Math.max(months.length - 1, 1);
-    const quotaY = height - padding - (quotaData[index] / maxValue) * (height - padding * 2);
-    const acquiredY = height - padding - (acquiredData[index] / maxValue) * (height - padding * 2);
+    const x = paddingX + (index * (width - paddingX * 2)) / Math.max(months.length - 1, 1);
+    const quotaY = height - paddingBottom - (quotaData[index] / maxValue) * plotHeight;
+    const acquiredY = height - paddingBottom - (acquiredData[index] / maxValue) * plotHeight;
     return { label, x, quotaY, acquiredY, quota: quotaData[index], acquired: acquiredData[index] };
   });
 
@@ -16,26 +50,38 @@ export function SalesQuotaChart({ months, quotaData, acquiredData }) {
   const acquiredPath = points.map((p, i) => `${i === 0 ? "M" : "L"} ${p.x} ${p.acquiredY}`).join(" ");
 
   return (
-    <div>
-      <div style={{ display: 'flex', alignItems: 'center', gap: 16, marginBottom: 12 }}>
-        <span style={{ display: 'inline-flex', alignItems: 'center', gap: 8 }}>
-          <span style={{ width: 12, height: 12, background: '#9a74e9', borderRadius: 999 }} /> Quota
+    <div ref={containerRef} style={{ width: "100%" }}>
+      <div style={{ display: "flex", alignItems: "center", gap: 18, marginBottom: 16 }}>
+        <span style={{ display: "inline-flex", alignItems: "center", gap: 8, fontSize: 13, fontWeight: 500, color: "#4e5579" }}>
+          <span style={{ width: 10, height: 10, background: "#9a74e9", borderRadius: 999 }} /> Quota
         </span>
-        <span style={{ display: 'inline-flex', alignItems: 'center', gap: 8 }}>
-          <span style={{ width: 12, height: 12, background: '#44bfb0', borderRadius: 999 }} /> Acquired
+        <span style={{ display: "inline-flex", alignItems: "center", gap: 8, fontSize: 13, fontWeight: 500, color: "#4e5579" }}>
+          <span style={{ width: 10, height: 10, background: "#44bfb0", borderRadius: 999 }} /> Acquired
         </span>
       </div>
-      <svg viewBox={`0 0 ${width} ${height}`} style={{ width: '100%', height: 280 }} aria-hidden="true">
-        <path d={quotaPath} fill="none" stroke="#9a74e9" strokeWidth={3} strokeLinecap="round" />
-        <path d={acquiredPath} fill="none" stroke="#44bfb0" strokeWidth={3} strokeLinecap="round" />
+      <svg
+        viewBox={`0 0 ${width} ${height}`}
+        style={{ width: "100%", height: 260, overflow: "visible", display: "block" }}
+        aria-hidden="true"
+      >
+        <path d={quotaPath} fill="none" stroke="#9a74e9" strokeWidth={3} strokeLinecap="round" strokeLinejoin="round" />
+        <path d={acquiredPath} fill="none" stroke="#44bfb0" strokeWidth={3} strokeLinecap="round" strokeLinejoin="round" />
         {points.map((point) => (
           <g key={point.label}>
-            <circle cx={point.x} cy={point.quotaY} r={5} fill="#fff" stroke="#9a74e9" strokeWidth={2} />
-            <circle cx={point.x} cy={point.acquiredY} r={5} fill="#fff" stroke="#44bfb0" strokeWidth={2} />
+            <circle cx={point.x} cy={point.quotaY} r={5} fill="#fff" stroke="#9a74e9" strokeWidth={2.5} />
+            <circle cx={point.x} cy={point.acquiredY} r={5} fill="#fff" stroke="#44bfb0" strokeWidth={2.5} />
           </g>
         ))}
         {points.map((point) => (
-          <text key={`${point.label}-label`} x={point.x} y={height - 16} textAnchor="middle" fontSize="11" fill="#6b6b77">
+          <text
+            key={`${point.label}-label`}
+            x={point.x}
+            y={height - 12}
+            textAnchor="middle"
+            fontSize="12"
+            fontWeight="500"
+            fill="#6b6b77"
+          >
             {point.label}
           </text>
         ))}

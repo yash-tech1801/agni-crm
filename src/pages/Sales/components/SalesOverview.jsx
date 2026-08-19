@@ -6,9 +6,9 @@ import { requestActivities } from "../mockSalesData";
 
 export default function SalesOverview({ kpiCards, onNavigate, dark }) {
   return (
-    <section className="dashboard-layout" style={{ animation: "fadeIn 0.25s ease-out" }}>
+    <section className="dashboard-layout sales-dashboard">
       <div className="dashboard-main">
-        <div className="scheme-grid" style={{ gridTemplateColumns: "repeat(2, minmax(0, 1fr))" }}>
+        <div className="scheme-grid sales-layout-grid">
           {kpiCards.map((card) => (
             <KpiCard key={card.label} card={card} dark={dark} />
           ))}
@@ -40,17 +40,9 @@ export default function SalesOverview({ kpiCards, onNavigate, dark }) {
             {requestActivities.map((activity) => (
               <button
                 key={activity.title}
-                className="activity-row"
+                className="activity-row sales-activity-btn"
                 type="button"
                 onClick={() => onNavigate && onNavigate("Requests")}
-                style={{
-                  border: "none",
-                  background: "transparent",
-                  width: "100%",
-                  textAlign: "left",
-                  padding: 0,
-                  cursor: "pointer",
-                }}
               >
                 <span className="activity-mark" style={{ background: activity.tone }} />
                 <div>

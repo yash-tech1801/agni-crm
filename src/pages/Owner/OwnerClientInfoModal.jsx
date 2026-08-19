@@ -10,84 +10,95 @@ export default function OwnerClientInfoModal({
 }) {
   if (!selectedClient) return null;
 
-  const isPaid = (selectedClient.paymentReceived || 0) >= (selectedClient.totalPayment || 0);
   const remaining = Math.max(0, (selectedClient.totalPayment || 0) - (selectedClient.paymentReceived || 0));
-
   const clientScheme = selectedClient.scheme || selectedClient.serviceName || selectedClient.serviceType || "PMEGP";
   const tracker = getTrackerState({ scheme: clientScheme, completedSteps: selectedClient.completedSteps });
   const processLabel = tracker.processTypeLabel || getProcessTypeLabel(tracker.processType);
 
+  const initials = selectedClient.name
+    ? selectedClient.name
+        .split(" ")
+        .map((n) => n[0])
+        .join("")
+        .slice(0, 2)
+        .toUpperCase()
+    : "CL";
+
   return (
     <SimpleModal onClose={onClose}>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 12, borderBottom: '1px solid #eef0f5', paddingBottom: 14 }}>
-        <div>
-          <span style={{ fontSize: 11, fontWeight: 800, textTransform: "uppercase", letterSpacing: 0.8, color: "#6366f1" }}>
-            CLIENT DOSSIER &amp; TRACKER
-          </span>
-          <h3 style={{ margin: "2px 0 0", fontSize: 18, fontWeight: 700 }}>{selectedClient.name}</h3>
-          <div style={{ color: '#7a748e', fontSize: 13, marginTop: 2 }}>
-            {selectedClient.company} {selectedClient.appId ? `• ID: ${selectedClient.appId}` : ''}
+      <div className="owner-modal-profile">
+        <div className="owner-modal-avatar">{initials}</div>
+        <div style={{ flex: 1 }}>
+          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: 8 }}>
+            <div>
+              <h2 className="owner-header-title">{selectedClient.name}</h2>
+              <span className="owner-header-subtitle">
+                {selectedClient.company} {selectedClient.appId ? `• ID: ${selectedClient.appId}` : ''}
+              </span>
+            </div>
+            <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
+              <span className="owner-status-pill completed">
+                ● {tracker.currentStage}
+              </span>
+              <span className="owner-rep-pill">
+                {tracker.progressPercent}%
+              </span>
+            </div>
           </div>
-        </div>
-        <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
-          <span style={{ background: '#eef2ff', color: '#4e7cff', padding: '6px 12px', borderRadius: 999, fontWeight: 600, fontSize: 12 }}>
-            ● {tracker.currentStage}
-          </span>
-          <span style={{ background: '#f3f6f9', color: '#475569', padding: '6px 12px', borderRadius: 6, fontSize: 12, fontWeight: 600 }}>
-            {tracker.progressPercent}%
-          </span>
         </div>
       </div>
 
       {/* Client Info Grid */}
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12, marginTop: 16 }}>
-        <div style={{ background: '#fbfbfe', padding: 12, borderRadius: 8, border: '1.5px solid #8c5ff833' }}>
-          <div style={{ color: '#8c5ff8', fontSize: 11, fontWeight: 800, textTransform: 'uppercase' }}>Selected Scheme</div>
-          <div style={{ marginTop: 4, fontWeight: 700, fontSize: 14, color: '#1e293b' }}>{clientScheme}</div>
+      <div className="owner-modal-info-grid">
+        <div className="owner-modal-card">
+          <span className="owner-modal-card-label">Selected Scheme</span>
+          <span className="owner-modal-card-val" style={{ color: "#6366f1" }}>{clientScheme}</span>
         </div>
-        <div style={{ background: '#fbfbfe', padding: 12, borderRadius: 8, border: '1.5px solid #4e7cff33' }}>
-          <div style={{ color: '#4e7cff', fontSize: 11, fontWeight: 800, textTransform: 'uppercase' }}>Process Type</div>
-          <div style={{ marginTop: 4, fontWeight: 700, fontSize: 14, color: '#4e7cff' }}>{processLabel} ({tracker.totalStages} Stages)</div>
-        </div>
-
-        <div style={{ background: '#fbfbfe', padding: 12, borderRadius: 8, border: '1px solid #eef0f5' }}>
-          <div style={{ color: '#6b6b77', fontSize: 12 }}>Mobile</div>
-          <div style={{ marginTop: 4, fontWeight: 600 }}>{selectedClient.phone}</div>
-        </div>
-        <div style={{ background: '#fbfbfe', padding: 12, borderRadius: 8, border: '1px solid #eef0f5' }}>
-          <div style={{ color: '#6b6b77', fontSize: 12 }}>Email</div>
-          <div style={{ marginTop: 4, fontWeight: 600 }}>{selectedClient.email}</div>
+        <div className="owner-modal-card">
+          <span className="owner-modal-card-label">Process Type</span>
+          <span className="owner-modal-card-val" style={{ color: "#3b82f6" }}>
+            {processLabel} ({tracker.totalStages} Stages)
+          </span>
         </div>
 
-        <div style={{ background: '#fbfbfe', padding: 12, borderRadius: 8, border: '1px solid #eef0f5' }}>
-          <div style={{ color: '#6b6b77', fontSize: 12 }}>Service Start Date</div>
-          <div style={{ marginTop: 4, fontWeight: 600 }}>{selectedClient.serviceStart || '—'}</div>
+        <div className="owner-modal-card">
+          <span className="owner-modal-card-label">Contact Phone</span>
+          <span className="owner-modal-card-val owner-phone-text">{selectedClient.phone}</span>
         </div>
-        <div style={{ background: '#fbfbfe', padding: 12, borderRadius: 8, border: '1px solid #eef0f5' }}>
-          <div style={{ color: '#6b6b77', fontSize: 12 }}>Total Payment</div>
-          <div style={{ marginTop: 4, fontWeight: 600 }}>₹{(selectedClient.totalPayment || 0).toLocaleString()}</div>
-        </div>
-
-        <div style={{ background: '#fbfbfe', padding: 12, borderRadius: 8, border: '1px solid #eef0f5' }}>
-          <div style={{ color: '#6b6b77', fontSize: 12 }}>Payment Received</div>
-          <div style={{ marginTop: 4, fontWeight: 600, color: '#16a34a' }}>₹{(selectedClient.paymentReceived || 0).toLocaleString()}</div>
+        <div className="owner-modal-card">
+          <span className="owner-modal-card-label">Email Address</span>
+          <span className="owner-modal-card-val">{selectedClient.email}</span>
         </div>
 
-        <div style={{ background: remaining > 0 ? '#fff7f6' : '#f0fdf4', padding: 12, borderRadius: 8, border: remaining > 0 ? '1px solid #fee2e2' : '1px solid #dcfce7' }}>
-          <div style={{ color: '#6b6b77', fontSize: 12 }}>Payment Remaining</div>
-          <div style={{ marginTop: 4, fontWeight: 700, color: remaining > 0 ? '#d0433b' : '#16a34a' }}>
+        <div className="owner-modal-card">
+          <span className="owner-modal-card-label">Service Start Date</span>
+          <span className="owner-modal-card-val">{selectedClient.serviceStart || '—'}</span>
+        </div>
+        <div className="owner-modal-card">
+          <span className="owner-modal-card-label">Total Commercial Payment</span>
+          <span className="owner-modal-card-val">₹{(selectedClient.totalPayment || 0).toLocaleString()}</span>
+        </div>
+
+        <div className="owner-modal-card">
+          <span className="owner-modal-card-label">Payment Received</span>
+          <span className="owner-modal-card-val owner-revenue-text">
+            ₹{(selectedClient.paymentReceived || 0).toLocaleString()}
+          </span>
+        </div>
+
+        <div className="owner-modal-card">
+          <span className="owner-modal-card-label">Payment Remaining</span>
+          <span className="owner-modal-card-val" style={{ color: remaining > 0 ? '#f43f5e' : '#10b981' }}>
             {remaining > 0 ? `₹${remaining.toLocaleString()}` : 'Fully Paid ✓'}
-          </div>
+          </span>
         </div>
       </div>
 
       {/* Dynamic Activity Status Stepper */}
-      <div style={{ marginTop: 20, paddingTop: 16, borderTop: '1px solid #eef0f5' }}>
+      <div style={{ marginTop: 20, paddingTop: 16, borderTop: '1px solid rgba(99, 102, 241, 0.14)' }}>
         <div style={{ marginBottom: 12 }}>
-          <span style={{ fontSize: 11, fontWeight: 700, letterSpacing: '0.05em', color: '#6366f1', textTransform: 'uppercase' }}>
-            WORK COMPLETION PIPELINE
-          </span>
-          <h4 style={{ margin: '4px 0 0', fontSize: 15, fontWeight: 700, color: '#1e293b' }}>
+          <p className="owner-header-eyebrow">Work Completion Pipeline</p>
+          <h4 style={{ margin: 0, fontSize: 15, fontWeight: 700 }}>
             {tracker.totalStages}-Point Sequential Activity Tracker ({clientScheme})
           </h4>
         </div>
@@ -100,16 +111,19 @@ export default function OwnerClientInfoModal({
         />
       </div>
 
-      <div className="modal-actions" style={{ display: 'flex', gap: 8, justifyContent: 'flex-end', marginTop: 20 }}>
+      <div className="owner-modal-actions">
         {onEditClient && (
           <button
-            className="table-action"
-            onClick={() => onEditClient(selectedClient)}
+            className="owner-btn-secondary"
+            onClick={() => {
+              onEditClient(selectedClient);
+              if (onClose) onClose();
+            }}
           >
             Edit Client
           </button>
         )}
-        <button className="primary-button" onClick={onClose}>
+        <button className="owner-btn-primary" onClick={onClose}>
           Close
         </button>
       </div>

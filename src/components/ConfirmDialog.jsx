@@ -1,12 +1,45 @@
 import React from 'react';
+import Icon from './Icon';
 
-export default function ConfirmDialog({ message, onConfirm, onCancel }) {
+export default function ConfirmDialog({
+  title = "Confirm Deletion",
+  message,
+  confirmLabel = "Delete Record",
+  cancelLabel = "Cancel",
+  onConfirm,
+  onCancel,
+}) {
   return (
-    <div className="confirm-dialog">
-      <p>{message}</p>
-      <div className="confirm-actions">
-        <button type="button" className="table-action" onClick={onCancel}>Cancel</button>
-        <button type="button" className="table-action danger" onClick={onConfirm}>Delete</button>
+    <div className="confirm-dialog-enhanced">
+      <div className="confirm-dialog-icon">
+        <Icon name="alert" size={28} />
+      </div>
+
+      <div className="confirm-dialog-content">
+        <h3 className="confirm-dialog-title">{title}</h3>
+        <p className="confirm-dialog-message">{message}</p>
+        <p className="confirm-dialog-warning">
+          Warning: This action will remove the record and cannot be undone.
+        </p>
+      </div>
+
+      <div className="confirm-dialog-actions">
+        <button
+          type="button"
+          className="manager-btn-secondary"
+          onClick={onCancel}
+          style={{ minWidth: 100, justifyContent: "center" }}
+        >
+          {cancelLabel}
+        </button>
+        <button
+          type="button"
+          className="manager-btn-danger"
+          onClick={onConfirm}
+          style={{ minWidth: 120, justifyContent: "center", padding: "10px 18px", fontSize: 13 }}
+        >
+          {confirmLabel}
+        </button>
       </div>
     </div>
   );

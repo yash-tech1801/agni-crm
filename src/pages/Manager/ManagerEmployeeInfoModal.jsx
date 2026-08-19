@@ -4,54 +4,57 @@ import SimpleModal from "../../components/SimpleModal";
 export default function ManagerEmployeeInfoModal({ member, onClose, managerName }) {
   if (!member) return null;
 
+  const initials = member.name
+    ? member.name
+        .split(" ")
+        .map((n) => n[0])
+        .join("")
+        .slice(0, 2)
+        .toUpperCase()
+    : "SP";
+
   return (
     <SimpleModal onClose={onClose}>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 12 }}>
+      <div className="manager-modal-profile">
+        <div className="manager-modal-avatar">{initials}</div>
         <div>
-          <h3 style={{ margin: 0 }}>Employee — {member.name}</h3>
-          <div style={{ color: '#7a748e', fontSize: 13 }}>{member.role}</div>
+          <h2 style={{ margin: "0 0 4px", fontSize: 20, fontWeight: 800 }}>{member.name}</h2>
+          <span className="manager-role-tag">{member.role}</span>
         </div>
       </div>
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12, marginTop: 16, padding: '12px 0' }}>
-        <div style={{ background: '#fbfbfe', padding: 12, borderRadius: 8 }}>
-          <div style={{ color: '#6b6b77', fontSize: 12 }}>Name</div>
-          <div style={{ marginTop: 6, fontWeight: 600 }}>{member.name}</div>
+
+      <div className="manager-modal-info-grid">
+        <div className="manager-modal-card">
+          <span className="manager-modal-card-label">Assigned Branch</span>
+          <span className="manager-modal-card-val">{member.branch} Branch</span>
         </div>
-        <div style={{ background: '#fbfbfe', padding: 12, borderRadius: 8 }}>
-          <div style={{ color: '#6b6b77', fontSize: 12 }}>Role</div>
-          <div style={{ marginTop: 6, fontWeight: 600 }}>{member.role}</div>
+        <div className="manager-modal-card">
+          <span className="manager-modal-card-label">Branch Region</span>
+          <span className="manager-modal-card-val">{member.region || "East Zone"}</span>
         </div>
-        <div style={{ background: '#fbfbfe', padding: 12, borderRadius: 8 }}>
-          <div style={{ color: '#6b6b77', fontSize: 12 }}>Branch</div>
-          <div style={{ marginTop: 6, fontWeight: 600 }}>{member.branch}</div>
+        <div className="manager-modal-card">
+          <span className="manager-modal-card-label">Reporting Manager</span>
+          <span className="manager-modal-card-val">{member.branchManager || managerName || "Manager"}</span>
         </div>
-        <div style={{ background: '#fbfbfe', padding: 12, borderRadius: 8 }}>
-          <div style={{ color: '#6b6b77', fontSize: 12 }}>Branch manager</div>
-          <div style={{ marginTop: 6, fontWeight: 600 }}>{member.branchManager || managerName || "Manager"}</div>
+        <div className="manager-modal-card">
+          <span className="manager-modal-card-label">Joining Date</span>
+          <span className="manager-modal-card-val">{member.joiningDate || "Jan 2025"}</span>
         </div>
-        <div style={{ background: '#fbfbfe', padding: 12, borderRadius: 8 }}>
-          <div style={{ color: '#6b6b77', fontSize: 12 }}>Region</div>
-          <div style={{ marginTop: 6, fontWeight: 600 }}>{member.region}</div>
+        <div className="manager-modal-card">
+          <span className="manager-modal-card-label">Email Address</span>
+          <span className="manager-modal-card-val">{member.email}</span>
         </div>
-        <div style={{ background: '#fbfbfe', padding: 12, borderRadius: 8 }}>
-          <div style={{ color: '#6b6b77', fontSize: 12 }}>Email</div>
-          <div style={{ marginTop: 6, fontWeight: 600 }}>{member.email}</div>
+        <div className="manager-modal-card">
+          <span className="manager-modal-card-label">Phone Number</span>
+          <span className="manager-modal-card-val" style={{ fontFamily: "monospace" }}>{member.phone}</span>
         </div>
-        <div style={{ background: '#fbfbfe', padding: 12, borderRadius: 8 }}>
-          <div style={{ color: '#6b6b77', fontSize: 12 }}>Phone</div>
-          <div style={{ marginTop: 6, fontWeight: 600 }}>{member.phone}</div>
+        <div className="manager-modal-card">
+          <span className="manager-modal-card-label">Monthly Target Quota</span>
+          <span className="manager-modal-card-val" style={{ color: "#8c5ff8", fontWeight: 800 }}>{member.quota || "₹100k"}</span>
         </div>
-        <div style={{ background: '#fbfbfe', padding: 12, borderRadius: 8 }}>
-          <div style={{ color: '#6b6b77', fontSize: 12 }}>Quota</div>
-          <div style={{ marginTop: 6, fontWeight: 600 }}>{member.quota}</div>
-        </div>
-        <div style={{ background: '#fbfbfe', padding: 12, borderRadius: 8 }}>
-          <div style={{ color: '#6b6b77', fontSize: 12 }}>Monthly sales</div>
-          <div style={{ marginTop: 6, fontWeight: 600 }}>{member.monthlySales}</div>
-        </div>
-        <div style={{ background: '#fbfbfe', padding: 12, borderRadius: 8, gridColumn: '1 / -1' }}>
-          <div style={{ color: '#6b6b77', fontSize: 12 }}>Joined</div>
-          <div style={{ marginTop: 6, fontWeight: 600 }}>{member.joiningDate}</div>
+        <div className="manager-modal-card">
+          <span className="manager-modal-card-label">Monthly Sales Performance</span>
+          <span className="manager-modal-card-val" style={{ color: "#10b981", fontWeight: 800 }}>{member.monthlySales || "₹0"}</span>
         </div>
       </div>
     </SimpleModal>

@@ -2,6 +2,7 @@ import React from "react";
 import DashboardSidebar from "../../components/dashboard/DashboardSidebar";
 import DashboardHeader from "../../components/dashboard/DashboardHeader";
 import Icon from "../../components/Icon";
+import "./salesdashboard.css";
 
 // Sub-components
 import SalesOverview from "./components/SalesOverview";
@@ -151,33 +152,12 @@ export default function SalesDashboard({ onSignOut, userEmail }) {
         </DashboardHeader>
 
         {toastMessage && (
-          <div
-            style={{
-              padding: "14px 20px",
-              marginBottom: 18,
-              borderRadius: 12,
-              background: "linear-gradient(135deg, #10b981 0%, #059669 100%)",
-              color: "#ffffff",
-              fontWeight: 600,
-              fontSize: "13.5px",
-              boxShadow: "0 4px 18px rgba(16, 185, 129, 0.35)",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "space-between",
-              animation: "fadeIn 0.25s ease",
-            }}
-          >
+          <div className="sales-toast">
             <span>{toastMessage}</span>
             <button
               type="button"
+              className="sales-toast-close"
               onClick={() => setToastMessage("")}
-              style={{
-                background: "transparent",
-                border: "none",
-                color: "#fff",
-                cursor: "pointer",
-                fontSize: 16,
-              }}
             >
               ✕
             </button>

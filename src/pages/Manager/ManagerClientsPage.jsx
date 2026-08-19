@@ -1,4 +1,5 @@
 import React, { useState, useMemo } from "react";
+import Icon from "../../components/Icon";
 import SimpleModal from "../../components/SimpleModal";
 import ConfirmDialog from "../../components/ConfirmDialog";
 import ManagerClientInfoModal from "./ManagerClientInfoModal";
@@ -9,16 +10,37 @@ export default function ManagerClientsPage({
   salesPeople = [],
 }) {
   const [selectedSalesPerson, setSelectedSalesPerson] = useState("all");
+  const [searchQuery, setSearchQuery] = useState("");
   const [selectedClient, setSelectedClient] = useState(null);
   const [deleteTargetClient, setDeleteTargetClient] = useState(null);
 
   const filteredClients = useMemo(() => {
-    if (selectedSalesPerson === "all") {
-      return clients;
-    }
-    const selectedId = Number(selectedSalesPerson);
-    return clients.filter((client) => client.assignedSalesPersonId === selectedId);
-  }, [clients, selectedSalesPerson]);
+    return clients.filter((client) => {
+      if (selectedSalesPerson !== "all") {
+        const selectedId = Number(selectedSalesPerson);
+        if (client.assignedSalesPersonId !== selectedId) return false;
+      }
+      if (searchQuery.trim()) {
+        const q = searchQuery.toLowerCase();
+        const matchName = client.name?.toLowerCase().includes(q);
+        const matchCompany = client.company?.toLowerCase().includes(q);
+        const matchRep = client.salesRep?.toLowerCase().includes(q);
+        const matchEmail = client.email?.toLowerCase().includes(q);
+        const matchPhone = client.phone?.toLowerCase().includes(q);
+        if (!matchName && !matchCompany && !matchRep && !matchEmail && !matchPhone) return false;
+      }
+      return true;
+    });
+  }, [clients, selectedSalesPerson, searchQuery]);
+
+  const stats = useMemo(() => {
+    const total = clients.length;
+    const totalRevenue = clients.reduce((sum, c) => {
+      const num = parseFloat(String(c.revenue || "0").replace(/[^0-9.-]+/g, "")) || 0;
+      return sum + num;
+    }, 0);
+    return { total, totalRevenue };
+  }, [clients]);
 
   function handleDeleteClient(clientId) {
     if (setClients) {
@@ -45,86 +67,195 @@ export default function ManagerClientsPage({
   }
 
   return (
-    <section style={{ animation: "fadeIn 0.25s ease-out" }}>
-      <div
-        style={{
-          display: "flex",
-          justifyContent: "space-between",
-          alignItems: "center",
-          marginBottom: 16,
-          flexWrap: "wrap",
-          gap: 12,
-        }}
-      >
-        <div>
-          <p className="eyebrow">Branch clients</p>
-          <h2>Clients under your sales team</h2>
-          <p style={{ margin: 0, color: "#6b6b77", fontSize: 13 }}>
-            Showing only clients managed by sales members in your branch.
+    <section className="manager-page-view">
+      {/* Header Banner */}
+      <div className="manager-header-banner">
+        <div className="manager-header-info">
+          <p className="manager-header-eyebrow">Client Portfolio</p>
+          <h1 className="manager-header-title">Branch Client Directory</h1>
+          <p className="manager-header-subtitle">
+            Overview of client accounts managed by regional sales representatives in your branch.
           </p>
-        </div>
-        <div style={{ display: "flex", alignItems: "center", gap: 12, flexWrap: "wrap" }}>
-          <div style={{ color: "#7a748e", fontSize: 13 }}>
-            {filteredClients.length} clients
-          </div>
-          <label className="field-label" style={{ minWidth: 220, margin: 0 }}>
-            <span>Sales Person</span>
-            <select
-              value={selectedSalesPerson}
-              onChange={(event) => setSelectedSalesPerson(event.target.value)}
-            >
-              <option value="all">All Sales Persons</option>
-              {salesPeople.map((person) => (
-                <option key={person.id} value={person.id}>
-                  {person.name}
-                </option>
-              ))}
-            </select>
-          </label>
         </div>
       </div>
 
-      <table className="clients-table">
-        <thead>
-          <tr>
-            <th>Client</th>
-            <th>Company</th>
-            <th>Assigned rep</th>
-            <th>Email</th>
-            <th>Phone</th>
-            <th>Start</th>
-            <th></th>
-          </tr>
-        </thead>
-        <tbody>
-          {filteredClients.map((client) => (
-            <tr key={client.id}>
-              <td>{client.name}</td>
-              <td>{client.company}</td>
-              <td>{client.salesRep}</td>
-              <td>{client.email}</td>
-              <td>{client.phone}</td>
-              <td>{client.startDate}</td>
-              <td style={{ textAlign: "right" }}>
-                <button
-                  className="table-action"
-                  type="button"
-                  onClick={() => setSelectedClient(client)}
-                >
-                  Info
-                </button>
-                <button
-                  className="table-action danger"
-                  type="button"
-                  onClick={() => setDeleteTargetClient(client)}
-                >
-                  Delete
-                </button>
-              </td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
+      {/* KPI Ribbon */}
+      <div className="manager-kpi-ribbon">
+        <div className="analytics-card manager-kpi-tile">
+          <div className="manager-kpi-tile-top">
+            <span className="manager-kpi-tile-label">Total Accounts</span>
+            <div className="manager-kpi-tile-icon">
+              <Icon name="clients" size={16} />
+            </div>
+          </div>
+          <div>
+            <strong className="manager-kpi-tile-value">{clients.length}</strong>
+            <span className="manager-kpi-tile-sub">Managed Portfolio</span>
+          </div>
+        </div>
+
+        <div className="analytics-card manager-kpi-tile">
+          <div className="manager-kpi-tile-top">
+            <span className="manager-kpi-tile-label">Assigned Reps</span>
+            <div className="manager-kpi-tile-icon" style={{ background: "rgba(59, 130, 246, 0.12)", color: "#3b82f6" }}>
+              <Icon name="team" size={16} />
+            </div>
+          </div>
+          <div>
+            <strong className="manager-kpi-tile-value" style={{ color: "#3b82f6" }}>{salesPeople.length}</strong>
+            <span className="manager-kpi-tile-sub">Active Sales Handlers</span>
+          </div>
+        </div>
+
+        <div className="analytics-card manager-kpi-tile">
+          <div className="manager-kpi-tile-top">
+            <span className="manager-kpi-tile-label">Branch Volume</span>
+            <div className="manager-kpi-tile-icon" style={{ background: "rgba(16, 185, 129, 0.12)", color: "#10b981" }}>
+              <Icon name="wallet" size={16} />
+            </div>
+          </div>
+          <div>
+            <strong className="manager-kpi-tile-value" style={{ color: "#10b981" }}>₹{stats.totalRevenue.toLocaleString("en-IN")}k</strong>
+            <span className="manager-kpi-tile-sub">Acquired Contract Revenue</span>
+          </div>
+        </div>
+      </div>
+
+      {/* Search & Filter Toolbar */}
+      <div className="analytics-card manager-toolbar-card">
+        <div className="manager-toolbar-filters">
+          <div className="manager-search-box">
+            <span className="manager-search-icon">
+              <Icon name="search" size={14} />
+            </span>
+            <input
+              type="text"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              placeholder="Search by client, company, rep, email, or phone..."
+            />
+          </div>
+
+          <select
+            className="manager-filter-select"
+            value={selectedSalesPerson}
+            onChange={(event) => setSelectedSalesPerson(event.target.value)}
+          >
+            <option value="all">All Sales Persons</option>
+            {salesPeople.map((person) => (
+              <option key={person.id} value={person.id}>
+                {person.name}
+              </option>
+            ))}
+          </select>
+        </div>
+
+        <div className="manager-count-badge">
+          <span>Showing</span>
+          <strong>{filteredClients.length}</strong>
+          <span>of {clients.length} clients</span>
+        </div>
+      </div>
+
+      {/* Clients Table Card */}
+      <div className="analytics-card manager-table-card">
+        <div className="manager-table-scroll">
+          <table className="manager-team-table">
+            <thead>
+              <tr>
+                <th>Client & Company</th>
+                <th>Assigned Rep</th>
+                <th>Contact Info</th>
+                <th>Service Plan</th>
+                <th>Revenue</th>
+                <th>Onboarding</th>
+                <th style={{ textAlign: "right" }}>Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              {filteredClients.map((client) => {
+                const initials = client.name
+                  ? client.name
+                      .split(" ")
+                      .map((n) => n[0])
+                      .join("")
+                      .slice(0, 2)
+                      .toUpperCase()
+                  : "CL";
+
+                return (
+                  <tr key={client.id}>
+                    <td>
+                      <div className="manager-member-avatar-cell">
+                        <div className="manager-member-avatar">{initials}</div>
+                        <div className="manager-member-details">
+                          <strong className="manager-member-name">{client.name}</strong>
+                          <span className="manager-member-branch">
+                            {client.company || "Individual"}
+                          </span>
+                        </div>
+                      </div>
+                    </td>
+                    <td>
+                      <span className="manager-rep-pill">
+                        <Icon name="user" size={12} />
+                        {client.salesRep || "Unassigned"}
+                      </span>
+                    </td>
+                    <td>
+                      <div style={{ display: "flex", flexDirection: "column", gap: 2 }}>
+                        <span>{client.email}</span>
+                        <span style={{ fontSize: 12, color: "#7a748e", fontFamily: "monospace" }}>
+                          {client.phone}
+                        </span>
+                      </div>
+                    </td>
+                    <td>
+                      <span className="manager-service-pill">
+                        {client.service || "Standard"}
+                      </span>
+                    </td>
+                    <td>
+                      <strong style={{ fontSize: 13.5, fontWeight: 800, color: "#10b981" }}>
+                        {client.revenue || "—"}
+                      </strong>
+                    </td>
+                    <td>
+                      <span style={{ fontSize: 12.5, color: "#7a748e" }}>{client.startDate || "2025"}</span>
+                    </td>
+                    <td style={{ textAlign: "right" }}>
+                      <div style={{ display: "inline-flex", gap: 8 }}>
+                        <button
+                          className="manager-view-btn"
+                          type="button"
+                          onClick={() => setSelectedClient(client)}
+                        >
+                          <Icon name="eye" size={13} />
+                          <span>View</span>
+                        </button>
+                        <button
+                          className="manager-btn-danger"
+                          type="button"
+                          onClick={() => setDeleteTargetClient(client)}
+                        >
+                          <span>Delete</span>
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                );
+              })}
+              {filteredClients.length === 0 && (
+                <tr>
+                  <td colSpan={7} className="manager-empty-state">
+                    No client records found matching your filters.
+                  </td>
+                </tr>
+              )}
+            </tbody>
+          </table>
+        </div>
+      </div>
 
       {selectedClient && (
         <ManagerClientInfoModal
@@ -137,7 +268,9 @@ export default function ManagerClientsPage({
       {deleteTargetClient && (
         <SimpleModal onClose={() => setDeleteTargetClient(null)} showCloseButton={false}>
           <ConfirmDialog
-            message={`Delete ${deleteTargetClient.name} from clients?`}
+            title="Delete Client Account?"
+            message={`Are you sure you want to remove ${deleteTargetClient.name} (${deleteTargetClient.company || "Client"}) from the active client roster?`}
+            confirmLabel="Delete Account"
             onConfirm={confirmDeleteClient}
             onCancel={() => setDeleteTargetClient(null)}
           />

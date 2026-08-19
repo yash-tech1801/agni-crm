@@ -1,5 +1,6 @@
 import React, { useMemo, useState } from "react";
 import Modal from "../../components/Modal";
+import Icon from "../../components/Icon";
 import { mockClients } from "./mockClients";
 
 const PAYMENT_TABS = ["All Records", "Payment Requests", "Completed Payments"];
@@ -99,10 +100,10 @@ const initialPayments = [
 ];
 
 const statusBadge = {
-  Paid: "#44bfb0",
-  Requested: "#f2aa38",
-  Pending: "#f2aa38",
-  Overdue: "#ff5757",
+  Paid: "#10b981",
+  Requested: "#f59e0b",
+  Pending: "#f59e0b",
+  Overdue: "#f43f5e",
   Cancelled: "#7c8490",
 };
 
@@ -164,104 +165,129 @@ function CreatePaymentRequestModal({ clients, onClose, onSubmit }) {
   };
 
   return (
-    <Modal title="Create Payment Request" onClose={onClose} closeLabel="Close">
-      <div style={{ display: "grid", gap: 18, minWidth: 320, maxWidth: 680 }}>
-        <div style={{ display: "grid", gap: 18 }}>
-          <div>
-            <p className="dashboard-eyebrow">Payment Demand</p>
-            <h2 style={{ margin: 0 }}>Issue Payment Request</h2>
-          </div>
+    <Modal title="Issue Payment Request" onClose={onClose} closeLabel="Close">
+      <div style={{ display: "flex", flexDirection: "column", gap: 18, minWidth: 320, maxWidth: 680 }}>
+        <div>
+          <p className="eyebrow" style={{ margin: 0, textTransform: "uppercase", letterSpacing: 1, fontSize: 11, color: "#8c5ff8", fontWeight: 700 }}>
+            Payment Demand
+          </p>
+          <h2 style={{ margin: "4px 0 4px", fontSize: 18, fontWeight: 800 }}>Create New Payment Demand</h2>
+          <p style={{ margin: 0, color: "#7a748e", fontSize: 13 }}>
+            Generate a formal payment request notification and track settlement progress.
+          </p>
+        </div>
 
+        <label className="field-label">
+          <span>Target Client Account <span style={{ color: "#f43f5e" }}>*</span></span>
+          <select name="clientId" value={formData.clientId} onChange={handleChange} style={{ padding: "10px 14px", borderRadius: 10 }} required>
+            {clients.map((client) => (
+              <option key={client.id} value={client.id}>
+                {client.name} — {client.company}
+              </option>
+            ))}
+          </select>
+        </label>
+
+        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 14 }}>
           <label className="field-label">
-            Client
-            <select name="clientId" value={formData.clientId} onChange={handleChange} required>
-              {clients.map((client) => (
-                <option key={client.id} value={client.id}>
-                  {client.name} — {client.company}
-                </option>
-              ))}
-            </select>
-          </label>
-
-          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 14 }}>
-            <label className="field-label">
-              Requested Amount (₹)
-              <input
-                type="number"
-                name="amount"
-                value={formData.amount}
-                onChange={handleChange}
-                placeholder="e.g. 25000"
-                min="1"
-                required
-              />
-            </label>
-
-            <label className="field-label">
-              Preferred Payment Mode
-              <select name="paymentMode" value={formData.paymentMode} onChange={handleChange}>
-                {PAYMENT_MODES.map((mode) => (
-                  <option key={mode} value={mode}>{mode}</option>
-                ))}
-              </select>
-            </label>
-          </div>
-
-          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 14 }}>
-            <label className="field-label">
-              Due Date
-              <input type="date" name="dueDate" value={formData.dueDate} onChange={handleChange} required />
-            </label>
-
-            <label className="field-label">
-              Related Invoice (optional)
-              <input
-                type="text"
-                name="relatedInvoice"
-                value={formData.relatedInvoice}
-                onChange={handleChange}
-                placeholder="e.g. INV-2026-008"
-              />
-            </label>
-          </div>
-
-          <label className="field-label">
-            Description / Reason for Request
-            <textarea
-              name="description"
-              value={formData.description}
+            <span>Requested Amount (₹) <span style={{ color: "#f43f5e" }}>*</span></span>
+            <input
+              type="number"
+              name="amount"
+              value={formData.amount}
               onChange={handleChange}
-              rows={3}
-              placeholder="Explain the payment installment or purpose"
-              style={{ resize: "vertical", minHeight: 90, padding: 12, borderRadius: 8, border: "1px solid #dedfe1", font: "inherit" }}
+              placeholder="e.g. 25000"
+              min="1"
+              required
             />
           </label>
 
-          {/* Live Summary Box */}
-          <div style={{ background: "#fbfbfe", padding: 14, borderRadius: 12, border: "1px solid #e7e7f5", display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
-            <div>
-              <p className="eyebrow" style={{ margin: "0 0 4px" }}>Total Demand</p>
-              <strong style={{ color: "#4e7cff", fontSize: 17 }}>{formatCurrency(formData.amount || 0)}</strong>
-            </div>
-            <div>
-              <p className="eyebrow" style={{ margin: "0 0 4px" }}>Payment Method</p>
-              <strong>{formData.paymentMode}</strong>
-            </div>
-          </div>
+          <label className="field-label">
+            <span>Preferred Payment Mode</span>
+            <select name="paymentMode" value={formData.paymentMode} onChange={handleChange}>
+              {PAYMENT_MODES.map((mode) => (
+                <option key={mode} value={mode}>{mode}</option>
+              ))}
+            </select>
+          </label>
+        </div>
 
-          <div style={{ display: "flex", justifyContent: "flex-end", flexWrap: "wrap", gap: 10, marginTop: 4 }}>
-            <button className="table-action" type="button" onClick={onClose}>
-              Cancel
-            </button>
-            <button
-              className="primary-button"
-              type="button"
-              onClick={handleSubmit}
-              disabled={!formData.amount || Number(formData.amount) <= 0}
-            >
-              Create Request
-            </button>
+        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 14 }}>
+          <label className="field-label">
+            <span>Due Date <span style={{ color: "#f43f5e" }}>*</span></span>
+            <input type="date" name="dueDate" value={formData.dueDate} onChange={handleChange} required />
+          </label>
+
+          <label className="field-label">
+            <span>Related Invoice Ref (optional)</span>
+            <input
+              type="text"
+              name="relatedInvoice"
+              value={formData.relatedInvoice}
+              onChange={handleChange}
+              placeholder="e.g. INV-2026-008"
+            />
+          </label>
+        </div>
+
+        <label className="field-label">
+          <span>Description / Milestone Remarks</span>
+          <textarea
+            name="description"
+            value={formData.description}
+            onChange={handleChange}
+            rows={3}
+            placeholder="Explain the payment installment or purpose..."
+            style={{ resize: "vertical", minHeight: 80, padding: "10px 14px", borderRadius: 10, fontFamily: "inherit" }}
+          />
+        </label>
+
+        {/* Live Summary Box */}
+        <div
+          style={{
+            background: "linear-gradient(135deg, rgba(140, 95, 248, 0.08) 0%, rgba(109, 59, 245, 0.03) 100%)",
+            padding: "16px 20px",
+            borderRadius: 14,
+            border: "1px solid rgba(140, 95, 248, 0.2)",
+            display: "grid",
+            gridTemplateColumns: "1fr 1fr",
+            gap: 14,
+          }}
+        >
+          <div>
+            <span style={{ fontSize: 11.5, color: "#7a748e", textTransform: "uppercase", letterSpacing: 0.5, fontWeight: 600, display: "block", marginBottom: 3 }}>
+              Total Demand
+            </span>
+            <strong style={{ color: "#10b981", fontSize: 18, fontWeight: 700 }}>
+              {formatCurrency(formData.amount || 0)}
+            </strong>
           </div>
+          <div>
+            <span style={{ fontSize: 11.5, color: "#7a748e", textTransform: "uppercase", letterSpacing: 0.5, fontWeight: 600, display: "block", marginBottom: 3 }}>
+              Payment Method
+            </span>
+            <strong style={{ fontSize: 15, color: "#8c5ff8" }}>{formData.paymentMode}</strong>
+          </div>
+        </div>
+
+        <div style={{ display: "flex", justifyContent: "flex-end", flexWrap: "wrap", gap: 12, marginTop: 4 }}>
+          <button className="sales-btn-secondary" type="button" onClick={onClose}>
+            Cancel
+          </button>
+          <button
+            className="sales-add-btn"
+            type="button"
+            onClick={handleSubmit}
+            disabled={!formData.amount || Number(formData.amount) <= 0}
+            style={{
+              opacity: (!formData.amount || Number(formData.amount) <= 0) ? 0.5 : 1,
+              cursor: (!formData.amount || Number(formData.amount) <= 0) ? "not-allowed" : "pointer",
+              padding: "10px 24px",
+              fontSize: 13.5,
+            }}
+          >
+            <span>+ Issue Payment Request</span>
+          </button>
         </div>
       </div>
     </Modal>
@@ -272,75 +298,105 @@ function PaymentDetailsModal({ payment, onClose, onDownload }) {
   if (!payment) return null;
 
   return (
-    <Modal title={`Payment Record ${payment.id}`} onClose={onClose} closeLabel="Close">
-      <div style={{ display: "grid", gap: 18, maxWidth: 680 }}>
-        <div style={{ display: "grid", gap: 10 }}>
-          <div style={{ display: "flex", justifyContent: "space-between", flexWrap: "wrap", gap: 12 }}>
+    <Modal title={`Payment Record Details — ${payment.id}`} onClose={onClose} closeLabel="Close">
+      <div style={{ display: "flex", flexDirection: "column", gap: 18, maxWidth: 680 }}>
+        {/* Top Summary Banner */}
+        <div
+          style={{
+            display: "grid",
+            gridTemplateColumns: "repeat(auto-fit, minmax(160px, 1fr))",
+            gap: 12,
+            padding: 16,
+            borderRadius: 14,
+            background: "linear-gradient(135deg, rgba(140, 95, 248, 0.08) 0%, rgba(109, 59, 245, 0.03) 100%)",
+            border: "1px solid rgba(140, 95, 248, 0.16)",
+          }}
+        >
+          <div>
+            <span style={{ fontSize: 11.5, color: "#7a748e", textTransform: "uppercase", letterSpacing: 0.5, fontWeight: 600, display: "block" }}>
+              Client
+            </span>
+            <strong style={{ fontSize: 15, marginTop: 2, display: "block" }}>{payment.clientName}</strong>
+          </div>
+          <div>
+            <span style={{ fontSize: 11.5, color: "#7a748e", textTransform: "uppercase", letterSpacing: 0.5, fontWeight: 600, display: "block" }}>
+              Record Type
+            </span>
+            <strong style={{ fontSize: 14, marginTop: 2, display: "block", color: "#8c5ff8" }}>{payment.type}</strong>
+          </div>
+          <div>
+            <span style={{ fontSize: 11.5, color: "#7a748e", textTransform: "uppercase", letterSpacing: 0.5, fontWeight: 600, display: "block" }}>
+              Status
+            </span>
             <div>
-              <p className="eyebrow">Client</p>
-              <strong>{payment.clientName}</strong>
-            </div>
-            <div>
-              <p className="eyebrow">Record Type</p>
-              <strong>{payment.type}</strong>
-            </div>
-            <div>
-              <p className="eyebrow">Status</p>
               <span
                 style={{
                   display: "inline-flex",
                   alignItems: "center",
-                  padding: "4px 10px",
+                  padding: "4px 12px",
                   borderRadius: 999,
-                  background: `${statusBadge[payment.status] || "#f2aa38"}22`,
-                  color: statusBadge[payment.status] || "#f2aa38",
+                  background: `${statusBadge[payment.status] || "#f59e0b"}22`,
+                  color: statusBadge[payment.status] || "#f59e0b",
                   fontWeight: 700,
                   fontSize: 12,
+                  marginTop: 2,
                 }}
               >
                 {payment.status}
               </span>
             </div>
           </div>
+        </div>
 
-          <div style={{ display: "grid", gridTemplateColumns: "repeat(3, minmax(0, 1fr))", gap: 10 }}>
-            <div style={{ background: "#fbfbfe", padding: 14, borderRadius: 12, border: "1px solid #e7e7f5" }}>
-              <p className="eyebrow">Amount</p>
-              <strong style={{ color: "#4e7cff" }}>{formatCurrency(payment.amount)}</strong>
-            </div>
-            <div style={{ background: "#fbfbfe", padding: 14, borderRadius: 12, border: "1px solid #e7e7f5" }}>
-              <p className="eyebrow">Payment Mode</p>
-              <strong>{payment.paymentMode}</strong>
-            </div>
-            <div style={{ background: "#fbfbfe", padding: 14, borderRadius: 12, border: "1px solid #e7e7f5" }}>
-              <p className="eyebrow">Date</p>
-              <strong>{payment.date || payment.dueDate}</strong>
-            </div>
+        {/* 3-Column Metrics */}
+        <div style={{ display: "grid", gridTemplateColumns: "repeat(3, minmax(0, 1fr))", gap: 12 }}>
+          <div style={{ padding: "12px 14px", borderRadius: 12, border: "1px solid rgba(16, 185, 129, 0.25)", background: "rgba(16, 185, 129, 0.06)" }}>
+            <span style={{ fontSize: 11.5, color: "#10b981", fontWeight: 600, display: "block" }}>Amount</span>
+            <strong style={{ fontSize: 16, color: "#10b981", marginTop: 2, display: "block", fontWeight: 700 }}>
+              {formatCurrency(payment.amount)}
+            </strong>
+          </div>
+          <div style={{ padding: "12px 14px", borderRadius: 12, border: "1px solid rgba(140, 95, 248, 0.14)", background: "rgba(255, 255, 255, 0.02)" }}>
+            <span style={{ fontSize: 11.5, color: "#7a748e", fontWeight: 600, display: "block" }}>Payment Mode</span>
+            <strong style={{ fontSize: 13.5, marginTop: 3, display: "block" }}>{payment.paymentMode}</strong>
+          </div>
+          <div style={{ padding: "12px 14px", borderRadius: 12, border: "1px solid rgba(140, 95, 248, 0.14)", background: "rgba(255, 255, 255, 0.02)" }}>
+            <span style={{ fontSize: 11.5, color: "#7a748e", fontWeight: 600, display: "block" }}>Date</span>
+            <strong style={{ fontSize: 13.5, marginTop: 3, display: "block" }}>{payment.date || payment.dueDate}</strong>
           </div>
         </div>
 
-        <div style={{ background: "#fbfbfe", padding: 14, borderRadius: 12, border: "1px solid #e7e7f5" }}>
-          <p className="eyebrow">Description</p>
-          <div>{payment.description}</div>
+        {/* Description */}
+        <div style={{ padding: "14px 16px", borderRadius: 12, border: "1px solid rgba(140, 95, 248, 0.14)", background: "rgba(140, 95, 248, 0.04)" }}>
+          <span style={{ fontSize: 11.5, fontWeight: 700, textTransform: "uppercase", letterSpacing: 0.5, color: "#8c5ff8", display: "block", marginBottom: 4 }}>
+            Payment Description / Purpose
+          </span>
+          <p style={{ margin: 0, fontSize: 13.5, lineHeight: 1.5, color: "inherit" }}>
+            {payment.description}
+          </p>
         </div>
 
-        <div style={{ display: "grid", gridTemplateColumns: "repeat(2, minmax(0, 1fr))", gap: 10 }}>
-          <div style={{ background: "#fbfbfe", padding: 14, borderRadius: 12, border: "1px solid #e7e7f5" }}>
-            <p className="eyebrow">Related Invoice</p>
-            <strong>{payment.relatedInvoice || "N/A"}</strong>
+        {/* Related Invoice & Transaction Ref */}
+        <div style={{ display: "grid", gridTemplateColumns: "repeat(2, minmax(0, 1fr))", gap: 12 }}>
+          <div style={{ padding: "12px 14px", borderRadius: 12, border: "1px solid rgba(140, 95, 248, 0.14)", background: "rgba(255, 255, 255, 0.02)" }}>
+            <span style={{ fontSize: 11.5, color: "#7a748e", fontWeight: 600, display: "block" }}>Related Invoice</span>
+            <strong style={{ fontSize: 14, marginTop: 3, display: "block", color: "#8c5ff8" }}>{payment.relatedInvoice || "N/A"}</strong>
           </div>
-          <div style={{ background: "#fbfbfe", padding: 14, borderRadius: 12, border: "1px solid #e7e7f5" }}>
-            <p className="eyebrow">Transaction Reference</p>
-            <strong>{payment.transactionRef || "Pending Settlement"}</strong>
+          <div style={{ padding: "12px 14px", borderRadius: 12, border: "1px solid rgba(140, 95, 248, 0.14)", background: "rgba(255, 255, 255, 0.02)" }}>
+            <span style={{ fontSize: 11.5, color: "#7a748e", fontWeight: 600, display: "block" }}>Transaction Reference</span>
+            <strong style={{ fontSize: 13.5, marginTop: 3, display: "block", fontFamily: "monospace" }}>
+              {payment.transactionRef || "Pending Settlement"}
+            </strong>
           </div>
         </div>
 
-        <div style={{ display: "flex", justifyContent: "flex-end", gap: 10 }}>
-          <button className="table-action" type="button" onClick={() => onDownload(payment)}>
-            Download Receipt
+        {/* Action Buttons */}
+        <div style={{ display: "flex", justifyContent: "flex-end", gap: 12, marginTop: 6 }}>
+          <button className="sales-btn-secondary" type="button" onClick={() => onDownload(payment)} style={{ padding: "9px 18px" }}>
+            📥 Download Receipt
           </button>
-          <button className="primary-button" type="button" onClick={onClose}>
-            Close
+          <button className="sales-add-btn" type="button" onClick={onClose} style={{ padding: "9px 24px" }}>
+            <span>Close</span>
           </button>
         </div>
       </div>
@@ -351,16 +407,61 @@ function PaymentDetailsModal({ payment, onClose, onDownload }) {
 export default function SalesPayments() {
   const [activeTab, setActiveTab] = useState("All Records");
   const [payments, setPayments] = useState(initialPayments);
+  const [searchTerm, setSearchTerm] = useState("");
+  const [modeFilter, setModeFilter] = useState("all");
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [selectedPayment, setSelectedPayment] = useState(null);
   const [notification, setNotification] = useState("");
 
+  // KPI Calculations
+  const stats = useMemo(() => {
+    const totalCollected = payments
+      .filter((p) => p.status === "Paid")
+      .reduce((sum, p) => sum + (Number(p.amount) || 0), 0);
+
+    const totalPending = payments
+      .filter((p) => p.status === "Requested" || p.status === "Pending")
+      .reduce((sum, p) => sum + (Number(p.amount) || 0), 0);
+
+    const totalDemand = totalCollected + totalPending;
+    const collectionRate = totalDemand > 0 ? Math.round((totalCollected / totalDemand) * 100) : 0;
+
+    return {
+      totalCollected,
+      totalPending,
+      collectionRate,
+      count: payments.length,
+    };
+  }, [payments]);
+
   const filteredPayments = useMemo(() => {
-    if (activeTab === "All Records") return payments;
-    if (activeTab === "Payment Requests") return payments.filter((p) => p.type === "Payment Request" || p.status === "Requested");
-    if (activeTab === "Completed Payments") return payments.filter((p) => p.status === "Paid");
-    return payments;
-  }, [payments, activeTab]);
+    return payments.filter((p) => {
+      // Tab filter
+      if (activeTab === "Payment Requests" && !(p.type === "Payment Request" || p.status === "Requested")) {
+        return false;
+      }
+      if (activeTab === "Completed Payments" && p.status !== "Paid") {
+        return false;
+      }
+
+      // Mode filter
+      if (modeFilter !== "all" && p.paymentMode !== modeFilter) {
+        return false;
+      }
+
+      // Search filter
+      if (searchTerm.trim()) {
+        const query = searchTerm.toLowerCase();
+        const matchId = p.id.toLowerCase().includes(query);
+        const matchClient = p.clientName.toLowerCase().includes(query);
+        const matchCompany = (p.clientCompany || "").toLowerCase().includes(query);
+        const matchInvoice = (p.relatedInvoice || "").toLowerCase().includes(query);
+        if (!matchId && !matchClient && !matchCompany && !matchInvoice) return false;
+      }
+
+      return true;
+    });
+  }, [payments, activeTab, modeFilter, searchTerm]);
 
   const addPaymentRequest = (newReq) => {
     const reqWithId = {
@@ -431,110 +532,238 @@ Thank you for choosing AgniCRM.
   };
 
   return (
-    <section>
-      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: 16, marginBottom: 24 }}>
-        <div>
-          <p className="dashboard-eyebrow">Payments</p>
-          <h1>Payment Tracker</h1>
+    <section className="sales-page-view">
+      {/* Header Banner */}
+      <div className="sales-header-banner">
+        <div className="sales-header-info">
+          <p className="sales-header-eyebrow">Payments & Collections</p>
+          <h1 className="sales-header-title">Payment Tracker</h1>
+          <p className="sales-header-subtitle">
+            Monitor client payment demands, collection milestones, and verified transaction receipts.
+          </p>
         </div>
-        <button type="button" className="primary-button" onClick={() => setShowCreateModal(true)}>
-          + Create Payment Request
+
+        <button
+          type="button"
+          className="sales-add-btn"
+          onClick={() => setShowCreateModal(true)}
+        >
+          <span style={{ fontSize: 16, lineHeight: 1 }}>+</span>
+          <span>Issue Payment Request</span>
         </button>
       </div>
 
-      <div style={{ display: "flex", flexWrap: "wrap", gap: 10, marginBottom: 20 }}>
-        {PAYMENT_TABS.map((tab) => (
-          <button
-            key={tab}
-            type="button"
-            className="table-action"
-            style={{
-              background: activeTab === tab ? "#4e7cff" : "#fff",
-              color: activeTab === tab ? "#fff" : "#1d2330",
-              border: activeTab === tab ? "1px solid #4e7cff" : "1px solid #e7e7f5",
-              minWidth: 170,
-            }}
-            onClick={() => setActiveTab(tab)}
+      {/* KPI Stats Ribbon */}
+      <div className="sales-kpi-ribbon">
+        <div className="analytics-card sales-kpi-tile">
+          <span className="sales-kpi-tile-label">Total Collected</span>
+          <strong className="sales-kpi-tile-value" style={{ color: "#10b981" }}>
+            {formatCurrency(stats.totalCollected)}
+          </strong>
+          <span className="sales-kpi-tile-sub" style={{ color: "#10b981" }}>
+            ✓ Verified settlements
+          </span>
+        </div>
+
+        <div className="analytics-card sales-kpi-tile">
+          <span className="sales-kpi-tile-label">Pending Demand</span>
+          <strong className="sales-kpi-tile-value" style={{ color: "#f59e0b" }}>
+            {formatCurrency(stats.totalPending)}
+          </strong>
+          <span className="sales-kpi-tile-sub" style={{ color: "#f59e0b" }}>
+            ⏳ Awaiting payment
+          </span>
+        </div>
+
+        <div className="analytics-card sales-kpi-tile">
+          <span className="sales-kpi-tile-label">Collection Rate</span>
+          <strong className="sales-kpi-tile-value" style={{ color: "#8c5ff8" }}>
+            {stats.collectionRate}%
+          </strong>
+          <div className="sales-kpi-progress-bar">
+            <div
+              className="sales-kpi-progress-fill"
+              style={{ width: `${stats.collectionRate}%` }}
+            />
+          </div>
+        </div>
+
+        <div className="analytics-card sales-kpi-tile">
+          <span className="sales-kpi-tile-label">Total Transactions</span>
+          <strong className="sales-kpi-tile-value">
+            {stats.count}
+          </strong>
+          <span className="sales-kpi-tile-sub" style={{ color: "#7a748e" }}>
+            Logged in pipeline
+          </span>
+        </div>
+      </div>
+
+      {/* Tabs & Filters Toolbar */}
+      <div className="analytics-card sales-toolbar-card">
+        {/* Segmented Tab Switcher */}
+        <div className="sales-tabs-switcher">
+          {PAYMENT_TABS.map((tab) => {
+            const isActive = activeTab === tab;
+            const count =
+              tab === "All Records"
+                ? payments.length
+                : tab === "Payment Requests"
+                ? payments.filter((p) => p.type === "Payment Request" || p.status === "Requested").length
+                : payments.filter((p) => p.status === "Paid").length;
+
+            return (
+              <button
+                key={tab}
+                type="button"
+                className={`sales-tab-btn ${isActive ? "active" : ""}`}
+                onClick={() => setActiveTab(tab)}
+              >
+                <span>{tab}</span>
+                <span className="sales-tab-count">
+                  {count}
+                </span>
+              </button>
+            );
+          })}
+        </div>
+
+        {/* Search & Mode Filters */}
+        <div style={{ display: "flex", flexWrap: "wrap", alignItems: "center", gap: 12 }}>
+          <div className="sales-search-box">
+            <span className="sales-search-icon">
+              <Icon name="search" size={14} />
+            </span>
+            <input
+              type="text"
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              placeholder="Search payment or client..."
+            />
+          </div>
+
+          <select
+            className="sales-filter-select"
+            value={modeFilter}
+            onChange={(e) => setModeFilter(e.target.value)}
           >
-            {tab}
-          </button>
-        ))}
+            <option value="all">All Payment Modes</option>
+            {PAYMENT_MODES.map((mode) => (
+              <option key={mode} value={mode}>{mode}</option>
+            ))}
+          </select>
+        </div>
       </div>
 
       {notification ? (
-        <div style={{ marginBottom: 18, padding: 16, borderRadius: 16, background: "#e7f6ff", color: "#175f8f", border: "1px solid #c7e5f7" }}>
-          {notification}
+        <div className="sales-notification-banner">
+          <span>{notification}</span>
+          <button
+            type="button"
+            onClick={() => setNotification("")}
+          >
+            ✕
+          </button>
         </div>
       ) : null}
 
-      <div style={{ overflowX: "auto" }}>
-        <table className="clients-table" style={{ minWidth: 900 }}>
-          <thead>
-            <tr>
-              <th>Reference ID</th>
-              <th>Client Name</th>
-              <th>Type</th>
-              <th>Payment Mode</th>
-              <th>Amount</th>
-              <th>Date / Due Date</th>
-              <th>Status</th>
-              <th style={{ textAlign: "right" }}>Action</th>
-            </tr>
-          </thead>
-          <tbody>
-            {filteredPayments.map((payment) => (
-              <tr key={payment.id}>
-                <td><strong>{payment.id}</strong></td>
-                <td>{payment.clientName}</td>
-                <td>{payment.type}</td>
-                <td>{payment.paymentMode}</td>
-                <td><strong>{formatCurrency(payment.amount)}</strong></td>
-                <td>{payment.date || payment.dueDate}</td>
-                <td>
-                  <span
-                    style={{
-                      display: "inline-flex",
-                      alignItems: "center",
-                      gap: 6,
-                      padding: "6px 10px",
-                      borderRadius: 999,
-                      background: `${statusBadge[payment.status] || "#f2aa38"}22`,
-                      color: statusBadge[payment.status] || "#f2aa38",
-                      fontWeight: 700,
-                      fontSize: 12,
-                    }}
-                  >
-                    {payment.status}
-                  </span>
-                </td>
-                <td style={{ textAlign: "right" }}>
-                  <div style={{ display: "inline-flex", gap: 8 }}>
-                    <button className="table-action" type="button" onClick={() => setSelectedPayment(payment)}>
-                      View
-                    </button>
-                    {payment.status === "Requested" && (
-                      <button
-                        className="table-action"
-                        style={{ color: "#44bfb0", borderColor: "rgba(68, 191, 176, 0.4)" }}
-                        type="button"
-                        onClick={() => markAsPaid(payment.id)}
-                      >
-                        Mark Paid
-                      </button>
-                    )}
-                  </div>
-                </td>
-              </tr>
-            ))}
-            {filteredPayments.length === 0 && (
+      {/* Payments Table Card */}
+      <div className="analytics-card sales-table-card">
+        <div className="sales-table-scroll">
+          <table className="sales-clients-table">
+            <thead>
               <tr>
-                <td colSpan={8} style={{ textAlign: "center", padding: "36px 16px", color: "#6b6b77" }}>
-                  No payment records found under {activeTab}.
-                </td>
+                <th>Reference ID</th>
+                <th>Client & Company</th>
+                <th>Type</th>
+                <th>Payment Mode</th>
+                <th>Amount</th>
+                <th>Date / Due Date</th>
+                <th>Status</th>
+                <th style={{ textAlign: "right" }}>Actions</th>
               </tr>
-            )}
-          </tbody>
-        </table>
+            </thead>
+            <tbody>
+              {filteredPayments.map((payment) => (
+                <tr key={payment.id}>
+                  <td>
+                    <span style={{ fontWeight: 700, color: "#8c5ff8", fontFamily: "monospace", fontSize: 13 }}>
+                      {payment.id}
+                    </span>
+                  </td>
+                  <td>
+                    <div>
+                      <strong className="client-name-title" style={{ display: "block" }}>{payment.clientName}</strong>
+                      <span className="client-company-sub" style={{ display: "block" }}>{payment.clientCompany}</span>
+                    </div>
+                  </td>
+                  <td>
+                    <span
+                      style={{
+                        display: "inline-block",
+                        padding: "3px 8px",
+                        borderRadius: 6,
+                        background: payment.type === "Payment" ? "rgba(16, 185, 129, 0.12)" : "rgba(140, 95, 248, 0.12)",
+                        color: payment.type === "Payment" ? "#10b981" : "#8c5ff8",
+                        fontWeight: 700,
+                        fontSize: 11.5,
+                      }}
+                    >
+                      {payment.type}
+                    </span>
+                  </td>
+                  <td>
+                    <span style={{ fontSize: 13, color: "inherit" }}>{payment.paymentMode}</span>
+                  </td>
+                  <td>
+                    <strong style={{ fontSize: 14, fontWeight: 700, color: payment.status === "Paid" ? "#10b981" : "#f59e0b" }}>
+                      {formatCurrency(payment.amount)}
+                    </strong>
+                  </td>
+                  <td>
+                    <span style={{ fontSize: 12.5, color: "#7a748e" }}>{payment.date || payment.dueDate}</span>
+                  </td>
+                  <td>
+                    <span
+                      className={`stage-tag ${payment.status === "Paid" ? "active" : "prospect"}`}
+                    >
+                      <span style={{ width: 6, height: 6, borderRadius: 999, background: "currentColor" }} />
+                      {payment.status}
+                    </span>
+                  </td>
+                  <td style={{ textAlign: "right" }}>
+                    <div style={{ display: "inline-flex", gap: 8 }}>
+                      <button
+                        type="button"
+                        className="sales-view-btn"
+                        onClick={() => setSelectedPayment(payment)}
+                      >
+                        <Icon name="eye" size={13} />
+                        <span>View</span>
+                      </button>
+                      {payment.status === "Requested" && (
+                        <button
+                          type="button"
+                          className="sales-settle-btn"
+                          onClick={() => markAsPaid(payment.id)}
+                        >
+                          <span>✓ Mark Paid</span>
+                        </button>
+                      )}
+                    </div>
+                  </td>
+                </tr>
+              ))}
+              {filteredPayments.length === 0 && (
+                <tr>
+                  <td colSpan={8} className="sales-empty-cell">
+                    No payment records found matching the current filters.
+                  </td>
+                </tr>
+              )}
+            </tbody>
+          </table>
+        </div>
       </div>
 
       {showCreateModal && (

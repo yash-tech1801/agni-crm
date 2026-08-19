@@ -23,12 +23,18 @@ function RevenueTrendChart({ data }) {
 
   return (
     <svg viewBox={`0 0 ${width} ${height}`} className="dashboard-chart" aria-hidden="true">
-      <path d={areaPath} fill="rgba(154, 116, 233, 0.16)" />
-      <path d={linePath} fill="none" stroke="#9a74e9" strokeWidth="3" strokeLinecap="round" />
+      <defs>
+        <linearGradient id="managerRevGrad" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stopColor="#8c5ff8" stopOpacity="0.35" />
+          <stop offset="100%" stopColor="#8c5ff8" stopOpacity="0.0" />
+        </linearGradient>
+      </defs>
+      <path d={areaPath} fill="url(#managerRevGrad)" />
+      <path d={linePath} fill="none" stroke="#8c5ff8" strokeWidth="3" strokeLinecap="round" />
       {points.map((point) => (
         <g key={point.label}>
-          <circle cx={point.x} cy={point.y} r="4.5" fill="#fff" stroke="#9a74e9" strokeWidth="2" />
-          <text x={point.x} y={height - 6} textAnchor="middle" fill="#7d79a8" fontSize="11">
+          <circle cx={point.x} cy={point.y} r="4.5" fill="#fff" stroke="#8c5ff8" strokeWidth="2.5" />
+          <text x={point.x} y={height - 6} textAnchor="middle" fill="currentColor" opacity="0.65" fontSize="10.5" fontWeight="600">
             {point.label}
           </text>
         </g>
@@ -65,25 +71,25 @@ export default function ManagerRevenuePage({
 
   const revenueSummaryCards = [
     {
-      label: "Team Payment Received",
-      value: `₹${revenueReceived.toLocaleString()}`,
-      hint: "Collected by team members",
+      label: "Payment Received",
+      value: `₹${revenueReceived.toLocaleString("en-IN")}`,
+      hint: "Collected from clients",
       accentClass: "received",
       icon: "arrowUp",
     },
     {
-      label: "Team Payment Pending",
-      value: `₹${revenuePending.toLocaleString()}`,
-      hint: "Pending from team clients",
+      label: "Payment Pending",
+      value: `₹${revenuePending.toLocaleString("en-IN")}`,
+      hint: "Pending team invoices",
       accentClass: "pending",
       icon: "overview",
     },
     {
-      label: "Total Team Payment",
-      value: `₹${revenueTotal.toLocaleString()}`,
-      hint: "Overall team revenue range",
+      label: "Total Pipeline Revenue",
+      value: `₹${revenueTotal.toLocaleString("en-IN")}`,
+      hint: "Combined active deals",
       accentClass: "total",
-      icon: "revenue",
+      icon: "wallet",
     },
   ];
 
@@ -93,147 +99,190 @@ export default function ManagerRevenuePage({
   }, [branchTeam, revenueSalesPersonFilter]);
 
   return (
-    <section style={{ animation: "fadeIn 0.25s ease-out" }}>
-      <div
-        style={{
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "space-between",
-          gap: 12,
-          marginBottom: 16,
-          flexWrap: "wrap",
-        }}
-      >
-        <div>
-          <h2 style={{ margin: 0 }}>Team Revenue Analytics</h2>
-          <div style={{ color: "#7a748e", fontSize: 13, marginTop: 4 }}>
-            Revenue performance for your sales team in {managedRegion} ({managedBranch} Branch)
-          </div>
+    <section className="manager-page-view">
+      {/* Header Banner */}
+      <div className="manager-header-banner">
+        <div className="manager-header-info">
+          <p className="manager-header-eyebrow">Financial Velocity</p>
+          <h1 className="manager-header-title">Team Revenue Intelligence</h1>
+          <p className="manager-header-subtitle">
+            Track commercial deal flows, quota achievement velocities, and collection pipelines for {managedRegion} ({managedBranch} Branch).
+          </p>
         </div>
-        <div style={{ display: "flex", alignItems: "center", gap: 12, flexWrap: "wrap" }}>
-          <div>
-            <label style={{ fontSize: 13, color: "#6b6b77", marginRight: 8 }}>Team Member</label>
+      </div>
+
+      {/* Toolbar Filter */}
+      <div className="analytics-card manager-toolbar-card">
+        <div className="manager-toolbar-filters">
+          <label className="field-label" style={{ margin: 0 }}>
+            <span>Filter Salesperson</span>
             <select
+              className="manager-filter-select"
               value={revenueSalesPersonFilter}
               onChange={(e) => setRevenueSalesPersonFilter(e.target.value)}
             >
-              <option value="all">All Team Members</option>
+              <option value="all">Entire Sales Team ({branchTeam.length} Members)</option>
               {branchTeam.map((member) => (
                 <option key={member.id} value={member.id}>
                   {member.name}
                 </option>
               ))}
             </select>
-          </div>
-          <div>
-            <label style={{ fontSize: 13, color: "#6b6b77", marginRight: 8 }}>Time range</label>
+          </label>
+
+          <label className="field-label" style={{ margin: 0 }}>
+            <span>Time Horizon</span>
             <select
+              className="manager-filter-select"
               value={revenueRange}
               onChange={(event) => setRevenueRange(event.target.value)}
             >
-              <option value="daily">Daily</option>
-              <option value="weekly">Weekly</option>
-              <option value="monthly">Monthly</option>
-              <option value="yearly">Yearly</option>
-              <option value="allTime">All time</option>
+              <option value="daily">Daily Collection</option>
+              <option value="weekly">Weekly View</option>
+              <option value="monthly">Monthly Cycle</option>
+              <option value="yearly">Yearly Aggregate</option>
+              <option value="allTime">All-Time Cumulative</option>
             </select>
-          </div>
+          </label>
+        </div>
+
+        <div className="manager-count-badge">
+          <span>Active Period:</span>
+          <strong>{revenueRange.toUpperCase()}</strong>
         </div>
       </div>
 
-      <div
-        className="revenue-panel"
-        style={{
-          display: "grid",
-          gridTemplateColumns: "1.2fr 0.8fr",
-          gap: 16,
-          alignItems: "stretch",
-        }}
-      >
-        <div className="revenue-summary" style={{ minHeight: 220 }}>
-          <p className="eyebrow">
-            {revenueSalesPersonFilter === "all"
-              ? "Team Revenue Overview"
-              : `${branchTeam.find((m) => String(m.id) === String(revenueSalesPersonFilter))?.name || "Member"}'s Revenue`}
-          </p>
-          <h2>₹{revenueTotal.toLocaleString()}</h2>
-          <p className="revenue-copy">
-            {revenueSalesPersonFilter === "all"
-              ? `Combined revenue of ${branchTeam.length} sales team members.`
-              : "Revenue generated by selected team member."}
-          </p>
+      {/* Hero Sparkline Section */}
+      <div className="revenue-panel">
+        <div className="revenue-summary">
+          <div>
+            <p className="eyebrow">
+              {revenueSalesPersonFilter === "all"
+                ? "Team Revenue Overview"
+                : `${branchTeam.find((m) => String(m.id) === String(revenueSalesPersonFilter))?.name || "Member"}'s Revenue`}
+            </p>
+            <h2>₹{revenueTotal.toLocaleString("en-IN")}</h2>
+            <p className="revenue-copy">
+              {revenueSalesPersonFilter === "all"
+                ? `Aggregate billing performance generated across ${branchTeam.length} active sales representatives.`
+                : "Individual pipeline revenue generated for the designated cycle."}
+            </p>
+          </div>
+
           <div className="revenue-breakdown">
             <div>
-              <span>Average</span>
-              <strong>₹{Math.round(revenueTotal / selectedRevenueData.length).toLocaleString()}</strong>
+              <span>Average Run Rate</span>
+              <strong>₹{Math.round(revenueTotal / selectedRevenueData.length).toLocaleString("en-IN")}</strong>
             </div>
             <div>
-              <span>Peak</span>
-              <strong>₹{Math.max(...selectedRevenueData.map((item) => item.value)).toLocaleString()}</strong>
+              <span>Cycle Peak</span>
+              <strong>₹{Math.max(...selectedRevenueData.map((item) => item.value)).toLocaleString("en-IN")}</strong>
             </div>
             <div>
-              <span>Team Members</span>
+              <span>Active Reps</span>
               <strong>{revenueSalesPersonFilter === "all" ? branchTeam.length : 1}</strong>
             </div>
           </div>
         </div>
-        <div className="revenue-chart-panel" style={{ minHeight: 220 }}>
+
+        <div className="revenue-chart-panel">
           <div className="revenue-chip">
             <Icon name="arrowUp" size={14} />
-            <span>Team Trend</span>
+            <span>Team Pipeline Trend</span>
           </div>
           <RevenueTrendChart data={selectedRevenueData} />
         </div>
       </div>
 
+      {/* Revenue Summary Cards */}
       <div className="revenue-summary-grid">
         {revenueSummaryCards.map((card) => (
           <RevenueSummaryCard key={card.label} card={card} />
         ))}
       </div>
 
-      <div style={{ marginTop: 24 }}>
-        <h3 style={{ margin: "0 0 12px 0" }}>Team Member Revenue Breakdown</h3>
-        <table className="clients-table">
-          <thead>
-            <tr>
-              <th>Sales Person</th>
-              <th>Role</th>
-              <th>Region</th>
-              <th>Monthly Quota</th>
-              <th>Revenue Generated</th>
-              <th>Achievement</th>
-            </tr>
-          </thead>
-          <tbody>
-            {filteredTeam.map((member) => {
-              const salesVal = parseInt(member.monthlySales.replace(/[^0-9]/g, "")) * 1000;
-              const quotaVal = parseInt(member.quota.replace(/[^0-9]/g, "")) * 1000;
-              const pct = Math.round((salesVal / (quotaVal || 1)) * 100);
-              return (
-                <tr key={member.id}>
-                  <td style={{ fontWeight: 600 }}>{member.name}</td>
-                  <td>{member.role}</td>
-                  <td>{member.region}</td>
-                  <td>{member.quota}</td>
-                  <td style={{ color: "#44bfb0", fontWeight: 600 }}>{member.monthlySales}</td>
-                  <td>
-                    <span
-                      className="table-action"
-                      style={{
-                        background: "#eef3ff",
-                        color: "#4e7cff",
-                        border: "1px solid #c7d7fe",
-                      }}
-                    >
-                      {pct}% Achieved
-                    </span>
-                  </td>
-                </tr>
-              );
-            })}
-          </tbody>
-        </table>
+      {/* Team Quota Breakdown Table */}
+      <div className="analytics-card manager-table-card">
+        <div style={{ padding: "18px 22px 14px", borderBottom: "1px solid rgba(140, 95, 248, 0.12)" }}>
+          <h2 style={{ margin: 0, fontSize: 16, fontWeight: 800 }}>Representative Quota Breakdown</h2>
+          <p style={{ margin: "4px 0 0", color: "#7a748e", fontSize: 13 }}>
+            Individual monthly target quotas compared against realized sales collections.
+          </p>
+        </div>
+
+        <div className="manager-table-scroll">
+          <table className="manager-team-table">
+            <thead>
+              <tr>
+                <th>Salesperson</th>
+                <th>Role</th>
+                <th>Monthly Target</th>
+                <th>Realized Revenue</th>
+                <th>Quota Progress</th>
+                <th style={{ textAlign: "right" }}>Attainment</th>
+              </tr>
+            </thead>
+            <tbody>
+              {filteredTeam.map((member) => {
+                const salesVal = parseInt(member.monthlySales.replace(/[^0-9]/g, "")) * 1000;
+                const quotaVal = parseInt(member.quota.replace(/[^0-9]/g, "")) * 1000;
+                const pct = Math.min(Math.round((salesVal / (quotaVal || 1)) * 100), 100);
+                const initials = member.name
+                  ? member.name
+                      .split(" ")
+                      .map((n) => n[0])
+                      .join("")
+                      .slice(0, 2)
+                      .toUpperCase()
+                  : "SP";
+
+                return (
+                  <tr key={member.id}>
+                    <td>
+                      <div className="manager-member-avatar-cell">
+                        <div className="manager-member-avatar">{initials}</div>
+                        <div className="manager-member-details">
+                          <strong className="manager-member-name">{member.name}</strong>
+                          <span className="manager-member-branch">{member.region || managedRegion}</span>
+                        </div>
+                      </div>
+                    </td>
+                    <td>
+                      <span className="manager-role-tag">{member.role}</span>
+                    </td>
+                    <td>
+                      <span style={{ fontWeight: 700 }}>{member.quota}</span>
+                    </td>
+                    <td>
+                      <strong style={{ color: "#10b981", fontSize: 14 }}>{member.monthlySales}</strong>
+                    </td>
+                    <td style={{ minWidth: 160 }}>
+                      <div className="manager-quota-cell">
+                        <div className="manager-quota-bar">
+                          <div
+                            className="manager-quota-fill"
+                            style={{
+                              width: `${pct}%`,
+                              background: pct >= 80 ? "linear-gradient(90deg, #10b981, #34d399)" : "linear-gradient(90deg, #8c5ff8, #6d3bf5)",
+                            }}
+                          />
+                        </div>
+                      </div>
+                    </td>
+                    <td style={{ textAlign: "right" }}>
+                      <span
+                        className={`manager-trend-pill ${pct >= 75 ? "positive" : "negative"}`}
+                        style={{ fontSize: 12, padding: "4px 10px", fontWeight: 800 }}
+                      >
+                        {pct}% Target
+                      </span>
+                    </td>
+                  </tr>
+                );
+              })}
+            </tbody>
+          </table>
+        </div>
       </div>
     </section>
   );

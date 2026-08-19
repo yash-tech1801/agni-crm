@@ -11,64 +11,70 @@ export default function OwnerRequestDecisionModal({
 
   if (!selectedRequest) return null;
 
+  const statusClass = (selectedRequest.status || "pending").toLowerCase();
+
   return (
     <SimpleModal onClose={onClose}>
-      <div style={{ display: "grid", gap: 16 }}>
-        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: 12 }}>
-          <div>
-            <span style={{ color: "#6366f1", fontWeight: 700, fontFamily: "monospace", fontSize: 13 }}>{selectedRequest.id}</span>
-            <h3 style={{ margin: "4px 0 0 0", color: "#0f172a" }}>{selectedRequest.clientName}</h3>
+      <div className="owner-modal-profile">
+        <div className="owner-modal-avatar">REQ</div>
+        <div style={{ flex: 1 }}>
+          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: 12 }}>
+            <div>
+              <span className="owner-rep-pill" style={{ fontFamily: "monospace", fontWeight: 700 }}>
+                {selectedRequest.id}
+              </span>
+              <h2 className="owner-header-title" style={{ marginTop: 4 }}>{selectedRequest.clientName}</h2>
+            </div>
+            <span className={`owner-status-pill ${statusClass}`}>
+              ● {selectedRequest.status}
+            </span>
           </div>
-          <span style={{
-            padding: "4px 12px",
-            borderRadius: 999,
-            fontSize: 12,
-            fontWeight: 700,
-            background: selectedRequest.status === "Approved" ? "#dcfce7" : selectedRequest.status === "Rejected" ? "#ffe4e6" : "#fef3c7",
-            color: selectedRequest.status === "Approved" ? "#15803d" : selectedRequest.status === "Rejected" ? "#be123c" : "#d97706"
-          }}>
-            {selectedRequest.status}
-          </span>
         </div>
+      </div>
 
+      <div style={{ display: "grid", gap: 16 }}>
         {/* Meta info grid */}
-        <div style={{ display: "grid", gridTemplateColumns: "repeat(3, minmax(0, 1fr))", gap: 10 }}>
-          <div style={{ background: "#f8fafc", padding: 12, borderRadius: 10, border: "1px solid #e2e8f0" }}>
-            <div style={{ color: "#64748b", fontSize: 11, fontWeight: 600 }}>Assigned Manager</div>
-            <strong style={{ color: "#0f172a", fontSize: 13, marginTop: 2, display: "block" }}>{selectedRequest.managerName}</strong>
+        <div className="owner-modal-info-grid">
+          <div className="owner-modal-card">
+            <span className="owner-modal-card-label">Assigned Branch Manager</span>
+            <span className="owner-modal-card-val">{selectedRequest.managerName}</span>
           </div>
-          <div style={{ background: "#f8fafc", padding: 12, borderRadius: 10, border: "1px solid #e2e8f0" }}>
-            <div style={{ color: "#64748b", fontSize: 11, fontWeight: 600 }}>Request Type</div>
-            <strong style={{ color: "#4338ca", fontSize: 13, marginTop: 2, display: "block" }}>{selectedRequest.requestType}</strong>
+          <div className="owner-modal-card">
+            <span className="owner-modal-card-label">Request Type</span>
+            <span className="owner-modal-card-val" style={{ color: "#6366f1" }}>{selectedRequest.requestType}</span>
           </div>
-          <div style={{ background: "#f8fafc", padding: 12, borderRadius: 10, border: "1px solid #e2e8f0" }}>
-            <div style={{ color: "#64748b", fontSize: 11, fontWeight: 600 }}>Request Date</div>
-            <strong style={{ color: "#0f172a", fontSize: 13, marginTop: 2, display: "block" }}>{selectedRequest.createdAt}</strong>
+          <div className="owner-modal-card">
+            <span className="owner-modal-card-label">Request Date</span>
+            <span className="owner-modal-card-val">{selectedRequest.createdAt}</span>
           </div>
         </div>
 
         {/* Reason box */}
-        <div style={{ background: "#f8fafc", padding: 14, borderRadius: 10, border: "1px solid #e2e8f0" }}>
-          <div style={{ color: "#64748b", fontSize: 12, fontWeight: 600, marginBottom: 4 }}>Reason for Request:</div>
-          <div style={{ color: "#334155", fontSize: 13, lineHeight: 1.5 }}>{selectedRequest.reason}</div>
+        <div className="owner-modal-card">
+          <span className="owner-modal-card-label">Reason for Request</span>
+          <span className="owner-modal-card-val" style={{ fontWeight: 500, lineHeight: 1.5, marginTop: 4 }}>
+            {selectedRequest.reason}
+          </span>
         </div>
 
         {/* Diff Visualization for Edit Client */}
         {selectedRequest.requestType === "Edit Client" && selectedRequest.requestedChanges && selectedRequest.requestedChanges.length > 0 && (
           <div style={{ display: "grid", gap: 12 }}>
-            <div style={{ color: "#475569", fontSize: 13, fontWeight: 700 }}>Requested Field Changes:</div>
+            <div style={{ fontSize: 13, fontWeight: 700 }}>Requested Field Changes:</div>
             {selectedRequest.requestedChanges.map((change) => (
-              <div key={change.field} style={{ borderRadius: 12, border: "1px solid #e2e8f0", background: "#ffffff", padding: 14 }}>
-                <div style={{ fontSize: 12, fontWeight: 700, color: "#6366f1", marginBottom: 8, textTransform: "uppercase" }}>{change.field}</div>
+              <div key={change.field} className="owner-modal-card" style={{ padding: 14 }}>
+                <div style={{ fontSize: 12, fontWeight: 700, color: "#6366f1", marginBottom: 8, textTransform: "uppercase" }}>
+                  {change.field}
+                </div>
                 <div style={{ display: "grid", gridTemplateColumns: "1fr auto 1fr", gap: 12, alignItems: "center" }}>
-                  <div style={{ background: "#fff1f2", padding: "10px 12px", borderRadius: 8, border: "1px solid #fecdd3" }}>
-                    <div style={{ color: "#9f1239", fontSize: 11, fontWeight: 600 }}>Old Value</div>
-                    <div style={{ color: "#be123c", fontWeight: 700, fontSize: 13, marginTop: 2 }}>{change.oldValue || "-"}</div>
+                  <div style={{ background: "rgba(244, 63, 94, 0.1)", padding: "10px 12px", borderRadius: 8, border: "1px solid rgba(244, 63, 94, 0.2)" }}>
+                    <div style={{ color: "#f43f5e", fontSize: 11, fontWeight: 700 }}>Old Value</div>
+                    <div style={{ fontWeight: 700, fontSize: 13, marginTop: 2 }}>{change.oldValue || "-"}</div>
                   </div>
                   <div style={{ color: "#6366f1", fontWeight: 900, fontSize: 18 }}>↓</div>
-                  <div style={{ background: "#f0fdf4", padding: "10px 12px", borderRadius: 8, border: "1px solid #bbf7d0" }}>
-                    <div style={{ color: "#166534", fontSize: 11, fontWeight: 600 }}>New Value</div>
-                    <div style={{ color: "#15803d", fontWeight: 700, fontSize: 13, marginTop: 2 }}>{change.newValue || "-"}</div>
+                  <div style={{ background: "rgba(16, 185, 129, 0.1)", padding: "10px 12px", borderRadius: 8, border: "1px solid rgba(16, 185, 129, 0.2)" }}>
+                    <div style={{ color: "#10b981", fontSize: 11, fontWeight: 700 }}>New Value</div>
+                    <div style={{ fontWeight: 700, fontSize: 13, marginTop: 2, color: "#10b981" }}>{change.newValue || "-"}</div>
                   </div>
                 </div>
               </div>
@@ -76,38 +82,39 @@ export default function OwnerRequestDecisionModal({
           </div>
         )}
 
-        {/* Owner / Manager Decision & Remarks */}
+        {/* Owner Decision & Remarks */}
         {selectedRequest.status !== "Pending" ? (
-          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10, marginTop: 4 }}>
-            <div style={{ background: "#f8fafc", padding: 12, borderRadius: 10, border: "1px solid #e2e8f0" }}>
-              <div style={{ color: "#64748b", fontSize: 11, fontWeight: 600 }}>Decision Date</div>
-              <strong style={{ color: "#0f172a", fontSize: 13, marginTop: 2, display: "block" }}>{selectedRequest.decisionDate || "-"}</strong>
+          <div className="owner-modal-info-grid">
+            <div className="owner-modal-card">
+              <span className="owner-modal-card-label">Decision Date</span>
+              <span className="owner-modal-card-val">{selectedRequest.decisionDate || "-"}</span>
             </div>
-            <div style={{ background: "#f8fafc", padding: 12, borderRadius: 10, border: "1px solid #e2e8f0" }}>
-              <div style={{ color: "#64748b", fontSize: 11, fontWeight: 600 }}>Owner / Manager Remarks</div>
-              <div style={{ color: "#334155", fontSize: 13, marginTop: 2 }}>{selectedRequest.managerRemarks || "-"}</div>
+            <div className="owner-modal-card">
+              <span className="owner-modal-card-label">Owner Remarks</span>
+              <span className="owner-modal-card-val">{selectedRequest.managerRemarks || "-"}</span>
             </div>
           </div>
         ) : (
-          <div style={{ marginTop: 6, background: "#f8fafc", padding: 14, borderRadius: 10, border: "1px solid #e2e8f0" }}>
-            <label style={{ fontSize: 12, fontWeight: 600, color: "#475569", display: "block", marginBottom: 6 }}>Owner Remarks / Note for Decision:</label>
+          <div className="owner-modal-card">
+            <span className="owner-modal-card-label">Owner Remarks / Note for Decision</span>
             <input
               type="text"
-              placeholder="e.g. Approved after reviewing company document verification"
+              placeholder="e.g. Approved after reviewing business case documents"
               value={remarksInput}
               onChange={(e) => setRemarksInput(e.target.value)}
-              style={{ width: "100%", padding: "8px 12px", borderRadius: 6, border: "1px solid #cbd5e1", fontSize: 13 }}
+              className="owner-search-box input"
+              style={{ width: "100%", padding: "10px 14px", borderRadius: 8, border: "1px solid rgba(99, 102, 241, 0.2)", marginTop: 6, fontSize: 13, background: "transparent", color: "inherit" }}
             />
           </div>
         )}
 
-        <div className="modal-actions" style={{ display: "flex", gap: 10, justifyContent: "flex-end", marginTop: 14 }}>
+        <div className="owner-modal-actions">
           {selectedRequest.status === "Pending" && (
             <>
               <button
                 type="button"
-                className="table-action"
-                style={{ background: "linear-gradient(135deg, #10b981 0%, #059669 100%)", color: "#ffffff", border: "none", fontWeight: 700, padding: "8px 16px", borderRadius: 6 }}
+                className="owner-btn-primary"
+                style={{ background: "linear-gradient(135deg, #10b981 0%, #059669 100%)" }}
                 onClick={() => {
                   onApprove(selectedRequest.id, remarksInput);
                   onClose();
@@ -117,8 +124,7 @@ export default function OwnerRequestDecisionModal({
               </button>
               <button
                 type="button"
-                className="table-action"
-                style={{ background: "#fee2e2", color: "#b91c1c", border: "none", fontWeight: 700, padding: "8px 16px", borderRadius: 6 }}
+                className="owner-btn-danger"
                 onClick={() => {
                   onReject(selectedRequest.id, remarksInput);
                   onClose();
@@ -128,7 +134,9 @@ export default function OwnerRequestDecisionModal({
               </button>
             </>
           )}
-          <button className="table-action" onClick={onClose}>Close</button>
+          <button className="owner-btn-secondary" onClick={onClose}>
+            Close
+          </button>
         </div>
       </div>
     </SimpleModal>

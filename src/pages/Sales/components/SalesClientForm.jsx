@@ -10,36 +10,46 @@ export default function SalesClientForm({
   onGoToDetails,
   dark,
 }) {
+  const baseAmt = parseFloat(newClient.amount) || 0;
+  const isOnline = newClient.paymentMode === "Online";
+
   return (
-    <section className="sales-clients-form-view" style={{ maxWidth: 860, margin: '0 auto', animation: 'fadeIn 0.3s ease' }}>
-      <div style={{ marginBottom: 20, display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 12 }}>
+    <section className="sales-clients-form-view">
+      {/* Top Title Banner */}
+      <div className="sales-header-banner">
         <div>
-          <p className="eyebrow" style={{ margin: 0, textTransform: 'uppercase', letterSpacing: 1, fontSize: 11.5, color: '#8c5ff8', fontWeight: 700 }}>Client Registration</p>
-          <h1 style={{ margin: '4px 0 2px', fontSize: 24, fontWeight: 800, color: dark ? '#f3effc' : '#1e1932', letterSpacing: '-0.5px' }}>Add New Client</h1>
-          <p style={{ margin: 0, color: '#7a748e', fontSize: 13 }}>Fill in client identity, scheme selection, commercial terms, and compliance documents. Submitted details will appear in the <strong>Details</strong> tab.</p>
+          <p className="sales-header-eyebrow">Client Onboarding</p>
+          <h1 className="sales-header-title">Register New Client</h1>
+          <p className="sales-header-subtitle">
+            Enter client identity, scheme tier, commercial terms, and verification numbers. Saved profiles appear in <strong>Details</strong>.
+          </p>
         </div>
+
         <button
           type="button"
           className="sales-btn-secondary"
           onClick={onGoToDetails}
-          style={{ display: 'inline-flex', alignItems: 'center', gap: 6 }}
         >
-          <Icon name="eye" size={14} />
-          <span>Go to Details</span>
+          <Icon name="eye" size={15} />
+          <span>View Directory</span>
         </button>
       </div>
 
-      <div className="sales-table-card" style={{ padding: 24 }}>
-        <form onSubmit={onAddClient} style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
+      {/* Form Container */}
+      <div className="analytics-card sales-form-card">
+        <form onSubmit={onAddClient} className="sales-form-wrapper">
           {/* Section 1: Business Identity */}
           <div className="sales-form-section">
             <div className="sales-section-title">
-              <Icon name="building" size={16} />
+              <div className="sales-section-icon">
+                <Icon name="building" size={15} />
+              </div>
               <span>1. Business & Contact Information</span>
             </div>
+
             <div className="sales-form-grid-2">
               <label className="field-label">
-                Client / Trading Name
+                <span>Client / Trading Name <span style={{ color: "#f43f5e" }}>*</span></span>
                 <input
                   type="text"
                   name="name"
@@ -50,7 +60,7 @@ export default function SalesClientForm({
                 />
               </label>
               <label className="field-label">
-                Contact Person Name
+                <span>Contact Person Name <span style={{ color: "#f43f5e" }}>*</span></span>
                 <input
                   type="text"
                   name="contactPerson"
@@ -61,9 +71,10 @@ export default function SalesClientForm({
                 />
               </label>
             </div>
+
             <div className="sales-form-grid-2" style={{ marginTop: 14 }}>
               <label className="field-label">
-                Registered Company Name
+                <span>Registered Company Name <span style={{ color: "#f43f5e" }}>*</span></span>
                 <input
                   type="text"
                   name="company"
@@ -74,7 +85,7 @@ export default function SalesClientForm({
                 />
               </label>
               <label className="field-label">
-                Registered Office / Location
+                <span>Registered Office / Location</span>
                 <input
                   type="text"
                   name="address"
@@ -84,9 +95,10 @@ export default function SalesClientForm({
                 />
               </label>
             </div>
+
             <div className="sales-form-grid-2" style={{ marginTop: 14 }}>
               <label className="field-label">
-                Official Email Address
+                <span>Official Email Address <span style={{ color: "#f43f5e" }}>*</span></span>
                 <input
                   type="email"
                   name="email"
@@ -97,7 +109,7 @@ export default function SalesClientForm({
                 />
               </label>
               <label className="field-label">
-                Phone Number
+                <span>Phone Number <span style={{ color: "#f43f5e" }}>*</span></span>
                 <input
                   type="tel"
                   name="phone"
@@ -113,12 +125,25 @@ export default function SalesClientForm({
           {/* Section 2: Engagement & Scheme */}
           <div className="sales-form-section">
             <div className="sales-section-title">
-              <Icon name="document" size={16} />
+              <div
+                style={{
+                  width: 28,
+                  height: 28,
+                  borderRadius: 8,
+                  background: "rgba(140, 95, 248, 0.15)",
+                  color: "#8c5ff8",
+                  display: "grid",
+                  placeItems: "center",
+                }}
+              >
+                <Icon name="document" size={15} />
+              </div>
               <span>2. Scheme & Engagement Tier</span>
             </div>
+
             <div className="sales-form-grid-2">
               <label className="field-label">
-                Lifecycle Stage
+                <span>Lifecycle Stage</span>
                 <select name="stage" value={newClient.stage} onChange={onNewClientChange}>
                   <option value="Active">Active</option>
                   <option value="Onboarding">Onboarding</option>
@@ -127,7 +152,7 @@ export default function SalesClientForm({
                 </select>
               </label>
               <label className="field-label">
-                Selected Scheme
+                <span>Selected Scheme <span style={{ color: "#f43f5e" }}>*</span></span>
                 <select name="scheme" value={newClient.scheme} onChange={onNewClientChange} required>
                   {schemeOptions.map((scheme) => (
                     <option key={scheme} value={scheme}>{scheme}</option>
@@ -140,12 +165,25 @@ export default function SalesClientForm({
           {/* Section 3: Commercials & Billing */}
           <div className="sales-form-section">
             <div className="sales-section-title">
-              <Icon name="currency" size={16} />
+              <div
+                style={{
+                  width: 28,
+                  height: 28,
+                  borderRadius: 8,
+                  background: "rgba(140, 95, 248, 0.15)",
+                  color: "#8c5ff8",
+                  display: "grid",
+                  placeItems: "center",
+                }}
+              >
+                <Icon name="currency" size={15} />
+              </div>
               <span>3. Commercials & Payment Setup</span>
             </div>
+
             <div className="sales-form-grid-3">
               <label className="field-label">
-                Base Contract Amount (₹)
+                <span>Base Contract Amount (₹) <span style={{ color: "#f43f5e" }}>*</span></span>
                 <input
                   type="number"
                   name="amount"
@@ -157,14 +195,14 @@ export default function SalesClientForm({
                 />
               </label>
               <label className="field-label">
-                Mode of Payment
+                <span>Mode of Payment</span>
                 <select name="paymentMode" value={newClient.paymentMode} onChange={onNewClientChange}>
                   <option value="Online">Online (18% GST Added)</option>
                   <option value="Offline">Offline (Direct/Exempt)</option>
                 </select>
               </label>
               <label className="field-label">
-                Payment Received (₹)
+                <span>Payment Received (₹)</span>
                 <input
                   type="number"
                   name="paymentReceived"
@@ -176,40 +214,85 @@ export default function SalesClientForm({
               </label>
             </div>
 
-            {/* Live Calculation Summary Box */}
-            <div className="sales-live-calc-box">
-              <div className="sales-live-calc-item">
-                <span>Base Amount</span>
-                <strong>₹{(parseFloat(newClient.amount) || 0).toLocaleString("en-IN")}</strong>
-              </div>
-              <div className="sales-live-calc-item">
-                <span>GST ({newClient.paymentMode === "Online" ? "18%" : "0%"})</span>
-                <strong style={{ color: newClient.paymentMode === "Online" ? "#6d3bf5" : "#7a748e" }}>
-                  ₹{newClient.gstAmount.toLocaleString("en-IN")}
+            {/* Live Calculation Summary Strip */}
+            <div
+              style={{
+                marginTop: 16,
+                padding: "16px 20px",
+                borderRadius: 14,
+                background: "linear-gradient(135deg, rgba(140, 95, 248, 0.08) 0%, rgba(109, 59, 245, 0.04) 100%)",
+                border: "1px solid rgba(140, 95, 248, 0.2)",
+                display: "grid",
+                gridTemplateColumns: "repeat(auto-fit, minmax(160px, 1fr))",
+                gap: 16,
+              }}
+            >
+              <div style={{ display: "flex", flexDirection: "column", gap: 3 }}>
+                <span style={{ fontSize: 11.5, color: "#7a748e", textTransform: "uppercase", letterSpacing: 0.5, fontWeight: 600 }}>
+                  Base Amount
+                </span>
+                <strong style={{ fontSize: 18, fontWeight: 700 }}>
+                  ₹{baseAmt.toLocaleString("en-IN")}
                 </strong>
               </div>
-              <div className="sales-live-calc-item">
-                <span>Total Payable</span>
-                <strong style={{ color: "#10b981" }}>₹{newClient.totalPayment.toLocaleString("en-IN")}</strong>
+
+              <div style={{ display: "flex", flexDirection: "column", gap: 3 }}>
+                <span style={{ fontSize: 11.5, color: "#7a748e", textTransform: "uppercase", letterSpacing: 0.5, fontWeight: 600 }}>
+                  GST ({isOnline ? "18%" : "0%"})
+                </span>
+                <strong style={{ fontSize: 18, fontWeight: 700, color: isOnline ? "#8c5ff8" : "#7a748e" }}>
+                  ₹{(newClient.gstAmount || 0).toLocaleString("en-IN")}
+                </strong>
               </div>
-              <div className="sales-live-calc-item">
-                <span>Pending Balance</span>
-                <strong style={{ color: newClient.paymentPending > 0 ? "#e11d48" : "#059669" }}>
-                  ₹{newClient.paymentPending.toLocaleString("en-IN")}
+
+              <div style={{ display: "flex", flexDirection: "column", gap: 3 }}>
+                <span style={{ fontSize: 11.5, color: "#7a748e", textTransform: "uppercase", letterSpacing: 0.5, fontWeight: 600 }}>
+                  Total Payable
+                </span>
+                <strong style={{ fontSize: 18, fontWeight: 700, color: "#10b981" }}>
+                  ₹{(newClient.totalPayment || 0).toLocaleString("en-IN")}
+                </strong>
+              </div>
+
+              <div style={{ display: "flex", flexDirection: "column", gap: 3 }}>
+                <span style={{ fontSize: 11.5, color: "#7a748e", textTransform: "uppercase", letterSpacing: 0.5, fontWeight: 600 }}>
+                  Pending Balance
+                </span>
+                <strong
+                  style={{
+                    fontSize: 18,
+                    fontWeight: 700,
+                    color: (newClient.paymentPending || 0) > 0 ? "#f43f5e" : "#10b981",
+                  }}
+                >
+                  ₹{(newClient.paymentPending || 0).toLocaleString("en-IN")}
                 </strong>
               </div>
             </div>
           </div>
 
-          {/* Section 4: Compliance & KYC Documents */}
+          {/* Section 4: Compliance & KYC */}
           <div className="sales-form-section">
             <div className="sales-section-title">
-              <Icon name="roles" size={16} />
+              <div
+                style={{
+                  width: 28,
+                  height: 28,
+                  borderRadius: 8,
+                  background: "rgba(140, 95, 248, 0.15)",
+                  color: "#8c5ff8",
+                  display: "grid",
+                  placeItems: "center",
+                }}
+              >
+                <Icon name="roles" size={15} />
+              </div>
               <span>4. Compliance & Verification Numbers</span>
             </div>
+
             <div className="sales-form-grid-3">
               <label className="field-label">
-                PAN Number
+                <span>PAN Number</span>
                 <input
                   type="text"
                   name="panNumber"
@@ -217,10 +300,11 @@ export default function SalesClientForm({
                   onChange={onNewClientChange}
                   placeholder="ABCDE1234F"
                   maxLength={10}
+                  style={{ textTransform: "uppercase" }}
                 />
               </label>
               <label className="field-label">
-                Aadhar Number
+                <span>Aadhar Number</span>
                 <input
                   type="text"
                   name="aadharNumber"
@@ -230,19 +314,21 @@ export default function SalesClientForm({
                 />
               </label>
               <label className="field-label">
-                GST Number
+                <span>GST Number</span>
                 <input
                   type="text"
                   name="gstNumber"
                   value={newClient.gstNumber}
                   onChange={onNewClientChange}
                   placeholder="27ABCDE1234F1Z5"
+                  style={{ textTransform: "uppercase" }}
                 />
               </label>
             </div>
+
             <div className="sales-form-grid-2" style={{ marginTop: 14 }}>
               <label className="field-label">
-                KYC Documentation Status
+                <span>KYC Documentation Status</span>
                 <select name="kycStatus" value={newClient.kycStatus} onChange={onNewClientChange}>
                   <option value="Submitted">Submitted / Verified</option>
                   <option value="Pending">Pending Documents</option>
@@ -250,7 +336,7 @@ export default function SalesClientForm({
                 </select>
               </label>
               <label className="field-label">
-                Internal Account Notes
+                <span>Internal Account Notes</span>
                 <input
                   type="text"
                   name="notes"
@@ -262,7 +348,8 @@ export default function SalesClientForm({
             </div>
           </div>
 
-          <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 12, marginTop: 8 }}>
+          {/* Action Buttons */}
+          <div className="sales-form-actions">
             <button
               type="button"
               className="sales-btn-secondary"
@@ -270,8 +357,11 @@ export default function SalesClientForm({
             >
               Clear Form
             </button>
-            <button type="submit" className="sales-add-btn" style={{ padding: '12px 28px', fontSize: 14 }}>
-              <span>+ Add Client</span>
+            <button
+              type="submit"
+              className="sales-add-btn"
+            >
+              <span>+ Register Client</span>
             </button>
           </div>
         </form>
@@ -279,3 +369,4 @@ export default function SalesClientForm({
     </section>
   );
 }
+
