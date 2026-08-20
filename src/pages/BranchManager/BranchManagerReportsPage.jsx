@@ -45,9 +45,9 @@ export default function BranchManagerReportsPage({
 
       {/* Revenue & Growth Analysis Card */}
       <div className="analytics-card bm-analytics-card">
-        <div className="panel-header" style={{ marginBottom: 18 }}>
+        <div className="panel-header bm-panel-header-gap">
           <div>
-            <p className="eyebrow" style={{ margin: "0 0 4px" }}>Cross-Territorial Analysis</p>
+            <p className="eyebrow bm-panel-eyebrow">Cross-Territorial Analysis</p>
             <h2 className="bm-header-title">Branch Revenue Comparison Chart</h2>
             <p className="bm-header-subtitle">
               Comparative billing volume and target settlement distribution across operational regional zones.

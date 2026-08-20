@@ -1,80 +1,96 @@
-import React, { useMemo, useState } from "react";
+import React, { useState, useMemo } from "react";
 import Icon from "../../components/Icon";
 import BranchManagerCreateRequestModal from "./BranchManagerCreateRequestModal";
 import BranchManagerRequestModal from "./BranchManagerRequestModal";
-import { initialManagerReceivedRequests, initialBranchSentRequests } from "./mockBranchRequests";
+import { initialBranchSentRequests, initialManagerReceivedRequests } from "./mockBranchRequests";
 
 export default function BranchManagerRequestsPage({
   employeesList = [],
   branchAdmins = [],
   branchIT = [],
   branchMarketing = [],
-  myBranch = "East",
 }) {
-  const [activeTab, setActiveTab] = useState("My Requests");
+  const [activeTab, setActiveTab] = useState("My Requests"); // "My Requests", "Manager Requests", "Decision History"
   const [sentRequests, setSentRequests] = useState(initialBranchSentRequests);
   const [receivedRequests, setReceivedRequests] = useState(initialManagerReceivedRequests);
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [selectedRequest, setSelectedRequest] = useState(null);
   const [selectedIsManagerReq, setSelectedIsManagerReq] = useState(false);
   const [notification, setNotification] = useState("");
+
+  // Filter states for History tab
   const [statusFilter, setStatusFilter] = useState("All");
   const [deptFilter, setDeptFilter] = useState("All");
   const [searchQuery, setSearchQuery] = useState("");
 
+  // KPIs
+  const pendingSentCount = useMemo(
+    () => sentRequests.filter((r) => r.status === "Pending").length,
+    [sentRequests]
+  );
   const pendingReceivedCount = useMemo(
     () => receivedRequests.filter((r) => r.status === "Pending").length,
     [receivedRequests]
   );
 
-  const pendingSentCount = useMemo(
-    () => sentRequests.filter((r) => r.status === "Pending").length,
-    [sentRequests]
-  );
-
+  // Filtered Decision History
   const historyList = useMemo(() => {
-    const all = [
+    const combined = [
       ...sentRequests.map((r) => ({ ...r, flowType: "Sent to Owner" })),
-      ...receivedRequests.map((r) => ({ ...r, flowType: "Received from Manager" })),
+      ...receivedRequests.map((r) => ({ ...r, flowType: "Manager Petition" })),
     ];
-    return all.filter((r) => {
-      const matchStatus = statusFilter === "All" || r.status === statusFilter;
-      const matchDept = deptFilter === "All" || r.department === deptFilter;
-      const q = searchQuery.trim().toLowerCase();
+
+    return combined.filter((item) => {
+      const matchStatus = statusFilter === "All" || item.status === statusFilter;
+      const matchDept =
+        deptFilter === "All" ||
+        item.department === deptFilter ||
+        item.targetRole?.toLowerCase().includes(deptFilter.toLowerCase());
+      const query = searchQuery.toLowerCase();
       const matchSearch =
-        !q ||
-        (r.id && r.id.toLowerCase().includes(q)) ||
-        (r.targetName && r.targetName.toLowerCase().includes(q)) ||
-        (r.requesterName && r.requesterName.toLowerCase().includes(q)) ||
-        (r.requestType && r.requestType.toLowerCase().includes(q));
+        !searchQuery ||
+        item.id.toLowerCase().includes(query) ||
+        item.targetName.toLowerCase().includes(query) ||
+        item.requestType.toLowerCase().includes(query) ||
+        (item.requesterName && item.requesterName.toLowerCase().includes(query));
+
       return matchStatus && matchDept && matchSearch;
     });
   }, [sentRequests, receivedRequests, statusFilter, deptFilter, searchQuery]);
 
-  const handleApproveManagerRequest = (requestId, remarks) => {
-    const now = new Date().toISOString().split("T")[0];
+  // Handlers for Manager requests review
+  const handleApproveManagerRequest = (reqId, remarks) => {
     setReceivedRequests((prev) =>
-      prev.map((req) =>
-        req.id === requestId
-          ? { ...req, status: "Approved", decisionDate: now, decisionRemarks: remarks || "Approved by Branch Manager" }
-          : req
+      prev.map((r) =>
+        r.id === reqId
+          ? {
+              ...r,
+              status: "Approved",
+              decisionDate: new Date().toISOString().split("T")[0],
+              managerRemarks: remarks || "Approved by Branch Manager.",
+            }
+          : r
       )
     );
-    setNotification(`Request ${requestId} approved successfully.`);
-    setTimeout(() => setNotification(""), 4200);
+    setNotification(`Request ${reqId} has been Approved.`);
+    setTimeout(() => setNotification(""), 4500);
   };
 
-  const handleRejectManagerRequest = (requestId, remarks) => {
-    const now = new Date().toISOString().split("T")[0];
+  const handleRejectManagerRequest = (reqId, remarks) => {
     setReceivedRequests((prev) =>
-      prev.map((req) =>
-        req.id === requestId
-          ? { ...req, status: "Rejected", decisionDate: now, decisionRemarks: remarks || "Rejected by Branch Manager" }
-          : req
+      prev.map((r) =>
+        r.id === reqId
+          ? {
+              ...r,
+              status: "Rejected",
+              decisionDate: new Date().toISOString().split("T")[0],
+              managerRemarks: remarks || "Rejected by Branch Manager.",
+            }
+          : r
       )
     );
-    setNotification(`Request ${requestId} rejected.`);
-    setTimeout(() => setNotification(""), 4200);
+    setNotification(`Request ${reqId} has been Rejected.`);
+    setTimeout(() => setNotification(""), 4500);
   };
 
   const handleCreateSentRequest = (newReq) => {
@@ -92,21 +108,14 @@ export default function BranchManagerRequestsPage({
         : "#f59e0b";
     return (
       <span
-        className="stage-tag"
+        className="stage-tag bm-req-status-badge"
         style={{
           background: `${color}1a`,
           color: color,
           border: `1px solid ${color}33`,
-          fontWeight: 800,
-          fontSize: 11.5,
-          padding: "3px 10px",
-          borderRadius: 999,
-          display: "inline-flex",
-          alignItems: "center",
-          gap: 5,
         }}
       >
-        <span style={{ width: 6, height: 6, borderRadius: 999, background: color }} />
+        <span className="bm-req-status-dot" style={{ background: color }} />
         {status}
       </span>
     );
@@ -117,8 +126,8 @@ export default function BranchManagerRequestsPage({
       {/* Header Banner */}
       <div className="bm-header-banner">
         <div className="bm-header-info">
-          <p className="bm-header-eyebrow">Governance & Team Requests</p>
-          <h1 className="bm-header-title">Branch Requests & Approvals</h1>
+          <p className="bm-header-eyebrow">Governance &amp; Team Requests</p>
+          <h1 className="bm-header-title">Branch Requests &amp; Approvals</h1>
           <p className="bm-header-subtitle">
             Review operational requests from Regional Managers and submit Edit, Delete, or Transfer petitions for Manager, Admin, IT, and Marketing staff to the Owner.
           </p>
@@ -126,9 +135,8 @@ export default function BranchManagerRequestsPage({
 
         <button
           type="button"
-          className="manager-btn-primary"
+          className="manager-btn-primary bm-req-header-btn"
           onClick={() => setShowCreateModal(true)}
-          style={{ padding: "10px 22px", fontSize: 13.5 }}
         >
           <Icon name="plus" size={16} />
           <span>Create Request</span>
@@ -137,48 +145,48 @@ export default function BranchManagerRequestsPage({
 
       {/* KPI Stats Ribbon */}
       <div className="bm-kpi-ribbon">
-        <div className="analytics-card bm-kpi-tile" style={{ borderLeft: "4px solid #8c5ff8" }}>
+        <div className="analytics-card bm-kpi-tile bm-req-kpi-owner">
           <div className="bm-kpi-tile-top">
             <span className="bm-kpi-tile-label">Pending Owner Decisions</span>
             <Icon name="clock" size={16} />
           </div>
-          <h2 className="bm-kpi-tile-value" style={{ margin: "8px 0 2px", fontSize: 24, fontWeight: 800, color: "#8c5ff8" }}>
+          <h2 className="bm-kpi-tile-value bm-req-kpi-val bm-req-kpi-val-purple">
             {pendingSentCount}
           </h2>
-          <span className="bm-kpi-tile-trend" style={{ fontSize: 12, color: "#7a748e" }}>Sent to Owner queue</span>
+          <span className="bm-kpi-tile-trend bm-req-kpi-trend">Sent to Owner queue</span>
         </div>
 
-        <div className="analytics-card bm-kpi-tile" style={{ borderLeft: "4px solid #f2aa38" }}>
+        <div className="analytics-card bm-kpi-tile bm-req-kpi-manager">
           <div className="bm-kpi-tile-top">
             <span className="bm-kpi-tile-label">Manager Requests to Review</span>
             <Icon name="alert" size={16} />
           </div>
-          <h2 className="bm-kpi-tile-value" style={{ margin: "8px 0 2px", fontSize: 24, fontWeight: 800, color: "#f2aa38" }}>
+          <h2 className="bm-kpi-tile-value bm-req-kpi-val bm-req-kpi-val-amber">
             {pendingReceivedCount}
           </h2>
-          <span className="bm-kpi-tile-trend" style={{ fontSize: 12, color: "#7a748e" }}>Awaiting Branch approval</span>
+          <span className="bm-kpi-tile-trend bm-req-kpi-trend">Awaiting Branch approval</span>
         </div>
 
-        <div className="analytics-card bm-kpi-tile" style={{ borderLeft: "4px solid #10b981" }}>
+        <div className="analytics-card bm-kpi-tile bm-req-kpi-approved">
           <div className="bm-kpi-tile-top">
             <span className="bm-kpi-tile-label">Approved Governance Actions</span>
             <Icon name="checkCircle" size={16} />
           </div>
-          <h2 className="bm-kpi-tile-value" style={{ margin: "8px 0 2px", fontSize: 24, fontWeight: 800, color: "#10b981" }}>
+          <h2 className="bm-kpi-tile-value bm-req-kpi-val bm-req-kpi-val-green">
             {sentRequests.filter((r) => r.status === "Approved").length + receivedRequests.filter((r) => r.status === "Approved").length}
           </h2>
-          <span className="bm-kpi-tile-trend" style={{ fontSize: 12, color: "#7a748e" }}>Active across branch</span>
+          <span className="bm-kpi-tile-trend bm-req-kpi-trend">Active across branch</span>
         </div>
 
-        <div className="analytics-card bm-kpi-tile" style={{ borderLeft: "4px solid #4e7cff" }}>
+        <div className="analytics-card bm-kpi-tile bm-req-kpi-teams">
           <div className="bm-kpi-tile-top">
             <span className="bm-kpi-tile-label">Total Governed Teams</span>
             <Icon name="team" size={16} />
           </div>
-          <h2 className="bm-kpi-tile-value" style={{ margin: "8px 0 2px", fontSize: 24, fontWeight: 800, color: "#4e7cff" }}>
+          <h2 className="bm-kpi-tile-value bm-req-kpi-val bm-req-kpi-val-blue">
             4 Depts
           </h2>
-          <span className="bm-kpi-tile-trend" style={{ fontSize: 12, color: "#7a748e" }}>Manager, Admin, IT, Marketing</span>
+          <span className="bm-kpi-tile-trend bm-req-kpi-trend">Manager, Admin, IT, Marketing</span>
         </div>
       </div>
 
@@ -216,24 +224,24 @@ export default function BranchManagerRequestsPage({
       </div>
 
       {notification && (
-        <div className="manager-alert-banner" style={{ margin: "0 0 8px" }}>
+        <div className="manager-alert-banner bm-req-alert-banner">
           <Icon name="checkCircle" size={16} />
           <span>{notification}</span>
-          <button type="button" onClick={() => setNotification("")} style={{ marginLeft: "auto", background: "none", border: "none", cursor: "pointer", color: "inherit" }}>✕</button>
+          <button type="button" className="bm-req-alert-close" onClick={() => setNotification("")}>✕</button>
         </div>
       )}
 
       {/* TAB 1: MY REQUESTS (SENT TO OWNER) */}
       {activeTab === "My Requests" && (
         <div className="analytics-card sales-table-card">
-          <div style={{ padding: "16px 20px", borderBottom: "1px solid rgba(255, 255, 255, 0.08)", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+          <div className="bm-req-card-header">
             <div>
-              <h3 style={{ margin: 0, fontSize: 16, fontWeight: 800 }}>Governance Petitions Submitted to Owner</h3>
-              <p style={{ margin: "4px 0 0", color: "#7a748e", fontSize: 12.5 }}>
+              <h3 className="bm-req-card-title">Governance Petitions Submitted to Owner</h3>
+              <p className="bm-req-card-sub">
                 Edit, Delete, and Transfer requests created for Managers, Admin, IT, and Marketing staff.
               </p>
             </div>
-            <span style={{ fontSize: 12, color: "#8c5ff8", fontWeight: 700 }}>
+            <span className="bm-req-meta-tag bm-req-meta-purple">
               Recipient: Business Owner
             </span>
           </div>
@@ -249,7 +257,7 @@ export default function BranchManagerRequestsPage({
                   <th>Submission Date</th>
                   <th>Priority</th>
                   <th>Owner Status</th>
-                  <th style={{ textAlign: "right" }}>Action</th>
+                  <th className="bm-req-text-right">Action</th>
                 </tr>
               </thead>
               <tbody>
@@ -259,29 +267,29 @@ export default function BranchManagerRequestsPage({
                     <td>
                       <div>
                         <strong>{req.targetName}</strong>
-                        <small style={{ color: "#7a748e", display: "block", fontSize: 11.5 }}>
+                        <small className="bm-req-subtext">
                           {req.targetRole} ({req.targetBranch} Branch)
                         </small>
                       </div>
                     </td>
                     <td>
-                      <span className="stage-tag" style={{ background: "rgba(140, 95, 248, 0.12)", color: "#8c5ff8" }}>
+                      <span className="stage-tag bm-req-dept-pill">
                         {req.department}
                       </span>
                     </td>
                     <td>
-                      <strong style={{ color: req.requestType.includes("Delete") ? "#f43f5e" : req.requestType.includes("Transfer") ? "#9a74e9" : "#4e7cff" }}>
+                      <strong className={req.requestType.includes("Delete") ? "bm-req-action-del" : req.requestType.includes("Transfer") ? "bm-req-action-transfer" : "bm-req-action-edit"}>
                         {req.requestType}
                       </strong>
                     </td>
                     <td>{req.createdAt}</td>
                     <td>
-                      <span style={{ fontSize: 12, fontWeight: 700, color: req.priority === "High" ? "#f43f5e" : "inherit" }}>
+                      <span className={`bm-req-priority ${req.priority === "High" ? "bm-req-priority-high" : ""}`}>
                         {req.priority || "Normal"}
                       </span>
                     </td>
                     <td>{statusBadge(req.status)}</td>
-                    <td style={{ textAlign: "right" }}>
+                    <td className="bm-req-text-right">
                       <button
                         type="button"
                         className="sales-view-btn"
@@ -312,14 +320,14 @@ export default function BranchManagerRequestsPage({
       {/* TAB 2: MANAGER REQUESTS (RECEIVED FROM MANAGERS) */}
       {activeTab === "Manager Requests" && (
         <div className="analytics-card sales-table-card">
-          <div style={{ padding: "16px 20px", borderBottom: "1px solid rgba(255, 255, 255, 0.08)", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+          <div className="bm-req-card-header">
             <div>
-              <h3 style={{ margin: 0, fontSize: 16, fontWeight: 800 }}>Requests Received from Regional Managers</h3>
-              <p style={{ margin: "4px 0 0", color: "#7a748e", fontSize: 12.5 }}>
+              <h3 className="bm-req-card-title">Requests Received from Regional Managers</h3>
+              <p className="bm-req-card-sub">
                 Review and approve client modifications or operational petitions submitted by branch managers.
               </p>
             </div>
-            <span style={{ fontSize: 12, color: "#f2aa38", fontWeight: 700 }}>
+            <span className="bm-req-meta-tag bm-req-meta-amber">
               {pendingReceivedCount} Pending Review
             </span>
           </div>
@@ -335,7 +343,7 @@ export default function BranchManagerRequestsPage({
                   <th>Date</th>
                   <th>Priority</th>
                   <th>Status</th>
-                  <th style={{ textAlign: "right" }}>Action</th>
+                  <th className="bm-req-text-right">Action</th>
                 </tr>
               </thead>
               <tbody>
@@ -345,7 +353,7 @@ export default function BranchManagerRequestsPage({
                     <td>
                       <div>
                         <strong>{req.requesterName}</strong>
-                        <small style={{ color: "#7a748e", display: "block", fontSize: 11.5 }}>
+                        <small className="bm-req-subtext">
                           {req.requesterRole} ({req.requesterBranch || "South"} Branch)
                         </small>
                       </div>
@@ -353,7 +361,7 @@ export default function BranchManagerRequestsPage({
                     <td>
                       <div>
                         <strong>{req.targetName}</strong>
-                        <small style={{ color: "#7a748e", display: "block", fontSize: 11.5 }}>
+                        <small className="bm-req-subtext">
                           {req.targetType || "Client"}
                         </small>
                       </div>
@@ -361,13 +369,13 @@ export default function BranchManagerRequestsPage({
                     <td><strong>{req.requestType}</strong></td>
                     <td>{req.createdAt}</td>
                     <td>
-                      <span style={{ fontSize: 12, fontWeight: 700, color: req.priority === "High" ? "#f43f5e" : "inherit" }}>
+                      <span className={`bm-req-priority ${req.priority === "High" ? "bm-req-priority-high" : ""}`}>
                         {req.priority || "Normal"}
                       </span>
                     </td>
                     <td>{statusBadge(req.status)}</td>
-                    <td style={{ textAlign: "right" }}>
-                      <div style={{ display: "inline-flex", gap: 6 }}>
+                    <td className="bm-req-text-right">
+                      <div className="bm-req-actions-group">
                         <button
                           type="button"
                           className="sales-view-btn"
@@ -383,8 +391,7 @@ export default function BranchManagerRequestsPage({
                           <>
                             <button
                               type="button"
-                              className="sales-view-btn"
-                              style={{ color: "#10b981", borderColor: "rgba(16, 185, 129, 0.3)" }}
+                              className="sales-view-btn bm-req-btn-approve"
                               onClick={() => handleApproveManagerRequest(req.id)}
                               title="Quick Approve"
                             >
@@ -392,8 +399,7 @@ export default function BranchManagerRequestsPage({
                             </button>
                             <button
                               type="button"
-                              className="sales-view-btn"
-                              style={{ color: "#f43f5e", borderColor: "rgba(244, 63, 94, 0.3)" }}
+                              className="sales-view-btn bm-req-btn-reject"
                               onClick={() => handleRejectManagerRequest(req.id)}
                               title="Quick Reject"
                             >
@@ -422,14 +428,14 @@ export default function BranchManagerRequestsPage({
       {activeTab === "Decision History" && (
         <div className="analytics-card sales-table-card">
           {/* History Filters Toolbar */}
-          <div style={{ padding: "16px 20px", borderBottom: "1px solid rgba(255, 255, 255, 0.08)", display: "flex", flexWrap: "wrap", gap: 14, justifyContent: "space-between", alignItems: "center" }}>
-            <div style={{ display: "flex", flexWrap: "wrap", gap: 12, alignItems: "center" }}>
-              <label style={{ display: "flex", alignItems: "center", gap: 6, fontSize: 13, fontWeight: 700 }}>
+          <div className="bm-req-filter-bar">
+            <div className="bm-req-filter-group">
+              <label className="bm-req-filter-label">
                 <span>Status:</span>
                 <select
                   value={statusFilter}
                   onChange={(e) => setStatusFilter(e.target.value)}
-                  style={{ padding: "6px 12px", borderRadius: 8, fontSize: 12.5 }}
+                  className="bm-req-filter-select-input"
                 >
                   <option value="All">All Statuses</option>
                   <option value="Approved">Approved</option>
@@ -438,12 +444,12 @@ export default function BranchManagerRequestsPage({
                 </select>
               </label>
 
-              <label style={{ display: "flex", alignItems: "center", gap: 6, fontSize: 13, fontWeight: 700 }}>
+              <label className="bm-req-filter-label">
                 <span>Department:</span>
                 <select
                   value={deptFilter}
                   onChange={(e) => setDeptFilter(e.target.value)}
-                  style={{ padding: "6px 12px", borderRadius: 8, fontSize: 12.5 }}
+                  className="bm-req-filter-select-input"
                 >
                   <option value="All">All Departments</option>
                   <option value="Manager">Manager</option>
@@ -455,13 +461,13 @@ export default function BranchManagerRequestsPage({
               </label>
             </div>
 
-            <div style={{ minWidth: 200 }}>
+            <div className="bm-req-filter-search-box">
               <input
                 type="text"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 placeholder="Search history records..."
-                style={{ padding: "6px 14px", borderRadius: 8, fontSize: 12.5, width: "100%" }}
+                className="bm-req-filter-search-input"
               />
             </div>
           </div>
@@ -477,7 +483,7 @@ export default function BranchManagerRequestsPage({
                   <th>Date</th>
                   <th>Status</th>
                   <th>Decided Date</th>
-                  <th style={{ textAlign: "right" }}>Action</th>
+                  <th className="bm-req-text-right">Action</th>
                 </tr>
               </thead>
               <tbody>
@@ -485,13 +491,13 @@ export default function BranchManagerRequestsPage({
                   <tr key={`${item.id}-${item.flowType}`}>
                     <td><strong>{item.id}</strong></td>
                     <td>
-                      <span className="stage-tag" style={{ background: item.flowType.includes("Owner") ? "rgba(140, 95, 248, 0.12)" : "rgba(68, 191, 176, 0.12)", color: item.flowType.includes("Owner") ? "#8c5ff8" : "#44bfb0" }}>
+                      <span className={`stage-tag ${item.flowType.includes("Owner") ? "bm-req-stage-owner" : "bm-req-stage-manager"}`}>
                         {item.flowType}
                       </span>
                     </td>
                     <td>
                       <strong>{item.targetName}</strong>
-                      <small style={{ color: "#7a748e", display: "block", fontSize: 11.5 }}>
+                      <small className="bm-req-subtext">
                         {item.department || "Client"}
                       </small>
                     </td>
@@ -499,7 +505,7 @@ export default function BranchManagerRequestsPage({
                     <td>{item.createdAt}</td>
                     <td>{statusBadge(item.status)}</td>
                     <td>{item.decisionDate || "Pending Review"}</td>
-                    <td style={{ textAlign: "right" }}>
+                    <td className="bm-req-text-right">
                       <button
                         type="button"
                         className="sales-view-btn"

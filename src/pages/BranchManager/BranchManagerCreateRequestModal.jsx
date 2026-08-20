@@ -100,53 +100,71 @@ export default function BranchManagerCreateRequestModal({
 
     setFormValues({
       name: selectedStaff.name || "",
-      role: selectedStaff.role || "",
+      role: selectedStaff.role || selectedStaff.designation || "",
       email: selectedStaff.email || "",
-      phone: selectedStaff.phone || "+91 91234 00000",
-      region: selectedStaff.region || `${selectedStaff.branch || "East"} Zone`,
-      quota: selectedStaff.quota || "₹120k",
+      phone: selectedStaff.phone || "",
+      region: selectedStaff.branch || selectedStaff.region || "East",
+      quota: selectedStaff.quota || "",
     });
   }, [selectedStaff]);
 
-  const handleFieldChange = (event) => {
-    const { name, value } = event.target;
+  const handleFieldChange = (e) => {
+    const { name, value } = e.target;
     setFormValues((prev) => ({ ...prev, [name]: value }));
   };
 
   const handleSubmit = (e) => {
-    e?.preventDefault();
-    if (!selectedType || !selectedStaff) return;
-    if (selectedType === "Delete Staff" && !reason.trim()) return;
-    if (selectedType === "Transfer Staff" && !reason.trim()) return;
+    e.preventDefault();
+    if (!selectedStaff) return;
 
-    let requestedChanges = [];
+    const requestedChanges = [];
+
     if (selectedType === "Edit Profile") {
-      requestedChanges = [
-        { field: "Name", oldValue: selectedStaff.name || "—", newValue: formValues.name },
-        { field: "Role / Designation", oldValue: selectedStaff.role || "—", newValue: formValues.role },
-        { field: "Email", oldValue: selectedStaff.email || "—", newValue: formValues.email },
-        { field: "Phone", oldValue: selectedStaff.phone || "—", newValue: formValues.phone },
-        { field: "Territory / Region", oldValue: selectedStaff.region || `${selectedStaff.branch || "East"} Zone`, newValue: formValues.region },
-        ...(selectedDept === "Manager"
-          ? [{ field: "Target Quota", oldValue: selectedStaff.quota || "₹120k", newValue: formValues.quota }]
-          : []),
-      ].filter((change) => change.oldValue !== change.newValue);
+      if (formValues.name && formValues.name !== selectedStaff.name) {
+        requestedChanges.push({ field: "Name", oldValue: selectedStaff.name || "-", newValue: formValues.name });
+      }
+      if (formValues.role && formValues.role !== selectedStaff.role) {
+        requestedChanges.push({ field: "Role / Designation", oldValue: selectedStaff.role || "-", newValue: formValues.role });
+      }
+      if (formValues.email && formValues.email !== selectedStaff.email) {
+        requestedChanges.push({ field: "Email Address", oldValue: selectedStaff.email || "-", newValue: formValues.email });
+      }
+      if (formValues.phone && formValues.phone !== selectedStaff.phone) {
+        requestedChanges.push({ field: "Phone Number", oldValue: selectedStaff.phone || "-", newValue: formValues.phone });
+      }
+      if (formValues.region && formValues.region !== (selectedStaff.branch || selectedStaff.region)) {
+        requestedChanges.push({ field: "Branch / Region", oldValue: selectedStaff.branch || selectedStaff.region || "-", newValue: formValues.region });
+      }
+      if (formValues.quota && formValues.quota !== selectedStaff.quota) {
+        requestedChanges.push({ field: "Target Quota", oldValue: selectedStaff.quota || "-", newValue: formValues.quota });
+      }
     } else if (selectedType === "Transfer Staff") {
-      requestedChanges = [
-        { field: "Assigned Branch", oldValue: `${selectedStaff.branch || selectedStaff.region || "East"} Branch`, newValue: `${destinationBranch} Branch` },
-        { field: "Reporting Authority", oldValue: "Current Branch Manager", newValue: receivingManager },
-      ];
+      requestedChanges.push({
+        field: "Branch Transfer",
+        oldValue: `${selectedStaff.branch || selectedStaff.region || "Current"} Branch`,
+        newValue: `${destinationBranch} Regional Branch`,
+      });
+      requestedChanges.push({
+        field: "Reporting Manager",
+        oldValue: "Vikramaditya Sharma (West BM)",
+        newValue: `${receivingManager} (${destinationBranch} BM)`,
+      });
+    } else if (selectedType === "Delete Staff") {
+      requestedChanges.push({
+        field: "Account Status",
+        oldValue: "Active Personnel",
+        newValue: "Deactivated / Offboarded",
+      });
     }
 
     const request = {
       id: makeRequestId(),
-      department: selectedDept,
       targetId: selectedStaff.id,
       targetName: selectedStaff.name,
       targetRole: selectedStaff.role,
       targetBranch: selectedStaff.branch || selectedStaff.region || "East",
+      department: selectedDept,
       requestType: selectedType,
-      recipient: "Owner",
       destinationBranch: selectedType === "Transfer Staff" ? destinationBranch : null,
       receivingManager: selectedType === "Transfer Staff" ? receivingManager : null,
       requestedChanges,
@@ -173,54 +191,37 @@ export default function BranchManagerCreateRequestModal({
 
   return (
     <Modal title="Create Governance Request to Owner" onClose={onClose} closeLabel="Close">
-      <div style={{ display: "grid", gap: 18, minWidth: 320, maxWidth: 680 }}>
+      <div className="bm-modal-wrapper">
         {!selectedType ? (
           <div>
-            <p className="bm-header-eyebrow" style={{ margin: "0 0 6px" }}>Step 1: Select Request Category</p>
-            <h2 style={{ margin: "0 0 6px", fontSize: 18, fontWeight: 800 }}>
+            <p className="bm-header-eyebrow bm-modal-step-eyebrow">Step 1: Select Request Category</p>
+            <h2 className="bm-modal-heading">
               What request do you want to submit to Owner?
             </h2>
-            <p style={{ margin: "0 0 16px", color: "#7a748e", fontSize: 13 }}>
+            <p className="bm-modal-desc">
               Select whether you are requesting a profile edit, an inter-branch transfer, or an offboarding deactivation for branch managers, admin, IT, or marketing team.
             </p>
 
-            <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))", gap: 14 }}>
+            <div className="bm-modal-cards-grid">
               {actionTypes.map((item) => (
                 <button
                   key={item.type}
                   type="button"
                   onClick={() => setSelectedType(item.type)}
-                  style={{
-                    display: "flex",
-                    flexDirection: "column",
-                    alignItems: "flex-start",
-                    textAlign: "left",
-                    padding: "20px 18px",
-                    borderRadius: 16,
-                    border: `1.5px solid ${item.accent}33`,
-                    background: "linear-gradient(145deg, rgba(255, 255, 255, 0.05) 0%, rgba(255, 255, 255, 0.01) 100%)",
-                    cursor: "pointer",
-                    transition: "all 0.25s ease",
-                  }}
-                  className="sales-req-type-card"
+                  style={{ border: `1.5px solid ${item.accent}33` }}
+                  className="bm-modal-type-btn sales-req-type-card"
                 >
                   <div
+                    className="bm-modal-type-icon"
                     style={{
-                      width: 42,
-                      height: 42,
-                      borderRadius: 12,
                       background: `${item.accent}1a`,
                       color: item.accent,
-                      display: "grid",
-                      placeItems: "center",
-                      fontSize: 18,
-                      marginBottom: 12,
                     }}
                   >
                     <Icon name={item.icon} size={20} />
                   </div>
-                  <strong style={{ fontSize: 15, marginBottom: 4, display: "block" }}>{item.title}</strong>
-                  <small style={{ color: "#7a748e", fontSize: 12.5, lineHeight: 1.4, display: "block" }}>
+                  <strong className="bm-modal-type-title">{item.title}</strong>
+                  <small className="bm-modal-type-sub">
                     {item.desc}
                   </small>
                 </button>
@@ -228,45 +229,21 @@ export default function BranchManagerCreateRequestModal({
             </div>
           </div>
         ) : (
-          <form onSubmit={handleSubmit} style={{ display: "flex", flexDirection: "column", gap: 18 }}>
+          <form onSubmit={handleSubmit} className="bm-modal-form">
             {/* Header info banner with back button */}
-            <div
-              style={{
-                display: "flex",
-                justifyContent: "space-between",
-                alignItems: "center",
-                flexWrap: "wrap",
-                gap: 12,
-                padding: "12px 16px",
-                borderRadius: 14,
-                background: "linear-gradient(135deg, rgba(140, 95, 248, 0.08) 0%, rgba(78, 124, 255, 0.04) 100%)",
-                border: "1px solid rgba(140, 95, 248, 0.18)",
-              }}
-            >
+            <div className="bm-modal-recipient-banner">
               <div>
-                <span
-                  style={{
-                    display: "inline-block",
-                    padding: "2px 8px",
-                    borderRadius: 6,
-                    background: "rgba(140, 95, 248, 0.15)",
-                    color: "#8c5ff8",
-                    fontSize: 11,
-                    fontWeight: 700,
-                    marginBottom: 2,
-                  }}
-                >
+                <span className="bm-modal-recipient-tag">
                   Recipient: Owner
                 </span>
-                <h3 style={{ margin: 0, fontSize: 16, fontWeight: 800 }}>
+                <h3 className="bm-req-card-title">
                   {selectedType} Request
                 </h3>
               </div>
               <button
                 type="button"
-                className="sales-btn-secondary"
+                className="sales-btn-secondary bm-modal-change-type-btn"
                 onClick={() => setSelectedType("")}
-                style={{ padding: "6px 14px", fontSize: 12.5 }}
               >
                 ← Change type
               </button>
@@ -274,10 +251,10 @@ export default function BranchManagerCreateRequestModal({
 
             {/* Department Selector Tabs */}
             <div>
-              <label className="field-label" style={{ marginBottom: 6 }}>
+              <label className="field-label bm-modal-step-eyebrow">
                 <span>Select Target Department / Team</span>
               </label>
-              <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 8 }}>
+              <div className="bm-modal-dept-grid">
                 {departments.map((dept) => {
                   const isSelected = selectedDept === dept.id;
                   return (
@@ -285,20 +262,12 @@ export default function BranchManagerCreateRequestModal({
                       key={dept.id}
                       type="button"
                       onClick={() => setSelectedDept(dept.id)}
+                      className="bm-modal-dept-btn"
                       style={{
-                        padding: "9px 10px",
-                        borderRadius: 10,
                         border: isSelected ? "1.5px solid #8c5ff8" : "1px solid rgba(255, 255, 255, 0.14)",
                         background: isSelected ? "rgba(140, 95, 248, 0.15)" : "rgba(255, 255, 255, 0.03)",
                         color: isSelected ? "#8c5ff8" : "inherit",
                         fontWeight: isSelected ? 800 : 600,
-                        fontSize: 12.5,
-                        display: "flex",
-                        alignItems: "center",
-                        justifyContent: "center",
-                        gap: 6,
-                        cursor: "pointer",
-                        transition: "all 0.2s ease",
                       }}
                     >
                       <Icon name={dept.icon} size={14} />
@@ -311,11 +280,11 @@ export default function BranchManagerCreateRequestModal({
 
             {/* Select Staff Member from that department */}
             <label className="field-label">
-              <span>Select Employee from {selectedDept} Team <span style={{ color: "#f43f5e" }}>*</span></span>
+              <span>Select Employee from {selectedDept} Team <span className="bm-req-action-del">*</span></span>
               <select
                 value={selectedStaffId}
                 onChange={(e) => setSelectedStaffId(e.target.value)}
-                style={{ padding: "10px 14px", borderRadius: 10 }}
+                className="bm-req-filter-select-input"
                 required
               >
                 {departmentStaff.map((staff) => (
@@ -328,31 +297,8 @@ export default function BranchManagerCreateRequestModal({
 
             {/* Selected staff card snapshot */}
             {selectedStaff && (
-              <div
-                style={{
-                  display: "flex",
-                  alignItems: "center",
-                  gap: 14,
-                  padding: "12px 16px",
-                  borderRadius: 12,
-                  background: "rgba(255, 255, 255, 0.03)",
-                  border: "1px solid rgba(140, 95, 248, 0.14)",
-                }}
-              >
-                <div
-                  style={{
-                    width: 40,
-                    height: 40,
-                    borderRadius: 12,
-                    background: "linear-gradient(135deg, #172135 0%, #8c5ff8 100%)",
-                    color: "#fff",
-                    fontWeight: 800,
-                    fontSize: 14,
-                    display: "grid",
-                    placeItems: "center",
-                    flexShrink: 0,
-                  }}
-                >
+              <div className="bm-modal-staff-preview">
+                <div className="bm-modal-staff-avatar">
                   {initials}
                 </div>
                 <div style={{ flex: 1 }}>
@@ -362,7 +308,7 @@ export default function BranchManagerCreateRequestModal({
                       {selectedDept} Team
                     </span>
                   </div>
-                  <small style={{ color: "#7a748e", fontSize: 12 }}>
+                  <small className="bm-req-subtext">
                     Role: {selectedStaff.role} • Email: {selectedStaff.email} • Branch: {selectedStaff.branch || selectedStaff.region || "East"}
                   </small>
                 </div>
@@ -371,7 +317,7 @@ export default function BranchManagerCreateRequestModal({
 
             {/* If Edit Profile: Show Editable Form */}
             {selectedType === "Edit Profile" && (
-              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 14 }}>
+              <div className="bm-modal-fields-grid">
                 <label className="field-label">
                   <span>Name</span>
                   <input
@@ -437,7 +383,7 @@ export default function BranchManagerCreateRequestModal({
 
             {/* If Transfer Staff: Destination branch & manager */}
             {selectedType === "Transfer Staff" && (
-              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 14 }}>
+              <div className="bm-modal-fields-grid">
                 <label className="field-label">
                   <span>Target Destination Branch</span>
                   <select
@@ -465,19 +411,19 @@ export default function BranchManagerCreateRequestModal({
             {/* Reason / Justification to Owner */}
             <label className="field-label">
               <span>
-                Reason & Justification to Owner <span style={{ color: "#f43f5e" }}>*</span>
+                Reason &amp; Justification to Owner <span className="bm-req-action-del">*</span>
               </span>
               <textarea
                 rows={3}
                 value={reason}
                 onChange={(e) => setReason(e.target.value)}
                 placeholder={`Explain why this ${selectedType.toLowerCase()} is needed for ${selectedStaff?.name || "this employee"}...`}
-                style={{ resize: "vertical", minHeight: 80, padding: 12, borderRadius: 8, border: "1px solid #dedfe1", font: "inherit" }}
+                className="sales-textarea"
                 required
               />
             </label>
 
-            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 14 }}>
+            <div className="bm-modal-fields-grid">
               <label className="field-label">
                 <span>Urgency / Priority</span>
                 <select value={priority} onChange={(e) => setPriority(e.target.value)}>
@@ -487,21 +433,20 @@ export default function BranchManagerCreateRequestModal({
                 </select>
               </label>
               <div style={{ display: "flex", alignItems: "flex-end" }}>
-                <span style={{ fontSize: 12, color: "#7a748e", lineHeight: 1.4 }}>
+                <span className="bm-req-subtext" style={{ fontSize: 12, lineHeight: 1.4 }}>
                   💡 This request will be submitted directly to the <strong>Owner</strong> governance queue for review and final sign-off.
                 </span>
               </div>
             </div>
 
             {/* Action Buttons */}
-            <div style={{ display: "flex", justifyContent: "flex-end", gap: 12, marginTop: 6 }}>
+            <div className="bm-modal-footer">
               <button className="sales-btn-secondary" type="button" onClick={onClose}>
                 Cancel
               </button>
               <button
                 type="submit"
-                className="manager-btn-primary"
-                style={{ padding: "10px 24px", fontSize: 13.5 }}
+                className="manager-btn-primary bm-modal-submit-btn"
               >
                 <Icon name="checkCircle" size={15} />
                 <span>Submit Request to Owner</span>

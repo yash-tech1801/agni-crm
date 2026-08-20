@@ -25,58 +25,43 @@ export default function BranchManagerRequestModal({
 
   return (
     <Modal title={`Request Details — ${request.id}`} onClose={onClose} closeLabel="Close">
-      <div style={{ display: "flex", flexDirection: "column", gap: 18, minWidth: 320, maxWidth: 680 }}>
+      <div className="bm-modal-wrapper">
         {/* Top Summary Banner */}
-        <div
-          style={{
-            display: "grid",
-            gridTemplateColumns: "repeat(auto-fit, minmax(180px, 1fr))",
-            gap: 12,
-            padding: 16,
-            borderRadius: 14,
-            background: "linear-gradient(135deg, rgba(140, 95, 248, 0.08) 0%, rgba(78, 124, 255, 0.04) 100%)",
-            border: "1px solid rgba(140, 95, 248, 0.18)",
-          }}
-        >
+        <div className="bm-inspect-head">
           <div>
-            <span style={{ fontSize: 11.5, color: "#7a748e", textTransform: "uppercase", letterSpacing: 0.5, fontWeight: 700, display: "block" }}>
+            <span className="bm-req-subtext" style={{ textTransform: "uppercase", letterSpacing: 0.5, fontWeight: 700 }}>
               {isManagerRequest ? "Submitted By Manager" : "Target Employee / Entity"}
             </span>
-            <strong style={{ fontSize: 15, marginTop: 2, display: "block" }}>
+            <strong className="bm-modal-type-title" style={{ marginTop: 2 }}>
               {isManagerRequest ? request.requesterName : request.targetName}
             </strong>
-            <small style={{ color: "#7a748e", fontSize: 11.5 }}>
+            <small className="bm-req-subtext">
               {isManagerRequest ? `${request.requesterRole} (${request.requesterBranch || "South"} Branch)` : `${request.targetRole || request.department} (${request.targetBranch || "East"} Branch)`}
             </small>
           </div>
 
           <div>
-            <span style={{ fontSize: 11.5, color: "#7a748e", textTransform: "uppercase", letterSpacing: 0.5, fontWeight: 700, display: "block" }}>
+            <span className="bm-req-subtext" style={{ textTransform: "uppercase", letterSpacing: 0.5, fontWeight: 700 }}>
               Request Type
             </span>
-            <strong style={{ fontSize: 14.5, marginTop: 2, display: "block", color: "#8c5ff8" }}>
+            <strong className="bm-req-meta-tag bm-req-meta-purple" style={{ marginTop: 2, display: "block" }}>
               {request.requestType}
             </strong>
-            <small style={{ color: "#7a748e", fontSize: 11.5 }}>
+            <small className="bm-req-subtext">
               {request.department ? `Department: ${request.department}` : `Target: ${request.targetName}`}
             </small>
           </div>
 
           <div>
-            <span style={{ fontSize: 11.5, color: "#7a748e", textTransform: "uppercase", letterSpacing: 0.5, fontWeight: 700, display: "block" }}>
+            <span className="bm-req-subtext" style={{ textTransform: "uppercase", letterSpacing: 0.5, fontWeight: 700 }}>
               Governance Status
             </span>
             <div style={{ marginTop: 4 }}>
               <span
+                className="bm-req-status-badge"
                 style={{
-                  display: "inline-flex",
-                  alignItems: "center",
-                  padding: "4px 12px",
-                  borderRadius: 999,
                   background: `${statusColor}22`,
                   color: statusColor,
-                  fontWeight: 800,
-                  fontSize: 12,
                 }}
               >
                 ● {request.status} {request.recipient === "Owner" ? "(Owner Review)" : ""}
@@ -86,29 +71,29 @@ export default function BranchManagerRequestModal({
         </div>
 
         {/* 3-Column Metrics */}
-        <div style={{ display: "grid", gridTemplateColumns: "repeat(3, minmax(0, 1fr))", gap: 12 }}>
-          <div style={{ padding: "12px 14px", borderRadius: 12, border: "1px solid rgba(140, 95, 248, 0.14)", background: "rgba(255, 255, 255, 0.02)" }}>
-            <span style={{ fontSize: 11.5, color: "#7a748e", fontWeight: 600, display: "block" }}>Creation Date</span>
+        <div className="bm-inspect-meta-grid">
+          <div className="bm-inspect-meta-cell">
+            <span className="bm-req-subtext" style={{ fontWeight: 600 }}>Creation Date</span>
             <strong style={{ fontSize: 13.5, marginTop: 3, display: "block" }}>{request.createdAt}</strong>
           </div>
-          <div style={{ padding: "12px 14px", borderRadius: 12, border: "1px solid rgba(140, 95, 248, 0.14)", background: "rgba(255, 255, 255, 0.02)" }}>
-            <span style={{ fontSize: 11.5, color: "#7a748e", fontWeight: 600, display: "block" }}>Priority Level</span>
+          <div className="bm-inspect-meta-cell">
+            <span className="bm-req-subtext" style={{ fontWeight: 600 }}>Priority Level</span>
             <strong style={{ fontSize: 13.5, marginTop: 3, display: "block", color: request.priority === "High" || request.priority === "Urgent" ? "#f43f5e" : "inherit" }}>
               {request.priority || "Normal"}
             </strong>
           </div>
-          <div style={{ padding: "12px 14px", borderRadius: 12, border: "1px solid rgba(140, 95, 248, 0.14)", background: "rgba(255, 255, 255, 0.02)" }}>
-            <span style={{ fontSize: 11.5, color: "#7a748e", fontWeight: 600, display: "block" }}>Recipient Authority</span>
-            <strong style={{ fontSize: 13.5, marginTop: 3, display: "block", color: "#8c5ff8" }}>
+          <div className="bm-inspect-meta-cell">
+            <span className="bm-req-subtext" style={{ fontWeight: 600 }}>Recipient Authority</span>
+            <strong className="bm-req-meta-tag bm-req-meta-purple" style={{ marginTop: 3, display: "block" }}>
               {request.recipient || (isManagerRequest ? "Branch Manager" : "Owner")}
             </strong>
           </div>
         </div>
 
         {/* Reason / Statement */}
-        <div style={{ padding: "14px 16px", borderRadius: 12, border: "1px solid rgba(140, 95, 248, 0.14)", background: "rgba(140, 95, 248, 0.04)" }}>
-          <span style={{ fontSize: 11.5, fontWeight: 700, textTransform: "uppercase", letterSpacing: 0.5, color: "#8c5ff8", display: "block", marginBottom: 4 }}>
-            Statement & Justification
+        <div className="bm-inspect-reason-box">
+          <span className="bm-req-meta-tag bm-req-meta-purple" style={{ textTransform: "uppercase", letterSpacing: 0.5, display: "block", marginBottom: 4 }}>
+            Statement &amp; Justification
           </span>
           <p style={{ margin: 0, fontSize: 13.5, lineHeight: 1.5 }}>
             {request.reason}
@@ -117,11 +102,11 @@ export default function BranchManagerRequestModal({
 
         {/* Transfer Destination if Transfer request */}
         {request.destinationBranch && (
-          <div style={{ padding: "12px 16px", borderRadius: 12, border: "1px solid rgba(154, 116, 233, 0.25)", background: "rgba(154, 116, 233, 0.08)" }}>
-            <span style={{ fontSize: 11.5, fontWeight: 700, textTransform: "uppercase", letterSpacing: 0.5, color: "#9a74e9", display: "block", marginBottom: 3 }}>
-              Transfer Destination & Receiving Lead
+          <div className="bm-modal-transfer-card">
+            <span className="bm-req-meta-tag" style={{ color: "#9a74e9", textTransform: "uppercase", letterSpacing: 0.5, display: "block", marginBottom: 3 }}>
+              Transfer Destination &amp; Receiving Lead
             </span>
-            <strong style={{ fontSize: 14, color: "var(--cd-ink, inherit)" }}>
+            <strong style={{ fontSize: 14 }}>
               {request.destinationBranch} Branch {request.receivingManager ? `• Assigned Lead: ${request.receivingManager}` : ""}
             </strong>
           </div>
@@ -130,24 +115,24 @@ export default function BranchManagerRequestModal({
         {/* Requested Changes Table / Diff */}
         {request.requestedChanges && request.requestedChanges.length > 0 && (
           <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
-            <span style={{ fontSize: 12, fontWeight: 700, textTransform: "uppercase", letterSpacing: 0.5, color: "#8c5ff8" }}>
+            <span className="bm-req-meta-tag bm-req-meta-purple" style={{ textTransform: "uppercase", letterSpacing: 0.5 }}>
               Requested Change Differential ({request.requestedChanges.length})
             </span>
             <div style={{ border: "1px solid rgba(255, 255, 255, 0.12)", borderRadius: 12, overflow: "hidden" }}>
-              <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 12.5 }}>
+              <table className="bm-inspect-diff-table">
                 <thead>
-                  <tr style={{ background: "rgba(140, 95, 248, 0.08)", textAlign: "left" }}>
-                    <th style={{ padding: "8px 12px", borderBottom: "1px solid rgba(255, 255, 255, 0.1)" }}>Field</th>
-                    <th style={{ padding: "8px 12px", borderBottom: "1px solid rgba(255, 255, 255, 0.1)" }}>Current Value</th>
-                    <th style={{ padding: "8px 12px", borderBottom: "1px solid rgba(255, 255, 255, 0.1)" }}>Proposed Value</th>
+                  <tr style={{ background: "rgba(140, 95, 248, 0.08)" }}>
+                    <th className="bm-inspect-diff-th">Field</th>
+                    <th className="bm-inspect-diff-th">Current Value</th>
+                    <th className="bm-inspect-diff-th">Proposed Value</th>
                   </tr>
                 </thead>
                 <tbody>
                   {request.requestedChanges.map((change, index) => (
-                    <tr key={index} style={{ borderBottom: "1px solid rgba(255, 255, 255, 0.06)" }}>
-                      <td style={{ padding: "8px 12px", fontWeight: 700 }}>{change.field}</td>
-                      <td style={{ padding: "8px 12px", color: "#f43f5e", textDecoration: "line-through" }}>{change.oldValue || "—"}</td>
-                      <td style={{ padding: "8px 12px", color: "#10b981", fontWeight: 700 }}>{change.newValue || "—"}</td>
+                    <tr key={index}>
+                      <td className="bm-inspect-diff-td" style={{ fontWeight: 700 }}>{change.field}</td>
+                      <td className="bm-inspect-diff-td bm-inspect-old-val" style={{ textDecoration: "line-through" }}>{change.oldValue || "—"}</td>
+                      <td className="bm-inspect-diff-td bm-inspect-new-val">{change.newValue || "—"}</td>
                     </tr>
                   ))}
                 </tbody>
@@ -158,13 +143,13 @@ export default function BranchManagerRequestModal({
 
         {/* Existing Decision Remarks or Owner Remarks */}
         {(request.decisionRemarks || request.ownerRemarks) && (
-          <div style={{ padding: "12px 16px", borderRadius: 12, border: "1px solid rgba(16, 185, 129, 0.2)", background: "rgba(16, 185, 129, 0.05)" }}>
-            <span style={{ fontSize: 11.5, fontWeight: 700, textTransform: "uppercase", letterSpacing: 0.5, color: "#10b981", display: "block", marginBottom: 3 }}>
+          <div className="bm-modal-transfer-card" style={{ borderColor: "rgba(16, 185, 129, 0.2)", background: "rgba(16, 185, 129, 0.05)" }}>
+            <span className="bm-req-meta-tag" style={{ color: "#10b981", textTransform: "uppercase", letterSpacing: 0.5, display: "block", marginBottom: 3 }}>
               {request.ownerRemarks ? "Owner Governance Remarks" : "Branch Decision Remarks"}
             </span>
             <p style={{ margin: 0, fontSize: 13 }}>{request.ownerRemarks || request.decisionRemarks}</p>
             {request.decisionDate && (
-              <small style={{ color: "#7a748e", fontSize: 11, display: "block", marginTop: 4 }}>
+              <small className="bm-req-subtext" style={{ fontSize: 11, marginTop: 4 }}>
                 Decided on: {request.decisionDate}
               </small>
             )}
@@ -173,7 +158,7 @@ export default function BranchManagerRequestModal({
 
         {/* Decision Actions for Pending Manager Requests */}
         {canDecide && (
-          <div style={{ display: "flex", flexDirection: "column", gap: 10, marginTop: 4 }}>
+          <div className="bm-inspect-decision-form">
             <label className="field-label">
               <span>Decision Remarks / Feedback (optional)</span>
               <textarea
@@ -181,15 +166,14 @@ export default function BranchManagerRequestModal({
                 value={remarks}
                 onChange={(e) => setRemarks(e.target.value)}
                 placeholder="Add approval notes or justification for rejection..."
-                style={{ resize: "vertical", padding: 10, borderRadius: 8, border: "1px solid #dedfe1", font: "inherit" }}
+                className="sales-textarea"
               />
             </label>
 
-            <div style={{ display: "flex", justifyContent: "flex-end", gap: 12, marginTop: 6 }}>
+            <div className="bm-modal-footer">
               <button
                 type="button"
-                className="sales-btn-secondary"
-                style={{ color: "#f43f5e", borderColor: "rgba(244, 63, 94, 0.3)" }}
+                className="sales-btn-secondary bm-req-btn-reject"
                 onClick={() => {
                   onReject(request.id, remarks);
                   onClose();
@@ -215,8 +199,8 @@ export default function BranchManagerRequestModal({
 
         {/* Default Close button if not deciding */}
         {!canDecide && (
-          <div style={{ display: "flex", justifyContent: "flex-end", gap: 12, marginTop: 6 }}>
-            <button className="manager-btn-primary" type="button" onClick={onClose} style={{ padding: "9px 24px" }}>
+          <div className="bm-modal-footer">
+            <button className="manager-btn-primary bm-modal-submit-btn" type="button" onClick={onClose}>
               <span>Close</span>
             </button>
           </div>

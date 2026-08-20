@@ -56,8 +56,8 @@ const branchActivities = [
 
 export default function BranchManagerOverviewPage({ dark, onNavigate }) {
   return (
-    <section className="dashboard-layout" style={{ animation: "bmFadeIn 0.25s ease-out", alignItems: "stretch" }}>
-      <div className="dashboard-main" style={{ display: "flex", flexDirection: "column", gap: 18 }}>
+    <section className="dashboard-layout bm-overview-layout">
+      <div className="dashboard-main bm-overview-main">
         {/* KPI Grid */}
         <section className="kpi-grid">
           {kpiCards.map((card) => (
@@ -71,12 +71,12 @@ export default function BranchManagerOverviewPage({ dark, onNavigate }) {
         </section>
 
         {/* Branch Overview Analytics Chart */}
-        <div className="analytics-card" style={{ padding: 22, flex: 1, display: "flex", flexDirection: "column", justifyContent: "space-between" }}>
-          <div className="panel-header" style={{ marginBottom: 18 }}>
+        <div className="analytics-card bm-overview-chart-card">
+          <div className="panel-header bm-panel-header-gap">
             <div>
-              <p className="eyebrow" style={{ margin: "0 0 4px" }}>Financial Health</p>
-              <h2 style={{ margin: 0 }}>Branch Overview</h2>
-              <p style={{ margin: "4px 0 0", color: "#7a748e", fontSize: 13 }}>
+              <p className="eyebrow bm-panel-eyebrow">Financial Health</p>
+              <h2 className="bm-panel-heading">Branch Overview</h2>
+              <p className="bm-panel-subtext">
                 Key metrics, territorial distribution, and regional branch revenue across zones.
               </p>
             </div>
@@ -86,12 +86,12 @@ export default function BranchManagerOverviewPage({ dark, onNavigate }) {
       </div>
 
       {/* Full-Height Recent Activity Sidebar with No Scroll */}
-      <aside className="owner-sidebar-widgets" style={{ display: "flex", flexDirection: "column" }}>
+      <aside className="owner-sidebar-widgets bm-sidebar-widgets-flex">
         <section className="activity-panel bm-activity-panel">
-          <div className="panel-header" style={{ marginBottom: 14 }}>
+          <div className="panel-header bm-panel-header-gap-sm">
             <div>
-              <p className="eyebrow" style={{ margin: "0 0 4px" }}>Live Activity Feed</p>
-              <h2 style={{ margin: 0 }}>What’s happening</h2>
+              <p className="eyebrow bm-panel-eyebrow">Live Activity Feed</p>
+              <h2 className="bm-panel-heading">What’s happening</h2>
             </div>
           </div>
 
@@ -99,15 +99,15 @@ export default function BranchManagerOverviewPage({ dark, onNavigate }) {
             {branchActivities.map((act) => (
               <div className="activity-row bm-activity-row" key={act.title}>
                 <span className="activity-mark bm-activity-mark" style={{ background: act.tone, boxShadow: `0 0 8px ${act.tone}` }} />
-                <div style={{ flex: 1, minWidth: 0 }}>
-                  <strong style={{ fontSize: 13, fontWeight: 700, display: "block", marginBottom: 2 }}>
+                <div className="bm-activity-content">
+                  <strong className="bm-activity-title">
                     {act.title}
                   </strong>
-                  <small style={{ color: "#7a748e", fontSize: 11.5, display: "block", lineHeight: 1.3 }}>
+                  <small className="bm-activity-detail">
                     {act.detail}
                   </small>
                 </div>
-                <time style={{ fontSize: 11, color: "#7a748e", whiteSpace: "nowrap", marginLeft: 6 }}>
+                <time className="bm-activity-time">
                   {act.time}
                 </time>
               </div>
