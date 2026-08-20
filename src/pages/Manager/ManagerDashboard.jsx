@@ -2,6 +2,8 @@ import React, { useState, useMemo, useRef, useEffect } from "react";
 import { Routes, Route, Navigate, useLocation, useNavigate } from "react-router-dom";
 import DashboardSidebar from "../../components/dashboard/DashboardSidebar";
 import DashboardHeader from "../../components/dashboard/DashboardHeader";
+import HeaderSearch from "../../components/dashboard/HeaderSearch";
+import UserProfileMenu from "../../components/dashboard/UserProfileMenu";
 import Icon from "../../components/Icon";
 
 // Modular Page Components
@@ -173,22 +175,13 @@ export default function ManagerDashboard({ onSignOut, userEmail }) {
           className="owner-dashboard-top"
         >
           <div className="top-actions owner-top-actions">
-            {searchOpen ? (
-              <div className="search-field">
-                <input
-                  value={query}
-                  onChange={(event) => setQuery(event.target.value)}
-                  placeholder="Search team, deals or reports"
-                />
-                <button type="button" onClick={() => setSearchOpen(false)}>
-                  <Icon name="search" size={16} />
-                </button>
-              </div>
-            ) : (
-              <button type="button" onClick={() => setSearchOpen(true)}>
-                <Icon name="search" size={16} />
-              </button>
-            )}
+            <HeaderSearch
+              query={query}
+              setQuery={setQuery}
+              isOpen={searchOpen}
+              setIsOpen={setSearchOpen}
+              placeholder="Search team, deals or reports..."
+            />
             <div className="notification-wrap">
               <button
                 className="notification"
@@ -235,6 +228,23 @@ export default function ManagerDashboard({ onSignOut, userEmail }) {
                 </section>
               )}
             </div>
+            <UserProfileMenu
+              user={{
+                name: managerName || "Neha Gupta",
+                email: "neha.gupta@agnicrm.com",
+                phone: "+91 98202 33445",
+                branch: "West Zone (Mumbai)",
+                designation: "Enterprise Sales Manager",
+                empId: "EMP-MGR-2004",
+                reportingManager: "Vikramaditya Sharma (Branch Manager)",
+              }}
+              role="Manager"
+              roleBadge="Manager"
+              initials="M"
+              avatarColor="linear-gradient(135deg, #8b5cf6 0%, #6d28d9 100%)"
+              onSignOut={onSignOut}
+              showToast={(msg) => alert(msg)}
+            />
           </div>
         </DashboardHeader>
 

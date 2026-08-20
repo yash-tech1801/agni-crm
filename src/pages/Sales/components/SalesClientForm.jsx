@@ -1,6 +1,6 @@
 import React from "react";
 import Icon from "../../../components/Icon";
-import { schemeOptions } from "../mockSalesData";
+import { serviceTypeSchemes } from "../mockSalesData";
 
 export default function SalesClientForm({
   newClient,
@@ -13,6 +13,9 @@ export default function SalesClientForm({
   const baseAmt = parseFloat(newClient.amount) || 0;
   const isOnline = newClient.paymentMode === "Online";
 
+  const currentServiceType = newClient.serviceType || "Certificate";
+  const availableSchemes = serviceTypeSchemes[currentServiceType] || serviceTypeSchemes.Certificate || [];
+
   return (
     <section className="sales-clients-form-view">
       {/* Top Title Banner */}
@@ -21,7 +24,7 @@ export default function SalesClientForm({
           <p className="sales-header-eyebrow">Client Onboarding</p>
           <h1 className="sales-header-title">Register New Client</h1>
           <p className="sales-header-subtitle">
-            Enter client identity, scheme tier, commercial terms, and verification numbers. Saved profiles appear in <strong>Details</strong>.
+            Enter client identity, service type, scheme tier, and commercial terms. Saved profiles appear in <strong>Details</strong>.
           </p>
         </div>
 
@@ -143,18 +146,27 @@ export default function SalesClientForm({
 
             <div className="sales-form-grid-2">
               <label className="field-label">
-                <span>Lifecycle Stage</span>
-                <select name="stage" value={newClient.stage} onChange={onNewClientChange}>
-                  <option value="Active">Active</option>
-                  <option value="Onboarding">Onboarding</option>
-                  <option value="Renewal">Renewal</option>
-                  <option value="Prospect">Prospect</option>
+                <span>Service Type <span style={{ color: "#f43f5e" }}>*</span></span>
+                <select
+                  name="serviceType"
+                  value={currentServiceType}
+                  onChange={onNewClientChange}
+                  required
+                >
+                  <option value="Certificate">Certificate</option>
+                  <option value="IT">IT</option>
+                  <option value="Marketing">Marketing</option>
                 </select>
               </label>
               <label className="field-label">
-                <span>Selected Scheme <span style={{ color: "#f43f5e" }}>*</span></span>
-                <select name="scheme" value={newClient.scheme} onChange={onNewClientChange} required>
-                  {schemeOptions.map((scheme) => (
+                <span>Selected Scheme ({currentServiceType}) <span style={{ color: "#f43f5e" }}>*</span></span>
+                <select
+                  name="scheme"
+                  value={newClient.scheme || availableSchemes[0]}
+                  onChange={onNewClientChange}
+                  required
+                >
+                  {availableSchemes.map((scheme) => (
                     <option key={scheme} value={scheme}>{scheme}</option>
                   ))}
                 </select>
@@ -268,83 +280,6 @@ export default function SalesClientForm({
                   ₹{(newClient.paymentPending || 0).toLocaleString("en-IN")}
                 </strong>
               </div>
-            </div>
-          </div>
-
-          {/* Section 4: Compliance & KYC */}
-          <div className="sales-form-section">
-            <div className="sales-section-title">
-              <div
-                style={{
-                  width: 28,
-                  height: 28,
-                  borderRadius: 8,
-                  background: "rgba(140, 95, 248, 0.15)",
-                  color: "#8c5ff8",
-                  display: "grid",
-                  placeItems: "center",
-                }}
-              >
-                <Icon name="roles" size={15} />
-              </div>
-              <span>4. Compliance & Verification Numbers</span>
-            </div>
-
-            <div className="sales-form-grid-3">
-              <label className="field-label">
-                <span>PAN Number</span>
-                <input
-                  type="text"
-                  name="panNumber"
-                  value={newClient.panNumber}
-                  onChange={onNewClientChange}
-                  placeholder="ABCDE1234F"
-                  maxLength={10}
-                  style={{ textTransform: "uppercase" }}
-                />
-              </label>
-              <label className="field-label">
-                <span>Aadhar Number</span>
-                <input
-                  type="text"
-                  name="aadharNumber"
-                  value={newClient.aadharNumber}
-                  onChange={onNewClientChange}
-                  placeholder="1234 5678 9012"
-                />
-              </label>
-              <label className="field-label">
-                <span>GST Number</span>
-                <input
-                  type="text"
-                  name="gstNumber"
-                  value={newClient.gstNumber}
-                  onChange={onNewClientChange}
-                  placeholder="27ABCDE1234F1Z5"
-                  style={{ textTransform: "uppercase" }}
-                />
-              </label>
-            </div>
-
-            <div className="sales-form-grid-2" style={{ marginTop: 14 }}>
-              <label className="field-label">
-                <span>KYC Documentation Status</span>
-                <select name="kycStatus" value={newClient.kycStatus} onChange={onNewClientChange}>
-                  <option value="Submitted">Submitted / Verified</option>
-                  <option value="Pending">Pending Documents</option>
-                  <option value="In Review">Under Review</option>
-                </select>
-              </label>
-              <label className="field-label">
-                <span>Internal Account Notes</span>
-                <input
-                  type="text"
-                  name="notes"
-                  value={newClient.notes}
-                  onChange={onNewClientChange}
-                  placeholder="Special client remarks or contract terms..."
-                />
-              </label>
             </div>
           </div>
 

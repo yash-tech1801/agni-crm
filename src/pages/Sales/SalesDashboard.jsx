@@ -1,6 +1,8 @@
 import React from "react";
 import DashboardSidebar from "../../components/dashboard/DashboardSidebar";
 import DashboardHeader from "../../components/dashboard/DashboardHeader";
+import HeaderSearch from "../../components/dashboard/HeaderSearch";
+import UserProfileMenu from "../../components/dashboard/UserProfileMenu";
 import Icon from "../../components/Icon";
 import "./salesdashboard.css";
 
@@ -85,22 +87,13 @@ export default function SalesDashboard({ onSignOut, userEmail }) {
           className="sales-dashboard-top"
         >
           <div className="top-actions">
-            {searchOpen ? (
-              <div className="search-field">
-                <input
-                  value={query}
-                  onChange={(event) => setQuery(event.target.value)}
-                  placeholder="Search clients, leads, or deals"
-                />
-                <button type="button" onClick={() => setSearchOpen(false)}>
-                  <Icon name="search" size={16} />
-                </button>
-              </div>
-            ) : (
-              <button type="button" onClick={() => setSearchOpen(true)}>
-                <Icon name="search" size={16} />
-              </button>
-            )}
+            <HeaderSearch
+              query={query}
+              setQuery={setQuery}
+              isOpen={searchOpen}
+              setIsOpen={setSearchOpen}
+              placeholder="Search clients, leads, or deals..."
+            />
 
             <div className="notification-wrap" ref={notificationWrapRef}>
               <button
@@ -144,10 +137,25 @@ export default function SalesDashboard({ onSignOut, userEmail }) {
                 </section>
               )}
             </div>
-            <button className="profile" type="button">
-              SP
-            </button>
-            <span className="role-badge">Sales</span>
+            <UserProfileMenu
+              user={{
+                name: salesPersonName,
+                email: "yash.patel@agnicrm.com",
+                phone: "+91 98201 54321",
+                branch: "West Zone (Mumbai)",
+                designation: "Senior Sales Officer",
+                empId: "EMP-SLS-2024",
+                quota: "₹15,00,000",
+                achieved: "₹11,40,000 (76%)",
+                reportingManager: "Vikramaditya Sharma",
+              }}
+              role="Sales"
+              roleBadge="Sales"
+              initials="SP"
+              avatarColor="linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%)"
+              onSignOut={onSignOut}
+              showToast={(msg) => setToastMessage(msg)}
+            />
           </div>
         </DashboardHeader>
 
@@ -205,6 +213,7 @@ export default function SalesDashboard({ onSignOut, userEmail }) {
                 setPaymentFilter={setPaymentFilter}
                 onSelectClient={(client) => setSelectedClient(client)}
                 onCreateNewClient={() => setActiveNav("Clients")}
+                salesPersonName={salesPersonName}
                 dark={dark}
               />
             ) : (

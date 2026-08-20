@@ -222,7 +222,7 @@ const chartPoints = [
 ];
 
 /* ── MAIN DASHBOARD COMPONENT ── */
-export default function Dashboard({ onSignOut }) {
+export default function Dashboard({ onSignOut, userEmail }) {
   const [activeNav, setActiveNav] = React.useState("Dashboard");
   const [dark, setDark] = React.useState(false);
   const [searchOpen, setSearchOpen] = React.useState(false);
@@ -232,17 +232,51 @@ export default function Dashboard({ onSignOut }) {
   const [notifFilter, setNotifFilter] = React.useState("all");
   const [unreadNotifCount, setUnreadNotifCount] = React.useState(3);
   const [profileOpen, setProfileOpen] = React.useState(false);
+  const [clientProfileOpen, setClientProfileOpen] = React.useState(false);
   const [changePasswordOpen, setChangePasswordOpen] = React.useState(false);
   const [newPassword, setNewPassword] = React.useState("");
   const [confirmPassword, setConfirmPassword] = React.useState("");
   const [passwordError, setPasswordError] = React.useState("");
+  const [passwordSuccess, setPasswordSuccess] = React.useState("");
   const [selectedScheme, setSelectedScheme] = React.useState(null);
 
   // Quick Action Modals
   const [newRequestOpen, setNewRequestOpen] = React.useState(false);
+  const [requestSubmitted, setRequestSubmitted] = React.useState(false);
   const [supportOpen, setSupportOpen] = React.useState(false);
   const [requestService, setRequestService] = React.useState("Certificate");
   const [requestNotes, setRequestNotes] = React.useState("");
+
+  const clientInfo = React.useMemo(() => {
+    return {
+      name: "Devika Shah",
+      designation: "Managing Director & Signatory",
+      company: "Acme Industries Pvt. Ltd.",
+      clientId: "CLI-2026-8942",
+      email: userEmail || "contact@acme.com",
+      phone: "+91 98765 43210",
+      address: "402, Cyber Heights, Sector 62, Noida, Uttar Pradesh - 201301",
+      gstNumber: "07AAAAA0000A1Z5",
+      panNumber: "AAAAA0000A",
+      cinNumber: "U74999UP2024PTC123456",
+      tier: "Enterprise Client",
+      status: "Active",
+      relationshipManager: "Kansish",
+      managerRole: "Enterprise Account Lead",
+      salesRepresentative: "Mia Ross",
+      salesRole: "Senior Sales Lead",
+      branch: "East Regional Branch",
+      memberSince: "14 June 2024",
+      activeCoverage: "₹5.0 Cr",
+      totalServices: "4 Active Plans",
+      annualBilling: "₹3,07,000 / year",
+      nextRenewal: "14 June 2027",
+      complianceScore: "94% Verified",
+      kycStatus: "Verified (Level 3 Tier)",
+      primaryScheme: "PMEGP / Corporate Health Shield",
+    };
+  }, [userEmail]);
+
   // Live Client Milestone Progress (syncable with Admin updates & scheme-driven)
   const clientTracker = React.useMemo(() => {
     let clientScheme = "PMEGP";
@@ -294,6 +328,19 @@ export default function Dashboard({ onSignOut }) {
     }
   }, [notificationsOpen, profileOpen]);
 
+  // Lock body scroll and hide scrollbars when profile modal is open
+  React.useEffect(() => {
+    if (clientProfileOpen) {
+      document.body.classList.add("cd-profile-modal-open");
+      const originalOverflow = document.body.style.overflow;
+      document.body.style.overflow = "hidden";
+      return () => {
+        document.body.classList.remove("cd-profile-modal-open");
+        document.body.style.overflow = originalOverflow;
+      };
+    }
+  }, [clientProfileOpen]);
+
   function handleCreateRequest(e) {
     e.preventDefault();
     setRequestSubmitted(true);
@@ -320,6 +367,7 @@ export default function Dashboard({ onSignOut }) {
 
       <section className="dashboard-content">
         {/* ── COMMAND HEADER ── */}
+        {!clientProfileOpen && (
         <header className="cd-header">
           <div className="cd-header-left">
             <div className="cd-company-pill">
@@ -474,7 +522,7 @@ export default function Dashboard({ onSignOut }) {
                   setProfileOpen(!profileOpen);
                   setNotificationsOpen(false);
                 }}
-                title="Profile"
+                title="Account & Profile"
               >
                 DS
               </button>
@@ -483,8 +531,8 @@ export default function Dashboard({ onSignOut }) {
                   <div className="cd-profile-header">
                     <div className="cd-profile-avatar">DS</div>
                     <div>
-                      <strong>Devika Shah</strong>
-                      <span className="cd-profile-email">contact@acme.com</span>
+                      <strong>{clientInfo.name}</strong>
+                      <span className="cd-profile-email">{clientInfo.email}</span>
                     </div>
                   </div>
                   <div className="cd-profile-menu">
@@ -492,23 +540,40 @@ export default function Dashboard({ onSignOut }) {
                       type="button"
                       onClick={() => {
                         setProfileOpen(false);
+                        setClientProfileOpen(true);
+                      }}
+                      style={{ display: "flex", alignItems: "center", gap: 10 }}
+                    >
+                      <DashboardIcon name="clients" size={16} />
+                      <span>Profile</span>
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setProfileOpen(false);
                         setChangePasswordOpen(true);
                       }}
+                      style={{ display: "flex", alignItems: "center", gap: 10 }}
                     >
-                      Change password
+                      <DashboardIcon name="shield" size={16} />
+                      <span>Change password</span>
                     </button>
                     <button
                       type="button"
                       onClick={() => setDark((prev) => !prev)}
+                      style={{ display: "flex", alignItems: "center", gap: 10 }}
                     >
-                      {dark ? "Switch to Light" : "Switch to Dark"}
+                      <DashboardIcon name="sparkle" size={16} />
+                      <span>{dark ? "Switch to Light" : "Switch to Dark"}</span>
                     </button>
                     <button
                       className="cd-logout-option"
                       type="button"
                       onClick={onSignOut}
+                      style={{ display: "flex", alignItems: "center", gap: 10 }}
                     >
-                      Logout
+                      <DashboardIcon name="briefcase" size={16} />
+                      <span>Logout</span>
                     </button>
                   </div>
                 </section>
@@ -516,6 +581,7 @@ export default function Dashboard({ onSignOut }) {
             </div>
           </div>
         </header>
+        )}
 
         {/* ── PAGE ROUTING CONTENT ── */}
         {activeNav === "More Services" ? (
@@ -908,6 +974,284 @@ export default function Dashboard({ onSignOut }) {
                 </a>
               </div>
             </div>
+          </section>
+        </div>
+      )}
+
+      {/* ── CLIENT PROFILE DOSSIER MODAL ── */}
+      {clientProfileOpen && (
+        <div className="cd-modal-backdrop" onMouseDown={() => setClientProfileOpen(false)}>
+          <section
+            className="cd-modal cd-modal-profile"
+            onMouseDown={(event) => event.stopPropagation()}
+            style={{ maxWidth: 760, width: "100%", maxHeight: "90vh", overflowY: "auto" }}
+          >
+            <div className="cd-modal-top-glow" />
+            <button
+              type="button"
+              className="cd-modal-close"
+              onClick={() => setClientProfileOpen(false)}
+              aria-label="Close"
+            >
+              ×
+            </button>
+
+            {/* Top Banner Profile Identity */}
+            <div className="cd-profile-dossier-hero">
+              <div className="cd-profile-dossier-avatar">
+                AI
+                <span className="cd-online-dot-lg" title="Active Account" />
+              </div>
+              <div className="cd-profile-dossier-info">
+                <div style={{ display: "flex", alignItems: "center", gap: 8, flexWrap: "wrap", marginBottom: 4 }}>
+                  <span className="cd-kicker" style={{ margin: 0 }}>CLIENT PROFILE & DOSSIER</span>
+                  <span className="cd-badge-active" style={{ fontSize: 11, padding: "2px 8px" }}>
+                    <DashboardIcon name="check" size={11} /> {clientInfo.status}
+                  </span>
+                </div>
+                <h2 style={{ fontSize: 22, fontWeight: 800, margin: "0 0 4px", color: "var(--cd-ink)" }}>
+                  {clientInfo.company}
+                </h2>
+                <div style={{ display: "flex", gap: 10, flexWrap: "wrap", alignItems: "center" }}>
+                  <span className="cd-meta-badge id-badge">ID: {clientInfo.clientId}</span>
+                  <span className="cd-meta-badge tier-badge">{clientInfo.tier}</span>
+                  <span className="cd-meta-badge mgr-badge">Authorized: {clientInfo.name}</span>
+                </div>
+              </div>
+            </div>
+
+            {/* Organization & Contact Information */}
+            <div className="cd-dossier-section-title">
+              <DashboardIcon name="briefcase" size={15} />
+              <span>Organization & Contact Information</span>
+            </div>
+            <div className="cd-dossier-grid">
+              <div className="cd-dossier-card">
+                <span className="cd-dossier-label">Authorized Signatory</span>
+                <strong className="cd-dossier-val">{clientInfo.name}</strong>
+                <small className="cd-dossier-sub">{clientInfo.designation}</small>
+              </div>
+              <div className="cd-dossier-card">
+                <span className="cd-dossier-label">Official Email</span>
+                <strong className="cd-dossier-val">{clientInfo.email}</strong>
+                <small className="cd-dossier-sub">Registered primary login ID</small>
+              </div>
+              <div className="cd-dossier-card">
+                <span className="cd-dossier-label">Primary Phone</span>
+                <strong className="cd-dossier-val">{clientInfo.phone}</strong>
+                <small className="cd-dossier-sub">24/7 Verified Contact</small>
+              </div>
+              <div className="cd-dossier-card">
+                <span className="cd-dossier-label">Registered Office</span>
+                <strong className="cd-dossier-val" style={{ fontSize: 12.5, lineHeight: 1.4 }}>
+                  {clientInfo.address}
+                </strong>
+              </div>
+            </div>
+
+            {/* Legal, Tax & Compliance Identifiers */}
+            <div className="cd-dossier-section-title" style={{ marginTop: 20 }}>
+              <DashboardIcon name="file" size={15} />
+              <span>Legal, Tax & Compliance Identifiers</span>
+            </div>
+            <div className="cd-dossier-grid">
+              <div className="cd-dossier-card">
+                <span className="cd-dossier-label">GSTIN Number</span>
+                <strong className="cd-dossier-val" style={{ color: "#4e7cff" }}>{clientInfo.gstNumber}</strong>
+                <span className="cd-tag-verified">✓ 100% Active & Verified</span>
+              </div>
+              <div className="cd-dossier-card">
+                <span className="cd-dossier-label">PAN Number</span>
+                <strong className="cd-dossier-val" style={{ color: "#9a74e9" }}>{clientInfo.panNumber}</strong>
+                <span className="cd-tag-verified">✓ Verified PAN Entity</span>
+              </div>
+              <div className="cd-dossier-card">
+                <span className="cd-dossier-label">Corporate CIN</span>
+                <strong className="cd-dossier-val">{clientInfo.cinNumber}</strong>
+                <span className="cd-tag-verified">✓ MCA Verified</span>
+              </div>
+              <div className="cd-dossier-card">
+                <span className="cd-dossier-label">KYC Compliance</span>
+                <strong className="cd-dossier-val" style={{ color: "#10b981" }}>{clientInfo.complianceScore}</strong>
+                <span className="cd-tag-verified">✓ Level 3 Enterprise KYC</span>
+              </div>
+            </div>
+
+            {/* CRM Management & Subscription Portfolio */}
+            <div className="cd-dossier-section-title" style={{ marginTop: 20 }}>
+              <DashboardIcon name="shield" size={15} />
+              <span>CRM Management & Relationship</span>
+            </div>
+            <div className="cd-dossier-grid">
+              <div className="cd-dossier-card">
+                <span className="cd-dossier-label">Relationship Manager</span>
+                <strong className="cd-dossier-val">{clientInfo.relationshipManager}</strong>
+                <small className="cd-dossier-sub">{clientInfo.managerRole}</small>
+              </div>
+              <div className="cd-dossier-card">
+                <span className="cd-dossier-label">Sales Specialist</span>
+                <strong className="cd-dossier-val">{clientInfo.salesRepresentative}</strong>
+                <small className="cd-dossier-sub">{clientInfo.salesRole}</small>
+              </div>
+              <div className="cd-dossier-card">
+                <span className="cd-dossier-label">Active Coverage</span>
+                <strong className="cd-dossier-val" style={{ color: "#4e7cff" }}>{clientInfo.activeCoverage}</strong>
+                <small className="cd-dossier-sub">Underwritten portfolio</small>
+              </div>
+              <div className="cd-dossier-card">
+                <span className="cd-dossier-label">Annual Value & Renewal</span>
+                <strong className="cd-dossier-val" style={{ color: "#10b981" }}>{clientInfo.annualBilling}</strong>
+                <small className="cd-dossier-sub">Next Renewal: {clientInfo.nextRenewal}</small>
+              </div>
+            </div>
+
+            {/* Subscribed Active Policies List */}
+            <div className="cd-dossier-section-title" style={{ marginTop: 20 }}>
+              <DashboardIcon name="receipt" size={15} />
+              <span>Subscribed Services & Active Policies ({activeSchemesData.length})</span>
+            </div>
+            <div className="cd-dossier-policies-list">
+              {activeSchemesData.map((scheme) => (
+                <div key={scheme.id} className="cd-dossier-policy-item">
+                  <div>
+                    <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                      <strong style={{ fontSize: 13.5, color: "var(--cd-ink)" }}>{scheme.name}</strong>
+                      <span className="cd-meta-badge tier-badge" style={{ fontSize: 10, padding: "2px 6px" }}>{scheme.tag}</span>
+                    </div>
+                    <small style={{ color: "var(--cd-muted)", fontSize: 11.5 }}>
+                      Policy: {scheme.policyNumber} • Renews: {scheme.renewalDate}
+                    </small>
+                  </div>
+                  <div style={{ textAlign: "right" }}>
+                    <span style={{ fontSize: 12.5, fontWeight: 700, color: "#4e7cff", display: "block" }}>{scheme.cover}</span>
+                    <small style={{ color: "var(--cd-muted)", fontSize: 11 }}>{scheme.premium}</small>
+                  </div>
+                </div>
+              ))}
+            </div>
+
+            {/* Action Buttons Footer */}
+            <div style={{ display: "flex", justifyContent: "flex-end", gap: 12, marginTop: 24, paddingTop: 16, borderTop: "1px solid var(--cd-border)" }}>
+              <button
+                type="button"
+                className="cd-modal-btn-secondary"
+                onClick={() => setClientProfileOpen(false)}
+              >
+                Close
+              </button>
+              <button
+                type="button"
+                className="cd-action-btn-primary"
+                onClick={() => {
+                  setClientProfileOpen(false);
+                  setNewRequestOpen(true);
+                }}
+                style={{ padding: "10px 22px" }}
+              >
+                <DashboardIcon name="addScheme" size={15} />
+                <span>Request Service Change</span>
+              </button>
+            </div>
+          </section>
+        </div>
+      )}
+
+      {/* ── CHANGE PASSWORD MODAL ── */}
+      {changePasswordOpen && (
+        <div className="cd-modal-backdrop" onMouseDown={() => setChangePasswordOpen(false)}>
+          <section
+            className="cd-modal cd-modal-sm"
+            onMouseDown={(event) => event.stopPropagation()}
+          >
+            <div className="cd-modal-top-glow" />
+            <button
+              type="button"
+              className="cd-modal-close"
+              onClick={() => {
+                setChangePasswordOpen(false);
+                setPasswordError("");
+                setPasswordSuccess("");
+                setNewPassword("");
+                setConfirmPassword("");
+              }}
+            >
+              ×
+            </button>
+
+            <span className="cd-kicker" style={{ marginBottom: 4, display: 'inline-block' }}>SECURITY & ACCESS</span>
+            <h2>Change Password</h2>
+            <p className="cd-modal-desc">Update your account credentials to keep your workspace secure.</p>
+
+            {passwordSuccess ? (
+              <div className="cd-request-success">
+                <div className="cd-request-success-icon">
+                  <DashboardIcon name="check" size={28} />
+                </div>
+                <h3>Password Updated!</h3>
+                <p>{passwordSuccess}</p>
+                <button
+                  type="button"
+                  className="cd-submit-btn"
+                  onClick={() => {
+                    setChangePasswordOpen(false);
+                    setPasswordSuccess("");
+                  }}
+                  style={{ marginTop: 12 }}
+                >
+                  Done
+                </button>
+              </div>
+            ) : (
+              <form
+                onSubmit={(e) => {
+                  e.preventDefault();
+                  if (newPassword.length < 6) {
+                    setPasswordError("Password must be at least 6 characters long.");
+                    return;
+                  }
+                  if (newPassword !== confirmPassword) {
+                    setPasswordError("Passwords do not match.");
+                    return;
+                  }
+                  setPasswordError("");
+                  setPasswordSuccess("Your password has been changed successfully.");
+                  setNewPassword("");
+                  setConfirmPassword("");
+                }}
+                className="cd-modal-form"
+              >
+                {passwordError && (
+                  <div style={{ padding: "8px 12px", background: "rgba(239, 68, 68, 0.12)", color: "#ef4444", borderRadius: 8, fontSize: 12.5 }}>
+                    {passwordError}
+                  </div>
+                )}
+                <div className="cd-form-group">
+                  <label className="cd-form-label">New Password</label>
+                  <input
+                    type="password"
+                    value={newPassword}
+                    onChange={(e) => setNewPassword(e.target.value)}
+                    className="cd-modal-select"
+                    placeholder="Enter new password"
+                    required
+                  />
+                </div>
+                <div className="cd-form-group">
+                  <label className="cd-form-label">Confirm New Password</label>
+                  <input
+                    type="password"
+                    value={confirmPassword}
+                    onChange={(e) => setConfirmPassword(e.target.value)}
+                    className="cd-modal-select"
+                    placeholder="Confirm new password"
+                    required
+                  />
+                </div>
+                <button type="submit" className="cd-submit-btn cd-submit-btn-glow">
+                  <span>Update Password</span>
+                </button>
+              </form>
+            )}
           </section>
         </div>
       )}

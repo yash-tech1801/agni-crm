@@ -12,9 +12,14 @@ const DashboardHeader = React.forwardRef(function DashboardHeader(
 ) {
   return (
     <header ref={ref} className={`dashboard-top ${className}`.trim()}>
-      <div>
-        {eyebrow && <p className="dashboard-eyebrow">{eyebrow}</p>}
-        {title && <h1>{title}</h1>}
+      <div className="dashboard-header-text">
+        {eyebrow && (
+          <div className="dashboard-eyebrow-wrap">
+            <span className="dashboard-header-live-pulse" />
+            <p className="dashboard-eyebrow">{eyebrow}</p>
+          </div>
+        )}
+        {title && <h1 className="dashboard-header-title">{title}</h1>}
         {copy && <p className="dashboard-copy">{copy}</p>}
       </div>
 

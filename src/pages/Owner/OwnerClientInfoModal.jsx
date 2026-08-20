@@ -7,6 +7,7 @@ export default function OwnerClientInfoModal({
   selectedClient,
   onClose,
   onEditClient,
+  onUpdateTracker,
 }) {
   if (!selectedClient) return null;
 
@@ -23,6 +24,12 @@ export default function OwnerClientInfoModal({
         .slice(0, 2)
         .toUpperCase()
     : "CL";
+
+  const handleStepToggle = (stepName, nextCompletedSteps, newPercent) => {
+    if (onUpdateTracker) {
+      onUpdateTracker(selectedClient.id, nextCompletedSteps, newPercent);
+    }
+  };
 
   return (
     <SimpleModal onClose={onClose}>
@@ -94,20 +101,26 @@ export default function OwnerClientInfoModal({
         </div>
       </div>
 
-      {/* Dynamic Activity Status Stepper */}
+      {/* Dynamic Activity Status Stepper with interactive milestone updating */}
       <div style={{ marginTop: 20, paddingTop: 16, borderTop: '1px solid rgba(99, 102, 241, 0.14)' }}>
-        <div style={{ marginBottom: 12 }}>
-          <p className="owner-header-eyebrow">Work Completion Pipeline</p>
-          <h4 style={{ margin: 0, fontSize: 15, fontWeight: 700 }}>
-            {tracker.totalStages}-Point Sequential Activity Tracker ({clientScheme})
-          </h4>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12, flexWrap: 'wrap', gap: 8 }}>
+          <div>
+            <p className="owner-header-eyebrow" style={{ margin: 0 }}>Work Completion Pipeline</p>
+            <h4 style={{ margin: 0, fontSize: 15, fontWeight: 700 }}>
+              {tracker.totalStages}-Point Sequential Activity Tracker ({clientScheme})
+            </h4>
+          </div>
+          <span style={{ fontSize: 12, color: '#6366f1', fontWeight: 600 }}>
+            {onUpdateTracker ? '💡 Click point to update status' : ''}
+          </span>
         </div>
         <ActivityStatusBar
           scheme={clientScheme}
           stages={tracker.stages}
           completedSteps={tracker.completedStages}
           progress={tracker.progressPercent}
-          interactive={false}
+          onStepToggle={handleStepToggle}
+          interactive={Boolean(onUpdateTracker)}
         />
       </div>
 
@@ -120,7 +133,7 @@ export default function OwnerClientInfoModal({
               if (onClose) onClose();
             }}
           >
-            Edit Client
+            Edit Client &amp; Tracker
           </button>
         )}
         <button className="owner-btn-primary" onClick={onClose}>
@@ -130,3 +143,4 @@ export default function OwnerClientInfoModal({
     </SimpleModal>
   );
 }
+

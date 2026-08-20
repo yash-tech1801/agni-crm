@@ -3,8 +3,35 @@ import Modal from "../../components/Modal";
 import Icon from "../../components/Icon";
 import { mockClients } from "./mockClients";
 
-const INVOICE_TABS = ["All Invoices", "Tax Invoices", "Personal Invoices"];
-const INVOICE_TYPES = ["Tax Invoice", "Personal"];
+const INVOICE_TABS = ["All Invoices", "Tax Invoices", "Standard Invoices", "Personal Invoices"];
+const INVOICE_TYPES = ["Tax Invoice", "Invoice", "Personal"];
+
+const INVOICE_TYPE_METADATA = {
+  "Tax Invoice": {
+    icon: "📑",
+    accent: "#8c5ff8",
+    bg: "rgba(140, 95, 248, 0.15)",
+    title: "Tax Invoice",
+    subtitle: "Official tax invoice with 18% GST (B2B compliant)",
+    hasGst: true,
+  },
+  "Invoice": {
+    icon: "🧾",
+    accent: "#3b82f6",
+    bg: "rgba(59, 130, 246, 0.15)",
+    title: "Invoice",
+    subtitle: "Standard commercial invoice without GST (0% GST rate)",
+    hasGst: false,
+  },
+  "Personal": {
+    icon: "👤",
+    accent: "#10b981",
+    bg: "rgba(16, 185, 129, 0.15)",
+    title: "Personal",
+    subtitle: "Direct personal billing exempt from GST (B2C)",
+    hasGst: false,
+  },
+};
 
 const initialInvoices = [
   {
@@ -57,6 +84,23 @@ const initialInvoices = [
     status: "Paid",
     createdBy: "Sales Person",
     notes: "Infrastructure and network security setup fee.",
+  },
+  {
+    id: "INV-2026-004",
+    invoiceType: "Invoice",
+    clientId: 4,
+    clientName: "Peak Logistics",
+    clientEmail: "contact@peaklogistics.com",
+    clientPhone: "+91 90123 45678",
+    clientGst: "",
+    serviceDescription: "Logistics Optimization Consultation (Non-GST)",
+    baseAmount: 50000,
+    gstPercentage: 0,
+    issueDate: "2026-08-05",
+    dueDate: "2026-08-20",
+    status: "Pending",
+    createdBy: "Sales Person",
+    notes: "Commercial standard invoice issued without GST.",
   },
 ];
 
@@ -155,13 +199,13 @@ function CreateInvoiceModal({ clients, onClose, onSubmit }) {
               </p>
               <h2 style={{ margin: "4px 0 4px", fontSize: 18, fontWeight: 800 }}>Select Invoice Class</h2>
               <p style={{ margin: 0, color: "#7a748e", fontSize: 13 }}>
-                Select whether this invoice requires B2B GST compliance or personal billing.
+                Select whether this invoice requires B2B GST compliance, standard commercial billing without GST, or personal billing.
               </p>
             </div>
 
-            <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(240px, 1fr))", gap: 14, marginTop: 4 }}>
+            <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(180px, 1fr))", gap: 14, marginTop: 4 }}>
               {INVOICE_TYPES.map((type) => {
-                const isTax = type === "Tax Invoice";
+                const meta = INVOICE_TYPE_METADATA[type];
                 return (
                   <button
                     key={type}
@@ -186,19 +230,19 @@ function CreateInvoiceModal({ clients, onClose, onSubmit }) {
                         width: 40,
                         height: 40,
                         borderRadius: 10,
-                        background: isTax ? "rgba(140, 95, 248, 0.15)" : "rgba(16, 185, 129, 0.15)",
-                        color: isTax ? "#8c5ff8" : "#10b981",
+                        background: meta?.bg || "rgba(140, 95, 248, 0.15)",
+                        color: meta?.accent || "#8c5ff8",
                         display: "grid",
                         placeItems: "center",
                         fontSize: 18,
                         marginBottom: 12,
                       }}
                     >
-                      {isTax ? "📑" : "👤"}
+                      {meta?.icon || "📄"}
                     </div>
-                    <strong style={{ fontSize: 15, marginBottom: 4, display: "block" }}>{type}</strong>
+                    <strong style={{ fontSize: 15, marginBottom: 4, display: "block" }}>{meta?.title || type}</strong>
                     <small style={{ color: "#7a748e", fontSize: 12.5, lineHeight: 1.4, display: "block" }}>
-                      {isTax ? "Official tax invoice with 18% GST (B2B compliant)" : "Direct personal billing exempt from GST (B2C)"}
+                      {meta?.subtitle || "Invoice without GST"}
                     </small>
                   </button>
                 );
@@ -226,8 +270,8 @@ function CreateInvoiceModal({ clients, onClose, onSubmit }) {
                     display: "inline-block",
                     padding: "2px 8px",
                     borderRadius: 6,
-                    background: "rgba(140, 95, 248, 0.15)",
-                    color: "#8c5ff8",
+                    background: INVOICE_TYPE_METADATA[selectedType]?.bg || "rgba(140, 95, 248, 0.15)",
+                    color: INVOICE_TYPE_METADATA[selectedType]?.accent || "#8c5ff8",
                     fontSize: 11,
                     fontWeight: 700,
                     marginBottom: 2,
@@ -236,7 +280,11 @@ function CreateInvoiceModal({ clients, onClose, onSubmit }) {
                   {selectedType}
                 </span>
                 <h3 style={{ margin: 0, fontSize: 16, fontWeight: 700 }}>
-                  {selectedType === "Tax Invoice" ? "Generate Tax Invoice" : "Generate Personal Invoice"}
+                  {selectedType === "Tax Invoice"
+                    ? "Generate Tax Invoice"
+                    : selectedType === "Invoice"
+                    ? "Generate Invoice (Without GST)"
+                    : "Generate Personal Invoice"}
                 </h3>
               </div>
               <button
@@ -302,7 +350,7 @@ function CreateInvoiceModal({ clients, onClose, onSubmit }) {
               ) : (
                 <label className="field-label">
                   GST Percentage (%)
-                  <input type="text" value="0% (Exempt)" disabled readOnly />
+                  <input type="text" value="0% (Without GST)" disabled readOnly />
                 </label>
               )}
             </div>
@@ -362,7 +410,9 @@ function CreateInvoiceModal({ clients, onClose, onSubmit }) {
                 <span style={{ fontSize: 11.5, color: "#7a748e", textTransform: "uppercase", letterSpacing: 0.5, fontWeight: 600, display: "block", marginBottom: 3 }}>
                   GST ({gstRate}%)
                 </span>
-                <strong style={{ fontSize: 16, color: "#8c5ff8" }}>{formatCurrency(gstAmount)}</strong>
+                <strong style={{ fontSize: 16, color: selectedType === "Tax Invoice" ? "#8c5ff8" : "#7a748e" }}>
+                  {formatCurrency(gstAmount)}
+                </strong>
               </div>
               <div>
                 <span style={{ fontSize: 11.5, color: "#7a748e", textTransform: "uppercase", letterSpacing: 0.5, fontWeight: 600, display: "block", marginBottom: 3 }}>
@@ -401,6 +451,7 @@ function CreateInvoiceModal({ clients, onClose, onSubmit }) {
 function InvoiceDetailsModal({ invoice, onClose, onDownload }) {
   if (!invoice) return null;
   const { gstAmount, totalAmount } = calculateTotals(invoice.baseAmount, invoice.gstPercentage);
+  const isTax = invoice.invoiceType === "Tax Invoice";
 
   return (
     <Modal title={`Invoice Details — ${invoice.id}`} onClose={onClose} closeLabel="Close">
@@ -427,7 +478,16 @@ function InvoiceDetailsModal({ invoice, onClose, onDownload }) {
             <span style={{ fontSize: 11.5, color: "#7a748e", textTransform: "uppercase", letterSpacing: 0.5, fontWeight: 600, display: "block" }}>
               Invoice Type
             </span>
-            <strong style={{ fontSize: 14, marginTop: 2, display: "block", color: "#8c5ff8" }}>{invoice.invoiceType}</strong>
+            <strong
+              style={{
+                fontSize: 14,
+                marginTop: 2,
+                display: "block",
+                color: INVOICE_TYPE_METADATA[invoice.invoiceType]?.accent || "#8c5ff8",
+              }}
+            >
+              {invoice.invoiceType} {isTax ? "(18% GST)" : "(No GST)"}
+            </strong>
           </div>
           <div>
             <span style={{ fontSize: 11.5, color: "#7a748e", textTransform: "uppercase", letterSpacing: 0.5, fontWeight: 600, display: "block" }}>
@@ -488,8 +548,12 @@ function InvoiceDetailsModal({ invoice, onClose, onDownload }) {
             <strong style={{ fontSize: 14.5, marginTop: 3, display: "block" }}>{formatCurrency(invoice.baseAmount)}</strong>
           </div>
           <div style={{ padding: "12px 14px", borderRadius: 12, border: "1px solid rgba(140, 95, 248, 0.14)", background: "rgba(255, 255, 255, 0.02)" }}>
-            <span style={{ fontSize: 11.5, color: "#7a748e", fontWeight: 600, display: "block" }}>GST ({invoice.gstPercentage}%)</span>
-            <strong style={{ fontSize: 14.5, marginTop: 3, display: "block", color: "#8c5ff8" }}>{formatCurrency(gstAmount)}</strong>
+            <span style={{ fontSize: 11.5, color: "#7a748e", fontWeight: 600, display: "block" }}>
+              GST ({invoice.gstPercentage}%)
+            </span>
+            <strong style={{ fontSize: 14.5, marginTop: 3, display: "block", color: isTax ? "#8c5ff8" : "#7a748e" }}>
+              {formatCurrency(gstAmount)}
+            </strong>
           </div>
         </div>
 
@@ -527,6 +591,7 @@ export default function SalesInvoices() {
   const filteredInvoices = useMemo(() => {
     if (activeTab === "All Invoices") return invoices;
     if (activeTab === "Tax Invoices") return invoices.filter((i) => i.invoiceType === "Tax Invoice");
+    if (activeTab === "Standard Invoices") return invoices.filter((i) => i.invoiceType === "Invoice");
     if (activeTab === "Personal Invoices") return invoices.filter((i) => i.invoiceType === "Personal");
     return invoices;
   }, [invoices, activeTab]);
@@ -543,13 +608,14 @@ export default function SalesInvoices() {
   };
 
   const downloadInvoice = (invoice) => {
+    const isTax = invoice.invoiceType === "Tax Invoice";
     const { gstAmount, totalAmount } = calculateTotals(invoice.baseAmount, invoice.gstPercentage);
     const fileContent = `
 ====================================================================
                       AGNI CRM - ${invoice.invoiceType.toUpperCase()}
 ====================================================================
 Invoice Number  : ${invoice.id}
-Invoice Type    : ${invoice.invoiceType}
+Invoice Type    : ${invoice.invoiceType} ${isTax ? "(Tax Invoice)" : "(Without GST)"}
 Client Name     : ${invoice.clientName}
 Email           : ${invoice.clientEmail}
 Phone           : ${invoice.clientPhone}
@@ -561,7 +627,7 @@ SERVICE DESCRIPTION:
 ${invoice.serviceDescription}
 --------------------------------------------------------------------
 Base Amount     : ${formatCurrency(invoice.baseAmount)}
-${invoice.invoiceType === "Tax Invoice" ? `GST (${invoice.gstPercentage}%)   : ${formatCurrency(gstAmount)}\n` : ""}TOTAL AMOUNT    : ${formatCurrency(totalAmount)}
+${isTax ? `GST (${invoice.gstPercentage}%)   : ${formatCurrency(gstAmount)}\n` : "GST             : ₹0 (Without GST)\n"}TOTAL AMOUNT    : ${formatCurrency(totalAmount)}
 ${invoice.notes ? `\nNOTES:\n${invoice.notes}\n` : ""}--------------------------------------------------------------------
 Thank you for choosing AgniCRM.
 For queries contact: billing@agnicrm.com
@@ -593,7 +659,7 @@ For queries contact: billing@agnicrm.com
             My Invoices
           </h1>
           <p className="sales-header-subtitle">
-            Generate and track B2B Tax Invoices and Personal invoices for acquired client accounts.
+            Generate and track B2B Tax Invoices, standard non-GST Invoices, and Personal invoices for acquired client accounts.
           </p>
         </div>
 
@@ -616,6 +682,8 @@ For queries contact: billing@agnicrm.com
               ? invoices.length
               : tab === "Tax Invoices"
               ? invoices.filter((i) => i.invoiceType === "Tax Invoice").length
+              : tab === "Standard Invoices"
+              ? invoices.filter((i) => i.invoiceType === "Invoice").length
               : invoices.filter((i) => i.invoiceType === "Personal").length;
 
           return (

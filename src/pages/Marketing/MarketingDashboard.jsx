@@ -2,6 +2,8 @@ import React, { useState, useMemo, useRef, useEffect } from "react";
 import { Routes, Route, Navigate, useLocation, useNavigate } from "react-router-dom";
 import DashboardSidebar from "../../components/dashboard/DashboardSidebar";
 import DashboardHeader from "../../components/dashboard/DashboardHeader";
+import HeaderSearch from "../../components/dashboard/HeaderSearch";
+import UserProfileMenu from "../../components/dashboard/UserProfileMenu";
 import Icon from "../../components/Icon";
 
 // Modular Sub-pages
@@ -148,33 +150,13 @@ export default function MarketingDashboard({ onSignOut, userEmail }) {
           eyebrow="MARKETING OPERATIONS &amp; CLIENT SERVICES"
         >
           <div className="owner-top-actions">
-            {searchOpen ? (
-              <div className="search-inline">
-                <input
-                  type="search"
-                  value={query}
-                  onChange={(e) => setQuery(e.target.value)}
-                  placeholder="Search marketing services, clients..."
-                  autoFocus
-                  onBlur={() => {
-                    if (!query) setSearchOpen(false);
-                  }}
-                />
-                <button
-                  type="button"
-                  onClick={() => {
-                    setQuery("");
-                    setSearchOpen(false);
-                  }}
-                >
-                  ✕
-                </button>
-              </div>
-            ) : (
-              <button type="button" onClick={() => setSearchOpen(true)}>
-                <Icon name="search" size={16} />
-              </button>
-            )}
+            <HeaderSearch
+              query={query}
+              setQuery={setQuery}
+              isOpen={searchOpen}
+              setIsOpen={setSearchOpen}
+              placeholder="Search marketing services, clients..."
+            />
             <div className="notification-wrap">
               <button
                 className="notification"
@@ -221,10 +203,24 @@ export default function MarketingDashboard({ onSignOut, userEmail }) {
                 </section>
               )}
             </div>
-            <button className="profile" type="button">
-              MKT
-            </button>
-            <span className="role-badge">Marketing Lead</span>
+
+            <UserProfileMenu
+              user={{
+                name: marketingLeadName || "Pooja Hegde",
+                email: "pooja.marketing@agnicrm.com",
+                phone: "+91 98206 99001",
+                branch: "Enterprise HQ (Mumbai)",
+                designation: "Chief Marketing Strategist",
+                empId: "EMP-MKT-5001",
+                reportingManager: "Yashvardhan Trivedi (Owner)",
+              }}
+              role="Marketing Lead"
+              roleBadge="Marketing Lead"
+              initials="MK"
+              avatarColor="linear-gradient(135deg, #ec4899 0%, #d946ef 100%)"
+              onSignOut={onSignOut}
+              showToast={(msg) => alert(msg)}
+            />
           </div>
         </DashboardHeader>
 

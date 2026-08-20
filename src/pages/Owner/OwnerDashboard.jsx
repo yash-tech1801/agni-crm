@@ -2,10 +2,14 @@ import React, { useState, useMemo, useRef, useEffect } from "react";
 import { Routes, Route, Navigate, useLocation, useNavigate } from "react-router-dom";
 import DashboardSidebar from "../../components/dashboard/DashboardSidebar";
 import DashboardHeader from "../../components/dashboard/DashboardHeader";
+import HeaderSearch from "../../components/dashboard/HeaderSearch";
+import UserProfileMenu from "../../components/dashboard/UserProfileMenu";
 import Icon from "../../components/Icon";
 import Modal from "../../components/Modal";
 import EditForm from "../../components/EditForm";
 import ConfirmDialog from "../../components/ConfirmDialog";
+import ActivityStatusBar from "../../components/dashboard/ActivityStatusBar";
+import { getTrackerState } from "../../utils/schemeTracker";
 import { ACTIVITY_STAGES } from "../Admin/mockAdminData";
 
 // Modular Page Components
@@ -208,19 +212,50 @@ export default function OwnerDashboard({ onSignOut, userEmail }) {
     setSelectedClient(client);
   };
 
+  const handleUpdateClientTracker = (clientId, nextCompletedSteps, newPercent) => {
+    const client = clients.find((c) => c.id === clientId);
+    if (!client) return;
+    const clientScheme = client.scheme || client.serviceName || client.serviceType || "PMEGP";
+    const tracker = getTrackerState({ scheme: clientScheme, completedSteps: nextCompletedSteps });
+    const activeStageName = tracker.completedStages.length > 0
+      ? tracker.completedStages[tracker.completedStages.length - 1]
+      : tracker.currentStage || "CRM Creation";
+
+    const updatedClient = {
+      ...client,
+      completedSteps: tracker.completedStages,
+      applicationStatus: activeStageName,
+      progressPercent: tracker.progressPercent,
+      progress: tracker.progressPercent,
+    };
+
+    setClients((prev) =>
+      prev.map((c) => (c.id === clientId ? updatedClient : c))
+    );
+
+    setSelectedClient((prev) => (prev && prev.id === clientId ? updatedClient : prev));
+    showToast(`✓ Updated ${client.name} tracker to "${activeStageName}" (${tracker.progressPercent}% - ${tracker.completedStages.length}/${tracker.totalStages} points)`);
+  };
+
   const handleOpenEditClient = (client) => {
+    const clientScheme = client.scheme || client.serviceName || client.serviceType || "PMEGP";
+    const tracker = getTrackerState({ scheme: clientScheme, completedSteps: client.completedSteps });
     setSelectedClient(null);
     setEditModal({
       type: "client",
       item: client,
       values: {
-        name: client.name,
-        company: client.company,
-        email: client.email,
-        phone: client.phone,
-        serviceType: client.serviceType,
-        serviceName: client.serviceName,
+        name: client.name || "",
+        company: client.company || "",
+        email: client.email || "",
+        phone: client.phone || "",
+        serviceType: client.serviceType || "",
+        serviceName: client.serviceName || client.scheme || "PMEGP",
+        totalPayment: client.totalPayment || 0,
+        paymentReceived: client.paymentReceived || 0,
       },
+      completedSteps: tracker.completedStages,
+      scheme: clientScheme,
     });
   };
 
@@ -329,12 +364,29 @@ export default function OwnerDashboard({ onSignOut, userEmail }) {
     if (!editModal) return;
 
     if (editModal.type === "client") {
+      const scheme = editModal.values.serviceName || editModal.values.scheme || editModal.values.serviceType || editModal.scheme || "PMEGP";
+      const tracker = getTrackerState({
+        scheme,
+        completedSteps: editModal.completedSteps || [],
+      });
+      const activeStageName = tracker.completedStages.length > 0
+        ? tracker.completedStages[tracker.completedStages.length - 1]
+        : tracker.currentStage || "CRM Creation";
+
+      const updatedClient = {
+        ...editModal.item,
+        ...editModal.values,
+        completedSteps: tracker.completedStages,
+        applicationStatus: activeStageName,
+        progressPercent: tracker.progressPercent,
+        progress: tracker.progressPercent,
+      };
+
       setClients((prev) =>
-        prev.map((item) =>
-          item.id === editModal.item.id ? { ...item, ...editModal.values } : item
-        )
+        prev.map((item) => (item.id === editModal.item.id ? updatedClient : item))
       );
-      showToast(`Saved updates for client "${editModal.values.name || editModal.item.name}"`);
+      setSelectedClient((prev) => (prev && prev.id === editModal.item.id ? updatedClient : prev));
+      showToast(`✓ Saved updates & tracker for client "${editModal.values.name || editModal.item.name}"`);
     } else if (editModal.type === "employee") {
       setEmployeesList((prev) =>
         prev.map((item) =>
@@ -382,22 +434,13 @@ export default function OwnerDashboard({ onSignOut, userEmail }) {
           className="owner-dashboard-top"
         >
           <div className="top-actions owner-top-actions">
-            {searchOpen ? (
-              <div className="search-field">
-                <input
-                  value={query}
-                  onChange={(event) => setQuery(event.target.value)}
-                  placeholder="Search reports, clients or teams"
-                />
-                <button type="button" onClick={() => setSearchOpen(false)}>
-                  <Icon name="search" size={16} />
-                </button>
-              </div>
-            ) : (
-              <button type="button" onClick={() => setSearchOpen(true)}>
-                <Icon name="search" size={16} />
-              </button>
-            )}
+            <HeaderSearch
+              query={query}
+              setQuery={setQuery}
+              isOpen={searchOpen}
+              setIsOpen={setSearchOpen}
+              placeholder="Search reports, clients or teams..."
+            />
 
             <div className="notification-wrap" ref={notificationWrapRef}>
               <button
@@ -442,10 +485,23 @@ export default function OwnerDashboard({ onSignOut, userEmail }) {
               )}
             </div>
 
-            <button className="profile" type="button">
-              JB
-            </button>
-            <span className="role-badge">Owner</span>
+            <UserProfileMenu
+              user={{
+                name: ownerName || "Yashvardhan Trivedi",
+                email: "owner@agnicrm.com",
+                phone: "+91 98000 00001",
+                branch: "Enterprise HQ (Mumbai)",
+                designation: "Enterprise Founder & Managing Director",
+                empId: "EMP-OWN-0001",
+                reportingManager: "Board of Directors",
+              }}
+              role="Owner"
+              roleBadge="Owner"
+              initials="JB"
+              avatarColor="linear-gradient(135deg, #8c5ff8 0%, #6366f1 100%)"
+              onSignOut={onSignOut}
+              showToast={(msg) => showToast(msg)}
+            />
           </div>
         </DashboardHeader>
 
@@ -703,14 +759,108 @@ export default function OwnerDashboard({ onSignOut, userEmail }) {
         {/* Global Modals */}
         {editModal && (
           <Modal
-            title={editModal.type === "client" ? "Edit Client Portfolio" : "Edit Employee Profile"}
+            title={editModal.type === "client" ? "Edit Client Portfolio & Milestone Tracker" : "Edit Employee Profile"}
             onClose={() => setEditModal(null)}
           >
             <div style={{ padding: "4px 0" }}>
               <div style={{ marginBottom: 18, fontSize: 13, color: "#64748b" }}>
-                Make necessary changes to {editModal.type === "client" ? "the client's portfolio records" : "the employee's system credentials"} below and save updates.
+                Make necessary changes to {editModal.type === "client" ? "the client's portfolio records, scheme, and milestone tracker" : "the employee's system credentials"} below and save updates.
               </div>
               <EditForm values={editModal.values} onChange={handleEditChange} />
+
+              {/* Dynamic Milestone Activity Tracker for Client Editing */}
+              {editModal.type === "client" && (() => {
+                const editScheme = editModal.values?.serviceName || editModal.values?.scheme || editModal.values?.serviceType || editModal.scheme || "PMEGP";
+                const editTracker = getTrackerState({
+                  scheme: editScheme,
+                  completedSteps: editModal.completedSteps || [],
+                });
+
+                return (
+                  <div style={{ marginTop: 22, paddingTop: 18, borderTop: "1px solid rgba(99, 102, 241, 0.16)" }}>
+                    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 12, flexWrap: "wrap", gap: 8 }}>
+                      <div>
+                        <p className="owner-header-eyebrow" style={{ margin: 0 }}>Milestone Completion Tracker</p>
+                        <h4 style={{ margin: "2px 0 0", fontSize: 15, fontWeight: 700 }}>
+                          {editTracker.totalStages}-Point Sequential Workflow ({editScheme})
+                        </h4>
+                      </div>
+                      <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
+                        <span className="owner-status-pill completed">
+                          ● {editTracker.currentStage}
+                        </span>
+                        <span className="owner-rep-pill">
+                          {editTracker.progressPercent}% ({editTracker.completedStages.length}/{editTracker.totalStages} points)
+                        </span>
+                      </div>
+                    </div>
+
+                    <ActivityStatusBar
+                      scheme={editScheme}
+                      stages={editTracker.stages}
+                      completedSteps={editModal.completedSteps || []}
+                      progress={editTracker.progressPercent}
+                      interactive={true}
+                      onStepToggle={(stepName, nextCompletedSteps) => {
+                        setEditModal((prev) => ({
+                          ...prev,
+                          completedSteps: nextCompletedSteps,
+                        }));
+                      }}
+                    />
+
+                    {/* Quick Stage Progress Buttons */}
+                    <div style={{ marginTop: 14 }}>
+                      <span style={{ fontSize: 11, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.5px", color: "#64748b", display: "block", marginBottom: 8 }}>
+                        Quick Milestone Advancement (Click step to advance/rollback):
+                      </span>
+                      <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
+                        {editTracker.stages.map((stage, idx) => {
+                          const isDone = (editModal.completedSteps || []).includes(stage.name);
+                          return (
+                            <button
+                              key={stage.name}
+                              type="button"
+                              onClick={() => {
+                                let next;
+                                if (isDone) {
+                                  next = (editModal.completedSteps || []).filter((name) => {
+                                    const sIdx = editTracker.stages.findIndex((s) => s.name === name);
+                                    return sIdx < idx;
+                                  });
+                                } else {
+                                  next = editTracker.stages.slice(0, idx + 1).map((s) => s.name);
+                                }
+                                setEditModal((prev) => ({
+                                  ...prev,
+                                  completedSteps: next,
+                                }));
+                              }}
+                              style={{
+                                padding: "6px 12px",
+                                borderRadius: 10,
+                                fontSize: 12,
+                                fontWeight: 700,
+                                cursor: "pointer",
+                                border: isDone ? "1px solid #10b981" : "1px solid rgba(99, 102, 241, 0.22)",
+                                background: isDone ? "rgba(16, 185, 129, 0.12)" : "rgba(99, 102, 241, 0.06)",
+                                color: isDone ? "#10b981" : "#6366f1",
+                                display: "inline-flex",
+                                alignItems: "center",
+                                gap: 6,
+                                transition: "all 0.2s ease",
+                              }}
+                            >
+                              <span>{isDone ? "✓" : idx + 1}</span>
+                              <span>{stage.name}</span>
+                            </button>
+                          );
+                        })}
+                      </div>
+                    </div>
+                  </div>
+                );
+              })()}
             </div>
             <div className="owner-modal-actions" style={{ marginTop: 22 }}>
               <button
@@ -721,7 +871,7 @@ export default function OwnerDashboard({ onSignOut, userEmail }) {
                 Cancel
               </button>
               <button className="owner-btn-primary" type="button" onClick={saveEditItem}>
-                Save Changes
+                Save Changes &amp; Tracker
               </button>
             </div>
           </Modal>
@@ -741,6 +891,7 @@ export default function OwnerDashboard({ onSignOut, userEmail }) {
           selectedClient={selectedClient}
           onClose={() => setSelectedClient(null)}
           onEditClient={handleOpenEditClient}
+          onUpdateTracker={handleUpdateClientTracker}
         />
 
         <OwnerEmployeeInfoModal

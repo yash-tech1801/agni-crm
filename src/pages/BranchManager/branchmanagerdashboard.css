@@ -672,6 +672,7 @@
 /* --------------------------------------------------------------------------
    9. Dark Theme Overrides
    -------------------------------------------------------------------------- */
+.dashboard-dark.branch-manager-dashboard,
 .dashboard-dark .branch-manager-dashboard {
   color: #f3f0fb;
 }

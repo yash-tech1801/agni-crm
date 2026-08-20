@@ -153,7 +153,7 @@ export default function App() {
         path="/client/*"
         element={
           userRole === "Client" ? (
-            <ClientDashboard onSignOut={handleSignOut} />
+            <ClientDashboard onSignOut={handleSignOut} userEmail={userEmail} />
           ) : (
             <Navigate to={userRole ? (rolePathMap[userRole] || "/login") : "/login"} replace />
           )

@@ -2,6 +2,8 @@ import React, { useState, useMemo, useRef, useEffect } from "react";
 import { Routes, Route, Navigate, useLocation, useNavigate } from "react-router-dom";
 import DashboardSidebar from "../../components/dashboard/DashboardSidebar";
 import DashboardHeader from "../../components/dashboard/DashboardHeader";
+import HeaderSearch from "../../components/dashboard/HeaderSearch";
+import UserProfileMenu from "../../components/dashboard/UserProfileMenu";
 import Icon from "../../components/Icon";
 import {
   initialBranches,
@@ -17,11 +19,13 @@ import AdminClientsPage from "./AdminClientsPage";
 import AdminPipelinePage from "./AdminPipelinePage";
 import AdminHistoryPage from "./AdminHistoryPage";
 import AdminTeamPage from "./AdminTeamPage";
+import AdminRequestsPage from "./AdminRequestsPage";
 import AgreementPage from "../Agreement/AgreementPage";
 
 // Dedicated Modals
 import AdminStatusModal from "./AdminStatusModal";
 import AdminClientDossierModal from "./AdminClientDossierModal";
+import AdminCreateRequestModal from "./AdminCreateRequestModal";
 import "./AdminDashboard.css";
 
 import {
@@ -36,7 +40,8 @@ const adminNavItems = [
   { icon: "clients", label: "Clients" },
   { icon: "overview", label: "Pipeline" },
   { icon: "agreement", label: "Agreement" },
-  { icon: "requests", label: "History" },
+  { icon: "requests", label: "Requests" },
+  { icon: "history", label: "History" },
   { icon: "team", label: "Team" },
 ];
 
@@ -51,6 +56,7 @@ export default function AdminDashboard({ onSignOut, userEmail }) {
     pipeline: "Pipeline",
     agreement: "Agreement",
     agreements: "Agreement",
+    requests: "Requests",
     history: "History",
     team: "Team",
   }), []);
@@ -117,6 +123,7 @@ export default function AdminDashboard({ onSignOut, userEmail }) {
   // Modals State
   const [selectedClientForDossier, setSelectedClientForDossier] = useState(null);
   const [updatingClient, setUpdatingClient] = useState(null);
+  const [rollbackRequestData, setRollbackRequestData] = useState(null);
   const [statusFormData, setStatusFormData] = useState({
     status: "Doc Audit",
     completedSteps: ["Submission", "Doc Audit"],
@@ -335,22 +342,13 @@ export default function AdminDashboard({ onSignOut, userEmail }) {
           className="admin-dashboard-top"
         >
           <div className="top-actions">
-            {searchOpen ? (
-              <div className="search-field">
-                <input
-                  value={query}
-                  onChange={(e) => setQuery(e.target.value)}
-                  placeholder="Search client applications..."
-                />
-                <button type="button" onClick={() => setSearchOpen(false)}>
-                  <Icon name="search" size={16} />
-                </button>
-              </div>
-            ) : (
-              <button type="button" onClick={() => setSearchOpen(true)}>
-                <Icon name="search" size={16} />
-              </button>
-            )}
+            <HeaderSearch
+              query={query}
+              setQuery={setQuery}
+              isOpen={searchOpen}
+              setIsOpen={setSearchOpen}
+              placeholder="Search client applications..."
+            />
 
             <div className="notification-wrap" ref={notificationWrapRef}>
               <button
@@ -383,12 +381,23 @@ export default function AdminDashboard({ onSignOut, userEmail }) {
               )}
             </div>
 
-            <button className="profile" type="button" style={{ background: "#4e7cff", color: "#fff" }}>
-              AD
-            </button>
-            <span className="role-badge" style={{ background: "rgba(78, 124, 255, 0.15)", color: "#4e7cff", borderColor: "#4e7cff" }}>
-              Branch Admin
-            </span>
+            <UserProfileMenu
+              user={{
+                name: adminName || "Rajesh Kumar",
+                email: "rajesh.admin@agnicrm.com",
+                phone: "+91 98203 11223",
+                branch: selectedBranch || "West Zone (Mumbai)",
+                designation: "Branch Lead Administrator",
+                empId: "EMP-ADM-3001",
+                reportingManager: "Vikramaditya Sharma (Branch Manager)",
+              }}
+              role="Branch Admin"
+              roleBadge="Branch Admin"
+              initials="AD"
+              avatarColor="linear-gradient(135deg, #3b82f6 0%, #2563eb 100%)"
+              onSignOut={onSignOut}
+              showToast={(msg) => showToast(msg)}
+            />
           </div>
         </DashboardHeader>
 
@@ -516,6 +525,17 @@ export default function AdminDashboard({ onSignOut, userEmail }) {
             }
           />
           <Route
+            path="requests"
+            element={
+              <AdminRequestsPage
+                clients={branchClients}
+                onRollbackApproved={(req) => {
+                  showToast(`Rollback request ${req.id} approved.`);
+                }}
+              />
+            }
+          />
+          <Route
             path="history"
             element={
               <AdminHistoryPage
@@ -552,6 +572,10 @@ export default function AdminDashboard({ onSignOut, userEmail }) {
           setStatusFormData={setStatusFormData}
           onClose={() => setUpdatingClient(null)}
           onSave={handleSaveStatusUpdate}
+          onRequestRollback={(client, targetStage) => {
+            setUpdatingClient(null);
+            setRollbackRequestData({ client, targetStage });
+          }}
         />
 
         {/* MODAL: CLIENT APPLICATION DOSSIER */}
@@ -563,6 +587,21 @@ export default function AdminDashboard({ onSignOut, userEmail }) {
             handleOpenStatusUpdate(client);
           }}
         />
+
+        {/* MODAL: STAGE ROLLBACK & GOVERNANCE REQUEST TO BRANCH MANAGER */}
+        {rollbackRequestData && (
+          <AdminCreateRequestModal
+            clients={branchClients}
+            preselectedClient={rollbackRequestData.client}
+            preselectedTargetStage={rollbackRequestData.targetStage}
+            onClose={() => setRollbackRequestData(null)}
+            onSubmit={(newReq) => {
+              setRollbackRequestData(null);
+              showToast(`Rollback request for ${newReq.clientName} submitted to Branch Manager.`);
+              navigate("/admin/requests");
+            }}
+          />
+        )}
       </section>
     </main>
   );

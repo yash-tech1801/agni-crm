@@ -2,10 +2,12 @@ import { useState, useMemo } from "react";
 import {
   GST_RATE,
   schemeOptions,
+  serviceTypeSchemes,
   initialSalesClients,
   initialNewClientState,
   salesLeads,
 } from "../mockSalesData";
+import { salesTeam } from "../../Manager/mockManagerData";
 import { getTrackerState } from "../../../utils/schemeTracker";
 
 export function useSalesClients(salesPersonName, onClientAdded) {
@@ -26,7 +28,8 @@ export function useSalesClients(salesPersonName, onClientAdded) {
         (c.company && c.company.toLowerCase().includes(q)) ||
         (c.email && c.email.toLowerCase().includes(q)) ||
         (c.phone && c.phone.toLowerCase().includes(q)) ||
-        (c.scheme && c.scheme.toLowerCase().includes(q));
+        (c.scheme && c.scheme.toLowerCase().includes(q)) ||
+        (c.serviceType && c.serviceType.toLowerCase().includes(q));
 
       const matchesStage = stageFilter === "all" || c.stage === stageFilter;
 
@@ -48,17 +51,48 @@ export function useSalesClients(salesPersonName, onClientAdded) {
   const totalActiveClients = clients.filter((client) => client.stage === "Active").length;
   const totalClosedDeals = salesLeads.filter((lead) => lead.status === "Closed").length;
 
+  const quotaMetrics = useMemo(() => {
+    const member = salesTeam.find(
+      (m) => m.name.toLowerCase() === (salesPersonName || "").toLowerCase()
+    );
+    if (member) {
+      const quotaNum = parseInt(member.quota.replace(/[^0-9]/g, ""), 10) * 1000;
+      const salesNum = parseInt(member.monthlySales.replace(/[^0-9]/g, ""), 10) * 1000;
+      const leftNum = Math.max(quotaNum - salesNum, 0);
+      const progressPct = quotaNum > 0 ? Math.round((salesNum / quotaNum) * 100) : 0;
+      return {
+        achieved: `₹${salesNum.toLocaleString("en-IN")}`,
+        left: `₹${leftNum.toLocaleString("en-IN")}`,
+        progress: `${progressPct}%`,
+      };
+    }
+    return {
+      achieved: "₹76,000",
+      left: "₹24,000",
+      progress: "76%",
+    };
+  }, [salesPersonName]);
+
   const kpiCards = useMemo(() => [
-    { label: "Active clients", value: `${totalActiveClients}`, trend: "+6%", description: "Currently active", accent: "#4e7cff" },
-    { label: "Total closed", value: `${totalClosedDeals || 3}`, trend: "+3%", description: "Closed deals", accent: "#44bfb0" },
-    { label: "Quota progress", value: "76%", trend: "+4%", description: "Towards target", accent: "#9a74e9" },
-    { label: "New contacts", value: "28", trend: "+22%", description: "Added this week", accent: "#f2aa38" },
-  ], [totalActiveClients, totalClosedDeals]);
+    { label: "Active clients", value: `${totalActiveClients}`, trend: "+6%", description: "Currently active", accent: "#4e7cff", icon: "clients" },
+    { label: "Total closed", value: `${totalClosedDeals || 3}`, trend: "+3%", description: "Closed deals", accent: "#44bfb0", icon: "checkCircle" },
+    { label: "Quota achieved", value: quotaMetrics.achieved, trend: "+8%", description: "Realized this month", accent: "#10b981", icon: "currency" },
+    { label: "Quota left", value: quotaMetrics.left, trend: "Remaining gap", description: "To reach target", accent: "#f43f5e", icon: "wallet" },
+    { label: "Quota progress", value: quotaMetrics.progress, trend: "+4%", description: "Towards target", accent: "#9a74e9", icon: "revenue" },
+    { label: "New contacts", value: "28", trend: "+22%", description: "Added this week", accent: "#f2aa38", icon: "users" },
+  ], [totalActiveClients, totalClosedDeals, quotaMetrics]);
 
   const handleNewClientChange = (event) => {
     const { name, value } = event.target;
     setNewClient((prev) => {
-      const next = { ...prev, [name]: value };
+      let next = { ...prev, [name]: value };
+
+      if (name === "serviceType") {
+        const available = serviceTypeSchemes[value] || serviceTypeSchemes.Certificate || [];
+        if (!available.includes(next.scheme)) {
+          next.scheme = available[0] || "";
+        }
+      }
 
       const amountNum = parseFloat(next.amount) || 0;
       const receivedNum = parseFloat(next.paymentReceived) || 0;
@@ -116,7 +150,8 @@ export function useSalesClients(salesPersonName, onClientAdded) {
       email: newClient.email,
       phone: newClient.phone,
       address: newClient.address || "Main Street, Metro City",
-      stage: newClient.stage,
+      serviceType: newClient.serviceType || "Certificate",
+      stage: newClient.stage || "Active",
       owner: salesPersonName,
       scheme: newClient.scheme,
       amount: newClient.amount || "0",

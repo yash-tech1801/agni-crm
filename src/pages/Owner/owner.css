@@ -846,6 +846,7 @@
 /* --------------------------------------------------------------------------
    9. Dark Theme Overrides
    -------------------------------------------------------------------------- */
+.dashboard-dark.owner-dashboard,
 .dashboard-dark .owner-dashboard {
   color: #f8fafc;
 }

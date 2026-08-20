@@ -2,6 +2,8 @@ import React, { useState, useMemo, useRef, useEffect } from "react";
 import { Routes, Route, Navigate, useLocation, useNavigate } from "react-router-dom";
 import DashboardSidebar from "../../components/dashboard/DashboardSidebar";
 import DashboardHeader from "../../components/dashboard/DashboardHeader";
+import HeaderSearch from "../../components/dashboard/HeaderSearch";
+import UserProfileMenu from "../../components/dashboard/UserProfileMenu";
 import Icon from "../../components/Icon";
 
 // Modular Sub-pages
@@ -163,22 +165,13 @@ export default function ITDashboard({ onSignOut, userEmail }) {
           className="owner-dashboard-top"
         >
           <div className="top-actions owner-top-actions">
-            {searchOpen ? (
-              <div className="search-field">
-                <input
-                  value={query}
-                  onChange={(event) => setQuery(event.target.value)}
-                  placeholder="Search IT clients, services, branches..."
-                />
-                <button type="button" onClick={() => setSearchOpen(false)}>
-                  <Icon name="search" size={16} />
-                </button>
-              </div>
-            ) : (
-              <button type="button" onClick={() => setSearchOpen(true)}>
-                <Icon name="search" size={16} />
-              </button>
-            )}
+            <HeaderSearch
+              query={query}
+              setQuery={setQuery}
+              isOpen={searchOpen}
+              setIsOpen={setSearchOpen}
+              placeholder="Search IT clients, services, branches..."
+            />
             <div className="notification-wrap">
               <button
                 className="notification"
@@ -225,10 +218,23 @@ export default function ITDashboard({ onSignOut, userEmail }) {
                 </section>
               )}
             </div>
-            <button className="profile" type="button">
-              IT
-            </button>
-            <span className="role-badge">IT Admin</span>
+            <UserProfileMenu
+              user={{
+                name: itLeadName || "Aakash Varma",
+                email: "aakash.it@agnicrm.com",
+                phone: "+91 98205 77889",
+                branch: "Enterprise HQ (Mumbai)",
+                designation: "Lead Enterprise Solutions Architect",
+                empId: "EMP-IT-4001",
+                reportingManager: "Yashvardhan Trivedi (Owner)",
+              }}
+              role="IT Admin"
+              roleBadge="IT Admin"
+              initials="IT"
+              avatarColor="linear-gradient(135deg, #059669 0%, #10b981 100%)"
+              onSignOut={onSignOut}
+              showToast={(msg) => alert(msg)}
+            />
           </div>
         </DashboardHeader>
 

@@ -17,6 +17,7 @@ export default function AdminStatusModal({
   setStatusFormData,
   onClose,
   onSave,
+  onRequestRollback,
 }) {
   if (!updatingClient) return null;
 
@@ -26,11 +27,20 @@ export default function AdminStatusModal({
   const processType = getProcessTypeForScheme(updatingClient.scheme);
   const processLabel = getProcessTypeLabel(processType);
 
+  const originallyCommitted = updatingClient.completedSteps || [];
   const currentCompleted = statusFormData.completedSteps || [];
   const firstUncompletedIndex = stages.findIndex((s) => !currentCompleted.includes(s.name));
 
-  // Toggle a single step checkbox inside the Status Update Modal with sequential enforcement
+  // Toggle a single step checkbox inside the Status Update Modal with sequential enforcement & reversal protection
   const handleModalStepCheckboxToggle = (stepName, idx) => {
+    // If the stage was ALREADY saved in the client database, admin cannot directly uncheck it!
+    if (originallyCommitted.includes(stepName) && currentCompleted.includes(stepName)) {
+      if (onRequestRollback) {
+        onRequestRollback(updatingClient, stepName);
+      }
+      return;
+    }
+
     setStatusFormData((prev) => {
       let updated;
       const prevCompleted = prev.completedSteps || [];
@@ -40,7 +50,7 @@ export default function AdminStatusModal({
         if (stepName === "CRM Creation") {
           updated = ["CRM Creation"];
         } else {
-          // Unchecking a stage automatically unchecks all subsequent stages
+          // Unchecking a newly toggled stage automatically unchecks all subsequent stages
           updated = prevCompleted.filter((name) => {
             const sIdx = stages.findIndex((s) => s.name === name);
             return sIdx < idx;
@@ -71,6 +81,15 @@ export default function AdminStatusModal({
 
   // Handle stage selection in modal (sequentially checks all points up to that stage)
   const handleModalStageSelect = (stageName, stageIdx) => {
+    // If admin is trying to select a stage that is EARLIER than what's already committed:
+    const latestCommittedIdx = stages.findLastIndex ? stages.findLastIndex((s) => originallyCommitted.includes(s.name)) : -1;
+    if (latestCommittedIdx > stageIdx && originallyCommitted.includes(stages[latestCommittedIdx]?.name)) {
+      if (onRequestRollback) {
+        onRequestRollback(updatingClient, stageName);
+      }
+      return;
+    }
+
     const nextSteps = stages.slice(0, stageIdx + 1).map((s) => s.name);
     const normalized = normalizeCompletedStages(nextSteps, stages);
     const newPercent = Math.round((normalized.length / totalStages) * 100);
@@ -257,10 +276,32 @@ export default function AdminStatusModal({
               </span>
             </div>
 
+            {/* Milestone Reversal Guard Alert Banner */}
+            <div
+              style={{
+                padding: "8px 12px",
+                borderRadius: 10,
+                background: "rgba(245, 158, 11, 0.08)",
+                border: "1px solid rgba(245, 158, 11, 0.22)",
+                display: "flex",
+                alignItems: "center",
+                gap: 8,
+                fontSize: 12,
+                color: "#f59e0b",
+                marginBottom: 10,
+              }}
+            >
+              <Icon name="alert" size={14} />
+              <span>
+                <strong>Milestone Integrity:</strong> Once saved, tracker stages cannot be undone directly. To reverse milestones, submit a <strong>Rollback Request</strong> to the Branch Manager.
+              </span>
+            </div>
+
             {/* Checklist Cards */}
             <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
               {stages.map((s, idx) => {
                 const isChecked = currentCompleted.includes(s.name);
+                const isCommitted = originallyCommitted.includes(s.name);
                 const isNextAvailable = !isChecked && idx === firstUncompletedIndex;
                 const isLocked = !isChecked && firstUncompletedIndex !== -1 && idx > firstUncompletedIndex;
 
@@ -337,7 +378,7 @@ export default function AdminStatusModal({
                               color: isChecked ? "#10b981" : isNextAvailable ? "#f59e0b" : "#64748b",
                             }}
                           >
-                            {isChecked ? "Completed" : isNextAvailable ? "In Progress" : "Pending"}
+                            {isChecked ? (isCommitted ? "Committed ✓" : "Completed") : isNextAvailable ? "In Progress" : "Pending"}
                           </span>
                         </div>
                         <small style={{ color: "#64748b", fontSize: 11.5, display: "block" }}>
@@ -346,21 +387,50 @@ export default function AdminStatusModal({
                       </div>
                     </div>
 
-                    <button
-                      type="button"
-                      className={isChecked ? "admin-btn-secondary" : "admin-btn-primary"}
-                      style={{
-                        padding: "5px 12px",
-                        fontSize: 11.5,
-                        flexShrink: 0,
-                      }}
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        handleModalStageSelect(s.name, idx);
-                      }}
-                    >
-                      {isChecked ? "Completed ✓" : isNextAvailable ? "Mark Done →" : "Set Stage →"}
-                    </button>
+                    <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                      {isCommitted && idx > 0 && idx < originallyCommitted.length - 1 && (
+                        <button
+                          type="button"
+                          className="admin-btn-secondary"
+                          style={{
+                            padding: "4px 10px",
+                            fontSize: 11,
+                            color: "#f59e0b",
+                            borderColor: "rgba(245, 158, 11, 0.3)",
+                          }}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            if (onRequestRollback) {
+                              onRequestRollback(updatingClient, s.name);
+                            }
+                          }}
+                          title="Request milestone reversal to this stage via Branch Manager"
+                        >
+                          ↩ Request Rollback
+                        </button>
+                      )}
+                      <button
+                        type="button"
+                        className={isChecked ? "admin-btn-secondary" : "admin-btn-primary"}
+                        style={{
+                          padding: "5px 12px",
+                          fontSize: 11.5,
+                          flexShrink: 0,
+                        }}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          if (isCommitted && isChecked && idx < originallyCommitted.length - 1) {
+                            if (onRequestRollback) {
+                              onRequestRollback(updatingClient, s.name);
+                            }
+                            return;
+                          }
+                          handleModalStageSelect(s.name, idx);
+                        }}
+                      >
+                        {isChecked ? (isCommitted ? "Committed ✓" : "Completed ✓") : isNextAvailable ? "Mark Done →" : "Set Stage →"}
+                      </button>
+                    </div>
                   </div>
                 );
               })}

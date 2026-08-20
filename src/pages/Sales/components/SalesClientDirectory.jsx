@@ -1,5 +1,6 @@
-import React from "react";
+import React, { useState } from "react";
 import Icon from "../../../components/Icon";
+import SalesClientViewModal from "./SalesClientViewModal";
 
 export default function SalesClientDirectory({
   clients = [],
@@ -12,8 +13,11 @@ export default function SalesClientDirectory({
   setPaymentFilter,
   onSelectClient,
   onCreateNewClient,
+  salesPersonName,
   dark,
 }) {
+  const [viewingClient, setViewingClient] = useState(null);
+
   return (
     <div className="sales-clients-view">
       {/* Header Banner */}
@@ -186,7 +190,7 @@ export default function SalesClientDirectory({
                         <button
                           type="button"
                           className="sales-view-btn"
-                          onClick={() => onSelectClient(client)}
+                          onClick={() => setViewingClient(client)}
                         >
                           <Icon name="eye" size={13} />
                           <span>View</span>
@@ -200,7 +204,22 @@ export default function SalesClientDirectory({
           </div>
         )}
       </div>
+
+      {/* Client View Pop-up Modal */}
+      {viewingClient && (
+        <SalesClientViewModal
+          client={viewingClient}
+          onClose={() => setViewingClient(null)}
+          onOpenFullDossier={(client) => {
+            setViewingClient(null);
+            onSelectClient?.(client);
+          }}
+          salesPersonName={salesPersonName}
+          dark={dark}
+        />
+      )}
     </div>
   );
 }
+
 

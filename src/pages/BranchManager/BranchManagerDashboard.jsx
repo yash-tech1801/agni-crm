@@ -2,6 +2,8 @@ import React, { useState, useMemo } from "react";
 import { Routes, Route, Navigate, useLocation, useNavigate } from "react-router-dom";
 import DashboardSidebar from "../../components/dashboard/DashboardSidebar";
 import DashboardHeader from "../../components/dashboard/DashboardHeader";
+import HeaderSearch from "../../components/dashboard/HeaderSearch";
+import UserProfileMenu from "../../components/dashboard/UserProfileMenu";
 import Icon from "../../components/Icon";
 
 // Modular Page Components
@@ -13,6 +15,7 @@ import BranchManagerReportsPage from "./BranchManagerReportsPage";
 import BranchManagerAdminPage from "./BranchManagerAdminPage";
 import BranchManagerITPage from "./BranchManagerITPage";
 import BranchManagerMarketingPage from "./BranchManagerMarketingPage";
+import BranchManagerRequestsPage from "./BranchManagerRequestsPage";
 import "./branchmanagerdashboard.css";
 
 // Mock & Initial Data
@@ -28,6 +31,7 @@ const navItems = [
   { icon: "dashboard", label: "Dashboard" },
   { icon: "clients", label: "Clients" },
   { icon: "team", label: "Employees" },
+  { icon: "requests", label: "Requests" },
   { icon: "revenue", label: "Revenue" },
   { icon: "reports", label: "Reports" },
   { icon: "settings", label: "Admin" },
@@ -45,6 +49,7 @@ export default function BranchManagerDashboard({ onSignOut, userEmail }) {
     clients: "Clients",
     employees: "Employees",
     team: "Employees",
+    requests: "Requests",
     revenue: "Revenue",
     reports: "Reports",
     admin: "Admin",
@@ -105,26 +110,32 @@ export default function BranchManagerDashboard({ onSignOut, userEmail }) {
           className="sales-dashboard-top"
         >
           <div className="top-actions">
-            {searchOpen ? (
-              <div className="search-field">
-                <input
-                  value={query}
-                  onChange={(event) => setQuery(event.target.value)}
-                  placeholder="Search clients, leads, or deals"
-                />
-                <button type="button" onClick={() => setSearchOpen(false)}>
-                  <Icon name="search" size={16} />
-                </button>
-              </div>
-            ) : (
-              <button type="button" onClick={() => setSearchOpen(true)}>
-                <Icon name="search" size={16} />
-              </button>
-            )}
-            <button className="profile" type="button">
-              BM
-            </button>
-            <span className="role-badge">Branch Manager</span>
+            <HeaderSearch
+              query={query}
+              setQuery={setQuery}
+              isOpen={searchOpen}
+              setIsOpen={setSearchOpen}
+              placeholder="Search clients, leads, or deals..."
+            />
+            <UserProfileMenu
+              user={{
+                name: salesPersonName || "Vikramaditya Sharma",
+                email: "vikram.sharma@agnicrm.com",
+                phone: "+91 98200 98765",
+                branch: "West Zone (Mumbai)",
+                designation: "Branch Director & Manager",
+                empId: "EMP-BM-1002",
+                quota: "₹1,20,00,000",
+                achieved: "₹94,80,000 (79%)",
+                reportingManager: "Yashvardhan Trivedi (Owner)",
+              }}
+              role="Branch Manager"
+              roleBadge="Branch Manager"
+              initials="BM"
+              avatarColor="linear-gradient(135deg, #2563eb 0%, #3b82f6 100%)"
+              onSignOut={onSignOut}
+              showToast={(msg) => alert(msg)}
+            />
           </div>
         </DashboardHeader>
 
@@ -164,6 +175,18 @@ export default function BranchManagerDashboard({ onSignOut, userEmail }) {
             element={
               <BranchManagerEmployeesPage
                 employeesList={employeesList}
+              />
+            }
+          />
+          <Route
+            path="requests"
+            element={
+              <BranchManagerRequestsPage
+                employeesList={employeesList}
+                branchAdmins={branchAdmins}
+                branchIT={branchIT}
+                branchMarketing={branchMarketing}
+                myBranch={myBranch}
               />
             }
           />
