@@ -83,7 +83,9 @@ export const SCHEME_PROCESS_TYPE_MAP = {
   "NAIFF": PROCESS_TYPES.APPLICATION,
   "NLM": PROCESS_TYPES.APPLICATION,
   "AHIDF": PROCESS_TYPES.APPLICATION,
+  "Animal Husbandry": PROCESS_TYPES.APPLICATION,
   "CGSS": PROCESS_TYPES.APPLICATION,
+  "Seed Funding": PROCESS_TYPES.APPLICATION,
   "Financial Assistant SC/ST": PROCESS_TYPES.APPLICATION,
 
   // --- INTERVIEW ONLY (5 Stages) ---
@@ -91,6 +93,7 @@ export const SCHEME_PROCESS_TYPE_MAP = {
   "Equity Based Funding": PROCESS_TYPES.INTERVIEW,
 
   // --- APPLICATION + INTERVIEW (6 Stages) ---
+  "DIV": PROCESS_TYPES.APPLICATION_INTERVIEW,
   "DIV Funding": PROCESS_TYPES.APPLICATION_INTERVIEW,
   "NGO Elevation": PROCESS_TYPES.APPLICATION_INTERVIEW,
   "NGO Development": PROCESS_TYPES.APPLICATION_INTERVIEW,
@@ -114,23 +117,32 @@ const SCHEME_ALIASES = {
   "naiff": "NAIFF",
   "nlm": "NLM",
   "ahidf": "AHIDF",
+  "ahide": "AHIDF",
+  "animal husbandry": "Animal Husbandry",
+  "animal husbandiary": "Animal Husbandry",
   "cgss": "CGSS",
+  "seed funding": "Seed Funding",
+  "seed funnding": "Seed Funding",
+  "startup india seed scheme": "Seed Funding",
   "financial assistant sc/st": "Financial Assistant SC/ST",
   "financial assistant sc st": "Financial Assistant SC/ST",
   "stand-up india": "Financial Assistant SC/ST",
   "stand up india": "Financial Assistant SC/ST",
 
   "private funding": "Private Funding",
+  "private funnding": "Private Funding",
   "equity based funding": "Equity Based Funding",
   "equity funding": "Equity Based Funding",
   "startup india": "Private Funding",
 
-  "div funding": "DIV Funding",
+  "div": "DIV",
+  "div funding": "DIV",
   "ngo elevation": "NGO Elevation",
   "ngo development": "NGO Development",
   "csr": "CSR",
   "csr grant": "CSR",
   "spark grant": "Spark Grant",
+  "spare grant": "Spark Grant",
   "growth grant": "Growth Grant",
   "msme design": "MSME Design",
   "msme subsidy": "MSME Design",
@@ -139,7 +151,7 @@ const SCHEME_ALIASES = {
   "textile machinery subsidy": "MSME Design",
   "fleet modernization grant": "Spark Grant",
   "artisan & msme capital scheme": "MSME Design",
-  "healthcare infra grant": "DIV Funding",
+  "healthcare infra grant": "DIV",
 };
 
 /**

@@ -4,28 +4,32 @@ export const GST_RATE = 0.18; // 18% GST applied only when payment mode is Onlin
 
 export const serviceTypeSchemes = {
   Certificate: [
-    "PMEGP",
-    "PM MUDRA",
-    "CGTMSE",
-    "NAIFF",
-    "NLM",
-    "AHIDF",
-    "CGSS",
     "Financial Assistant SC/ST",
-    "Private Funding",
-    "Equity Based Funding",
-    "DIV Funding",
-    "NGO Elevation",
-    "NGO Development",
-    "CSR",
-    "Spark Grant",
-    "Growth Grant",
     "MSME Design",
     "Mudra Export Certification",
     "MSME ZED Certification",
     "ISO Certification Suite",
     "Corporate Health Shield Annual",
+  ],
+  "Consultancy Services": [
     "Startup India Seed Scheme",
+    "Equity Based Funding",
+    "Growth Grant",
+    "NAIFF",
+    "PM MUDRA",
+    "PMEGP",
+    "CGTMSE",
+    "Seed Funding",
+    "CGSS",
+    "Div Funding",
+    "NLM",
+    "Animal Husbandry",
+    "AHIDF",
+    "Private Funding",
+    "NGO Elevation",
+    "NGO Development",
+    "CSR",
+    "Spark Grant",
   ],
   IT: [
     "Enterprise Web Portal & CRM Maintenance",
@@ -47,6 +51,11 @@ export const serviceTypeSchemes = {
     "Website & Brand Growth Suite",
   ],
 };
+
+// Aliases for flexible matching
+serviceTypeSchemes["Certification"] = serviceTypeSchemes["Certificate"];
+serviceTypeSchemes["Consultancy"] = serviceTypeSchemes["Consultancy Services"];
+serviceTypeSchemes["culsontancy services"] = serviceTypeSchemes["Consultancy Services"];
 
 export const schemeOptions = mockEligibleSchemes.map((scheme) => scheme.schemeName);
 
@@ -190,7 +199,7 @@ export const initialNewClientState = {
   address: "",
   serviceType: "Certificate",
   stage: "Active",
-  scheme: schemeOptions[0] || "Standard Scheme",
+  scheme: serviceTypeSchemes.Certificate[0] || "Financial Assistant SC/ST",
   amount: "",
   paymentMode: "Online",
   gstAmount: 0,

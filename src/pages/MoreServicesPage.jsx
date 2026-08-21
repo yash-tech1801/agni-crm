@@ -83,6 +83,123 @@ const serviceGroups = [
     ]
   },
   {
+    categoryKey: "consultancy",
+    title: "Consultancy Services",
+    iconName: "consultancy",
+    tone: "#10b981",
+    grad: "linear-gradient(135deg, #10b981 0%, #059669 100%)",
+    items: [
+      {
+        id: "con-1",
+        name: "PM MUDRA Scheme Advisory",
+        description: "Collateral-free institutional credit financing support up to ₹10 Lakhs for micro and small enterprises.",
+        tag: "Credit Facility",
+        turnaround: "3-5 Business Days",
+        estimate: "₹15,000 / Advisory",
+        features: ["Shishu, Kishore & Tarun Tiers", "Zero Collateral", "DPR & Audit Preparation", "Bank Liaison"]
+      },
+      {
+        id: "con-2",
+        name: "PMEGP Subsidy Consultancy",
+        description: "Credit-linked government subsidy on new micro-enterprises with up to 35% capital subsidy assistance.",
+        tag: "Govt Subsidy",
+        turnaround: "5-7 Business Days",
+        estimate: "₹20,000 / Advisory",
+        features: ["Up to 35% Capital Subsidy", "Manufacturing & Service", "KVIC Portal Filing", "Bank Sanction Tracking"]
+      },
+      {
+        id: "con-3",
+        name: "CGTMSE Collateral-Free Assistance",
+        description: "Credit Guarantee Fund Trust for Micro and Small Enterprises coverage up to ₹5 Crore loans.",
+        tag: "Credit Guarantee",
+        turnaround: "4-6 Business Days",
+        estimate: "₹25,000 / Advisory",
+        features: ["Up to ₹5 Cr Guarantee", "No Third-Party Security", "Project Feasibility Report", "Lender Follow-up"]
+      },
+      {
+        id: "con-4",
+        name: "Seed Funding Support",
+        description: "Early-stage capital and startup innovation grant guidance for prototype validation and proof of concept.",
+        tag: "Early Capital",
+        turnaround: "7-10 Business Days",
+        estimate: "Custom Advisory",
+        features: ["Incubator Matchmaking", "Pitch Deck Review", "Milestone Structuring", "Grant Compliance"]
+      },
+      {
+        id: "con-5",
+        name: "CGSS (Credit Guarantee for Startups)",
+        description: "Credit guarantee framework for DPIIT-recognized startups to secure venture debt and scaling loans.",
+        tag: "Startup Debt",
+        turnaround: "5-8 Business Days",
+        estimate: "Custom Advisory",
+        features: ["DPIIT Verification", "Venture Debt Structuring", "Guarantee Filing", "Institutional Liaison"]
+      },
+      {
+        id: "con-6",
+        name: "DIV (Development Innovation Ventures)",
+        description: "Global tier grant funding for breakthrough development innovations with rigorous impact evidence.",
+        tag: "Global Grant",
+        turnaround: "10-15 Business Days",
+        estimate: "Custom Proposal",
+        features: ["Stage 1-3 Structuring", "Impact Evidence Audit", "Evaluation Board Pitch", "Dossier Submission"]
+      },
+      {
+        id: "con-7",
+        name: "NLM (National Livestock Mission)",
+        description: "Financial assistance and capital subsidy for livestock farming, poultry, and animal feed enterprises.",
+        tag: "Livestock Subsidy",
+        turnaround: "5-7 Business Days",
+        estimate: "₹18,000 / Advisory",
+        features: ["50% Capital Subsidy", "Breed Development DPR", "State Portal Registration", "Direct Bank Credit"]
+      },
+      {
+        id: "con-8",
+        name: "Animal Husbandry & AHIDF",
+        description: "Infrastructure development fund for dairy, meat processing, animal feed plants, and veterinary setup.",
+        tag: "Infrastructure Fund",
+        turnaround: "7-12 Business Days",
+        estimate: "Custom Proposal",
+        features: ["3% Interest Subvention", "Up to 90% Loan Guarantee", "Detailed Project Report", "Ministry Portal Tracking"]
+      },
+      {
+        id: "con-9",
+        name: "Private Funding & Equity Syndication",
+        description: "Angel investor network and private syndicate capital access for high-growth enterprises.",
+        tag: "Private Equity",
+        turnaround: "2-3 Weeks",
+        estimate: "Custom Retainer",
+        features: ["Investor Evaluation Pitch", "Valuation Financial Model", "Term Sheet Advisory", "Due Diligence Support"]
+      },
+      {
+        id: "con-10",
+        name: "NGO Elevation & Development Program",
+        description: "Institutional grant enablement, 12A/80G/CSR-1 compliance, and scaling roadmap for non-profits.",
+        tag: "NGO Scaling",
+        turnaround: "7-10 Business Days",
+        estimate: "₹22,000 / Package",
+        features: ["12A & 80G Verification", "CSR-1 Registration", "Institutional Profiling", "Donor Presentation"]
+      },
+      {
+        id: "con-11",
+        name: "CSR Grant & Allocation Facilitation",
+        description: "Corporate Social Responsibility statutory fund allocation matchmaking for high-impact social projects.",
+        tag: "CSR Allocation",
+        turnaround: "1-2 Weeks",
+        estimate: "Custom Advisory",
+        features: ["Corporate CSR Alignment", "Proposal Submission", "SLA & Milestones Setup", "Annual Impact Reporting"]
+      },
+      {
+        id: "con-12",
+        name: "Spark Grant (Innovation Seed)",
+        description: "Seed stage innovation spark grant supporting pilot proof-of-concept and prototyping.",
+        tag: "Innovation Grant",
+        turnaround: "5-7 Business Days",
+        estimate: "₹15,000 / Advisory",
+        features: ["Prototype Validation", "Grant Documentation", "Milestone Tracking", "Fund Release Coordination"]
+      }
+    ]
+  },
+  {
     categoryKey: "legal",
     title: "Legal & Regulatory Compliance",
     iconName: "legal",
@@ -170,6 +287,13 @@ export default function MoreServicesPage() {
           onClick={() => setActiveCategory("marketing")}
         >
           Marketing & Growth
+        </button>
+        <button
+          type="button"
+          className={`cd-filter-tab ${activeCategory === "consultancy" ? "active" : ""}`}
+          onClick={() => setActiveCategory("consultancy")}
+        >
+          Consultancy Services
         </button>
         <button
           type="button"

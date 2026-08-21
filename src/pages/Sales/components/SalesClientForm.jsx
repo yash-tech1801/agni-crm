@@ -154,6 +154,7 @@ export default function SalesClientForm({
                   required
                 >
                   <option value="Certificate">Certificate</option>
+                  <option value="Consultancy Services">Consultancy Services</option>
                   <option value="IT">IT</option>
                   <option value="Marketing">Marketing</option>
                 </select>

@@ -913,6 +913,7 @@ export default function Dashboard({ onSignOut, userEmail }) {
                     className="cd-modal-select"
                   >
                     <option value="Certificate">Certificate Verification & Licensing</option>
+                    <option value="Consultancy Services">Consultancy Services (Govt & Private Schemes)</option>
                     <option value="IT Support">IT Infrastructure & Security Audit</option>
                     <option value="Marketing">Digital Brand Growth & PR Campaign</option>
                     <option value="Insurance">Corporate Group Health Shield</option>
