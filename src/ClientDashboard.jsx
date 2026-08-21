@@ -1,11 +1,12 @@
 import React from "react";
 import "./ClientDashboard.css";
 import DashboardSidebar from "./components/dashboard/DashboardSidebar";
-import ActivityStatusBar from "./components/dashboard/ActivityStatusBar";
+import ActivityTracker from "./components/ActivityTracker";
 import MoreServicesPage from "./pages/MoreServicesPage";
 import EligibilityPage from "./pages/EligibilityPage";
 import DealsPage from "./pages/DealsPage";
 import InvoicesPage from "./pages/InvoicesPage";
+import { CircularProgressChart } from "./components/charts";
 import { getTrackerState } from "./utils/schemeTracker";
 
 /* ── Icon Registry ── */
@@ -643,32 +644,13 @@ export default function Dashboard({ onSignOut, userEmail }) {
                       <h2>Active Service Pipeline</h2>
                     </div>
                     <div className="cd-tracker-ring-wrap">
-                      <div className="cd-tracker-ring">
-                        <svg viewBox="0 0 36 36">
-                          <path
-                            d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
-                            fill="none"
-                            stroke="rgba(78, 124, 255, 0.15)"
-                            strokeWidth="3.5"
-                          />
-                          <path
-                            d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
-                            fill="none"
-                            stroke="#4e7cff"
-                            strokeWidth="3.5"
-                            strokeDasharray={`${clientProgressPercent}, 100`}
-                            strokeLinecap="round"
-                          />
-                        </svg>
-                        <span className="cd-tracker-percent-text">{clientProgressPercent}%</span>
-                      </div>
+                      <CircularProgressChart progress={clientProgressPercent} />
                     </div>
                   </div>
 
                   <div style={{ marginTop: 12 }}>
-                    <ActivityStatusBar
+                    <ActivityTracker
                       scheme={clientTracker.schemeName}
-                      stages={clientTracker.stages}
                       completedSteps={clientTracker.completedStages}
                       progress={clientTracker.progressPercent}
                       interactive={false}

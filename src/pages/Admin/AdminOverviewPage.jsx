@@ -1,7 +1,7 @@
 import React from "react";
 import KpiCard from "../../components/KpiCard";
 import Icon from "../../components/Icon";
-import ActivityStatusBar from "../../components/dashboard/ActivityStatusBar";
+import ActivityTracker from "../../components/ActivityTracker";
 import { ACTIVITY_STAGES, stageBadgeColors } from "./mockAdminData";
 import { getTrackerState } from "../../utils/schemeTracker";
 import "./AdminDashboard.css";
@@ -239,9 +239,8 @@ export default function AdminOverviewPage({
                     </div>
 
                     {/* Dynamic Scheme-Based Activity Stepper Bar */}
-                    <ActivityStatusBar
+                    <ActivityTracker
                       scheme={client.scheme}
-                      stages={tracker.stages}
                       completedSteps={tracker.completedStages}
                       progress={tracker.progressPercent}
                       interactive={true}

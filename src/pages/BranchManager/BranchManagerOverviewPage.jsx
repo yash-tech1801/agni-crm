@@ -1,6 +1,6 @@
 import React from "react";
 import KpiCard from "../../components/KpiCard";
-import BranchRevenueChart from "../../components/BranchRevenueChart";
+import { BranchRevenueChart } from "../../components/charts";
 import { kpiCards, branchRevenueData } from "./mockBranchManagerData";
 
 const branchActivities = [

@@ -1,5 +1,5 @@
 import React from "react";
-import DashboardChart from "./SalesQuotaChart";
+import { DashboardChart } from "../../../components/charts";
 
 export default function SalesPerformance() {
   return (

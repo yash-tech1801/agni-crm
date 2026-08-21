@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import Icon from "../../../components/Icon";
-import ActivityStatusBar from "../../../components/dashboard/ActivityStatusBar";
+import ActivityTracker from "../../../components/ActivityTracker";
 import { getTrackerState, getProcessTypeLabel } from "../../../utils/schemeTracker";
 
 export default function SalesClientViewModal({
@@ -330,9 +330,8 @@ export default function SalesClientViewModal({
               </div>
 
               <div className="sales-vm-tracker-wrapper">
-                <ActivityStatusBar
+                <ActivityTracker
                   scheme={schemeName}
-                  stages={tracker.stages}
                   completedSteps={tracker.completedStages}
                   progress={tracker.progressPercent}
                   interactive={false}

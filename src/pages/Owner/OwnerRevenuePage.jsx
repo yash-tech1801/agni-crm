@@ -1,51 +1,8 @@
 import React, { useState } from "react";
 import Icon from "../../components/Icon";
 import RevenueSummaryCard from "../../components/RevenueSummaryCard";
+import { RevenueTrendChart } from "../../components/charts";
 import { revenueSeries } from "./mockOwnerData";
-
-function RevenueTrendChart({ data }) {
-  const width = 320;
-  const height = 180;
-  const padding = 24;
-  const values = data.map((item) => item.value);
-  const maxValue = Math.max(...values);
-  const minValue = Math.min(...values);
-  const range = maxValue - minValue || 1;
-
-  const points = data.map((item, index) => {
-    const x = padding + (index * (width - padding * 2)) / Math.max(data.length - 1, 1);
-    const y = height - padding - ((item.value - minValue) / range) * (height - padding * 2);
-    return { x, y, label: item.label };
-  });
-
-  const linePath = points
-    .map((point, index) => `${index === 0 ? "M" : "L"} ${point.x} ${point.y}`)
-    .join(" ");
-  const areaPath = `${linePath} L ${points[points.length - 1].x} ${
-    height - padding
-  } L ${points[0].x} ${height - padding} Z`;
-
-  return (
-    <svg viewBox={`0 0 ${width} ${height}`} className="dashboard-chart" aria-hidden="true">
-      <defs>
-        <linearGradient id="ownerRevGrad" x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0%" stopColor="#6366f1" stopOpacity="0.35" />
-          <stop offset="100%" stopColor="#6366f1" stopOpacity="0.0" />
-        </linearGradient>
-      </defs>
-      <path d={areaPath} fill="url(#ownerRevGrad)" />
-      <path d={linePath} fill="none" stroke="#6366f1" strokeWidth="3" strokeLinecap="round" />
-      {points.map((point) => (
-        <g key={point.label}>
-          <circle cx={point.x} cy={point.y} r="4.5" fill="#fff" stroke="#6366f1" strokeWidth="2.5" />
-          <text x={point.x} y={height - 6} textAnchor="middle" fill="currentColor" opacity="0.65" fontSize="10.5" fontWeight="600">
-            {point.label}
-          </text>
-        </g>
-      ))}
-    </svg>
-  );
-}
 
 export default function OwnerRevenuePage({
   revenueRange = "monthly",

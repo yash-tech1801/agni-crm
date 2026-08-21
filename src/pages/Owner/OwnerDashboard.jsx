@@ -8,7 +8,7 @@ import Icon from "../../components/Icon";
 import Modal from "../../components/Modal";
 import EditForm from "../../components/EditForm";
 import ConfirmDialog from "../../components/ConfirmDialog";
-import ActivityStatusBar from "../../components/dashboard/ActivityStatusBar";
+import ActivityTracker from "../../components/ActivityTracker";
 import { getTrackerState } from "../../utils/schemeTracker";
 import { ACTIVITY_STAGES } from "../Admin/mockAdminData";
 
@@ -795,9 +795,8 @@ export default function OwnerDashboard({ onSignOut, userEmail }) {
                       </div>
                     </div>
 
-                    <ActivityStatusBar
+                    <ActivityTracker
                       scheme={editScheme}
-                      stages={editTracker.stages}
                       completedSteps={editModal.completedSteps || []}
                       progress={editTracker.progressPercent}
                       interactive={true}

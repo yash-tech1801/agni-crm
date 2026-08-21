@@ -1,6 +1,6 @@
 import React from "react";
 import SimpleModal from "../../components/SimpleModal";
-import ActivityStatusBar from "../../components/dashboard/ActivityStatusBar";
+import ActivityTracker from "../../components/ActivityTracker";
 import { getTrackerState, getProcessTypeLabel } from "../../utils/schemeTracker";
 
 export default function OwnerClientInfoModal({
@@ -114,9 +114,8 @@ export default function OwnerClientInfoModal({
             {onUpdateTracker ? '💡 Click point to update status' : ''}
           </span>
         </div>
-        <ActivityStatusBar
+        <ActivityTracker
           scheme={clientScheme}
-          stages={tracker.stages}
           completedSteps={tracker.completedStages}
           progress={tracker.progressPercent}
           onStepToggle={handleStepToggle}

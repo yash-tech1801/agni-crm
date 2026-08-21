@@ -1,6 +1,6 @@
 import React from "react";
 import Icon from "../../components/Icon";
-import ActivityStatusBar from "../../components/dashboard/ActivityStatusBar";
+import ActivityTracker from "../../components/ActivityTracker";
 import { formatCurrency, stageBadgeColors } from "./mockAdminData";
 import {
   getTrackerStages,
@@ -442,9 +442,8 @@ export default function AdminStatusModal({
             <span className="admin-kicker" style={{ fontSize: 11, display: "block", marginBottom: 8 }}>
               Real-Time Stepper Pipeline Preview
             </span>
-            <ActivityStatusBar
+            <ActivityTracker
               scheme={updatingClient.scheme}
-              stages={stages}
               completedSteps={statusFormData.completedSteps}
               progress={statusFormData.progress}
               interactive={false}

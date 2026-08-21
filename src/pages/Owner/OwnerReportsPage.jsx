@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import TopPerformerLeaderboard from "../../components/TopPerformerLeaderboard";
-import PerformanceChart from "../../components/PerformanceChart";
+import { PerformanceChart } from "../../components/charts";
 import SimpleModal from "../../components/SimpleModal";
 import {
   topPerformers,

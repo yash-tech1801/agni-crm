@@ -1,7 +1,7 @@
 import React from "react";
 import KpiCard from "../../../components/KpiCard";
 import Icon from "../../../components/Icon";
-import DashboardChart from "./SalesQuotaChart";
+import { DashboardChart } from "../../../components/charts";
 import { requestActivities } from "../mockSalesData";
 
 export default function SalesOverview({ kpiCards, onNavigate, dark }) {

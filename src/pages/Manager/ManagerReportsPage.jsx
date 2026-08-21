@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import Icon from "../../components/Icon";
 import TopPerformerLeaderboard from "../../components/TopPerformerLeaderboard";
-import PerformanceChart from "../../components/PerformanceChart";
+import { PerformanceChart } from "../../components/charts";
 import SimpleModal from "../../components/SimpleModal";
 import { generateYearlySeries } from "./mockManagerData";
 

@@ -1,25 +1,9 @@
 import React, { useMemo } from "react";
 import KpiCard from "../../components/KpiCard";
 import Icon from "../../components/Icon";
+import { RevenueSparkline } from "../../components/charts";
 import { kpiCards, activities } from "./mockManagerData";
 import { getDailyPayment, getWeeklyPayment, getMonthlyPayment, formatCurrency } from "../../utils/paymentHelpers";
-
-function RevenueSparkline() {
-  return (
-    <svg viewBox="0 0 240 64" aria-hidden="true" className="sparkline-chart">
-      <path
-        d="M12 48 C42 36 70 30 98 22 C126 14 154 18 182 12 C210 6 228 12 236 20"
-        fill="none"
-        stroke="rgba(255,255,255,0.9)"
-        strokeWidth="3"
-        strokeLinecap="round"
-      />
-      <circle cx="12" cy="48" r="4" fill="#fff" />
-      <circle cx="98" cy="22" r="4" fill="#fff" />
-      <circle cx="236" cy="20" r="4" fill="#fff" />
-    </svg>
-  );
-}
 
 export default function ManagerOverviewPage({ onNavigate, dark }) {
   const currentManagerId = 4;
@@ -101,7 +85,15 @@ export default function ManagerOverviewPage({ onNavigate, dark }) {
               <Icon name="arrowUp" size={14} />
               <span>Pipeline trend</span>
             </div>
-            <RevenueSparkline />
+            <RevenueSparkline
+              d="M12 48 C42 36 70 30 98 22 C126 14 154 18 182 12 C210 6 228 12 236 20"
+              dots={[
+                { cx: 12, cy: 48 },
+                { cx: 98, cy: 22 },
+                { cx: 236, cy: 20 },
+              ]}
+              strokeColor="rgba(255,255,255,0.9)"
+            />
           </div>
         </section>
       </div>

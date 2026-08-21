@@ -1,5 +1,5 @@
 import React from "react";
-import BranchRevenueChart from "../../components/BranchRevenueChart";
+import { BranchRevenueChart } from "../../components/charts";
 import { branchRevenueData } from "./mockBranchManagerData";
 
 export default function BranchManagerReportsPage({

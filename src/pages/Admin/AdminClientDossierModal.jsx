@@ -1,6 +1,6 @@
 import React from "react";
 import Icon from "../../components/Icon";
-import ActivityStatusBar from "../../components/dashboard/ActivityStatusBar";
+import ActivityTracker from "../../components/ActivityTracker";
 import { stageBadgeColors, formatCurrency } from "./mockAdminData";
 import { getTrackerState, getProcessTypeForScheme, getProcessTypeLabel } from "../../utils/schemeTracker";
 import "./AdminDashboard.css";
@@ -171,9 +171,8 @@ export default function AdminClientDossierModal({
             <span className="admin-kicker" style={{ fontSize: 11, display: "block", marginBottom: 8 }}>
               Activity Progress Pipeline ({schemeName})
             </span>
-            <ActivityStatusBar
+            <ActivityTracker
               scheme={schemeName}
-              stages={tracker.stages}
               completedSteps={tracker.completedStages}
               progress={tracker.progressPercent}
               interactive={false}

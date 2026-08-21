@@ -1,6 +1,6 @@
 import React from "react";
 import Icon from "../../../components/Icon";
-import ActivityStatusBar from "../../../components/dashboard/ActivityStatusBar";
+import ActivityTracker from "../../../components/ActivityTracker";
 import EligibleSchemes from "../EligibleSchemes";
 import { mockEligibleSchemes } from "../mockEligibleSchemes";
 import { getTrackerState, getProcessTypeLabel } from "../../../utils/schemeTracker";
@@ -108,9 +108,8 @@ export default function SalesClientDossier({
         </div>
 
         <div style={{ marginTop: 14 }}>
-          <ActivityStatusBar
+          <ActivityTracker
             scheme={schemeName}
-            stages={tracker.stages}
             completedSteps={tracker.completedStages}
             progress={tracker.progressPercent}
             interactive={false}

@@ -1,26 +1,8 @@
 import React from "react";
 import KpiCard from "../../components/KpiCard";
 import Icon from "../../components/Icon";
+import { RevenueSparkline, ActivityTracker } from "../../components/charts";
 import { revenueKpiCards, workforceKpiCards, activities } from "./mockOwnerData";
-import { ACTIVITY_STAGES } from "../Admin/mockAdminData";
-import { getTrackerState } from "../../utils/schemeTracker";
-
-function RevenueSparkline() {
-  return (
-    <svg viewBox="0 0 240 64" aria-hidden="true" className="sparkline-chart">
-      <path
-        d="M12 42 C42 34 70 22 98 26 C126 30 154 18 182 24 C210 30 228 18 236 14"
-        fill="none"
-        stroke="rgba(255,255,255,0.85)"
-        strokeWidth="3"
-        strokeLinecap="round"
-      />
-      <circle cx="12" cy="42" r="4" fill="#fff" />
-      <circle cx="98" cy="26" r="4" fill="#fff" />
-      <circle cx="236" cy="14" r="4" fill="#fff" />
-    </svg>
-  );
-}
 
 export default function OwnerOverviewPage({
   clients = [],
@@ -124,40 +106,7 @@ export default function OwnerOverviewPage({
 
       <aside className="owner-sidebar-widgets">
         {/* Dynamic Activity Status Milestone Widget */}
-        <section className="activity-panel" style={{ marginBottom: 18 }}>
-          <div className="panel-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-            <div>
-              <p className="eyebrow">Milestone pipeline</p>
-              <h2>Activity Status Breakdown</h2>
-            </div>
-            <span className="owner-status-pill completed">
-              Scheme-Driven
-            </span>
-          </div>
-          <div className="owner-milestone-panel">
-            {ACTIVITY_STAGES.map((st) => {
-              const clientsInStage = clients.filter(c => {
-                const clientScheme = c.serviceName || c.scheme || c.serviceType || "PMEGP";
-                const tracker = getTrackerState({ scheme: clientScheme, completedSteps: c.completedSteps });
-                return tracker.completedStages.includes(st.name);
-              }).length;
-              const percentOfClients = Math.round((clientsInStage / Math.max(1, clients.length)) * 100);
-
-              return (
-                <div key={st.name} className="owner-milestone-stage-row">
-                  <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                    <span className="owner-milestone-stage-dot" style={{ background: st.badgeColor || '#10b981' }} />
-                    <span className="owner-milestone-stage-name">{st.name}</span>
-                    <span style={{ fontSize: 11, color: '#64748b' }}>({st.percent}%)</span>
-                  </div>
-                  <span className="owner-milestone-stage-count">
-                    {clientsInStage} Clients ({percentOfClients}%)
-                  </span>
-                </div>
-              );
-            })}
-          </div>
-        </section>
+        <ActivityTracker clients={clients} />
 
         <section className="activity-panel">
           <div className="panel-header">
